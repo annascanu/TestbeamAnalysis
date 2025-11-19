@@ -1,0 +1,34 @@
+# Compiled object files
+*.o
+*.so
+*.a
+*.d
+
+# Executables
+*.out
+*.exe
+
+# ROOT files (intermediate/processed)
+*.root
+*.root~ 
+
+# Backup files
+*~
+*.swp
+*.bak
+*.tmp
+
+# CMake or build folders
+CMakeFiles/
+CMakeCache.txt
+Makefile
+cmake_install.cmake
+build/
+
+# Logs
+*.log
+
+# IDE files (if using e.g., CLion, VSCode)
+.vscode/
+.idea/
+*.iml
