@@ -78,14 +78,13 @@ int main()
     Int_t HitFeb[3], Board[MAXPULSES];
     int tot_hit_feb;
     Double_t time_12, time_23, time_13, time20_12, time20_13, time20_23;
-    Double_t time30_12, time30_13, time30_23; // declare the CFD30 variables
+    Double_t time30_12, time30_13, time30_23;
 
     tree->SetBranchAddress("npulses", &npulses);
     tree->SetBranchAddress("pulses_amplitude", &pulses_amplitude);
     tree->SetBranchAddress("pulses_integral", &pulses_integral);
     tree->SetBranchAddress("pulses_time_cfd10", &pulses_time_cfd10);
     tree->SetBranchAddress("pulses_time_cfd20", &pulses_time_cfd20);
-    // FIXED: correct branch name for CFD30
     tree->SetBranchAddress("pulses_time_cfd30", &pulses_time_cfd30);
     tree->SetBranchAddress("pulses_bad_pulse", &pulses_bad_pulse);
     tree->SetBranchAddress("HitFeb", &HitFeb);
@@ -97,7 +96,7 @@ int main()
     TH1F *hAmpAll  = new TH1F("hAmpAll", "All pulse amplitudes;Amplitude [a.u.];Counts", 1000, 0, 5);
     TH1F *hAmp1Hit = new TH1F("hAmp1Hit", "Single-Hit event amplitudes;Amplitude [a.u.];Counts", 1000, 0, 5);
     TH1F *hQ       = new TH1F("hQ", "Pulse integral (namely charge);Integral [a.u.];Counts", 1000, 0, 10);
-    TH1F *hTime    = new TH1F("hTime", "Constant fraction discriminator set at 20% Time;Time [ns];Counts", 1000, 0, 10);
+    TH1F *hTime    = new TH1F("hTime", "Constant fraction discriminator set at 20% Time;Time [ps];Counts", 1000, 0, 10);
 
     // Histograms for triple hits
     TH1F *htriple1  = new TH1F("htriple1", "amplitude of a triple", 1000, 0, 500);
@@ -105,17 +104,17 @@ int main()
     TH1F *htriple3  = new TH1F("htriple3", "amplitude of a triple", 1000, 0, 500);
 
     // Histograms for time differences for the different values of CDF
-    TH1F *htime_12    = new TH1F("htime_12", "time diff ;Time [ns];Counts", 100, -2000, 2000);
-    TH1F *htime_13    = new TH1F("htime_13", "time diff ;Time [ns];Counts", 100, -2000, 1000);
-    TH1F *htime_23    = new TH1F("htime_23", "time diff ;Time [ns];Counts", 100, -2000, 2000);
+    TH1F *htime_12    = new TH1F("htime_12", "time diff ;Time [ps];Counts", 100, -2000, 2000);
+    TH1F *htime_13    = new TH1F("htime_13", "time diff ;Time [ps];Counts", 100, -2000, 1000);
+    TH1F *htime_23    = new TH1F("htime_23", "time diff ;Time [ps];Counts", 100, -2000, 2000);
 
-    TH1F *htime20_12    = new TH1F("htime20_12", "time diff ;Time [ns];Counts", 100, -100, 100);
-    TH1F *htime20_13    = new TH1F("htime20_13", "time diff ;Time [ns];Counts", 100, -100, 100);
-    TH1F *htime20_23    = new TH1F("htime20_23", "time diff ;Time [ns];Counts", 100, -100, 100);
+    TH1F *htime20_12    = new TH1F("htime20_12", "time diff ;Time [ps];Counts", 100, -100, 100);
+    TH1F *htime20_13    = new TH1F("htime20_13", "time diff ;Time [ps];Counts", 100, -100, 100);
+    TH1F *htime20_23    = new TH1F("htime20_23", "time diff ;Time [ps];Counts", 100, -100, 100);
 
-    TH1F *htime30_12    = new TH1F("htime30_12", "time diff ;Time [ns];Counts", 100, -2000, 2000);
-    TH1F *htime30_13    = new TH1F("htime30_13", "time diff ;Time [ns];Counts", 100, -2000, 2000);
-    TH1F *htime30_23    = new TH1F("htime30_23", "time diff ;Time [ns];Counts", 100, -2000, 2000);
+    TH1F *htime30_12    = new TH1F("htime30_12", "time diff ;Time [ps];Counts", 100, -2000, 2000);
+    TH1F *htime30_13    = new TH1F("htime30_13", "time diff ;Time [ps];Counts", 100, -2000, 2000);
+    TH1F *htime30_23    = new TH1F("htime30_23", "time diff ;Time [ps];Counts", 100, -2000, 2000);
 
     // -----------------------
     //        Read tree
@@ -149,7 +148,8 @@ int main()
 
         // ---- Triple hits for all three FEBs ----
         // AS: Replaced assumption about pulse index ordering with explicit Board[] mapping
-        if (HitFeb[0] == 1 && HitFeb[1] == 1 && HitFeb[2] == 1 && nGood == 3)
+        // also see the hitfeb = [1, 1, anything] (otherwise we lose statistics because of smaller geometrical acceptance of 3rd detector)
+        if (HitFeb[0] == 1 && HitFeb[1] == 1 && nGood == 2)
         {
             // Arrays indexed by FEB number (0,1,2)
             double ampFEB[3]  = {-1.0, -1.0, -1.0};
@@ -162,7 +162,7 @@ int main()
             {
                 if (pulses_bad_pulse[j])
                     continue;
-                int det = Board[j];   // Which detector this pulse belongs to (expected 0,1,2)
+                int det = Board[j];   // Which detector this pulse belongs to (either 0, 1, 2)
 
                 if (det < 0 || det > 2)
                 {
@@ -176,6 +176,7 @@ int main()
                 cfd30[det]  = pulses_time_cfd30[j];
             }
 
+            /* // This is probably not needed anymore
             // Sanity check to make sure we found valid entries for all three FEBs
             bool validTriple = true;
             for (int d = 0; d < 3; ++d)
@@ -184,6 +185,7 @@ int main()
     
             if (!validTriple) 
                 continue; // skip this event if something weird happened
+            */
 
             // Fill amplitude histograms           // AS: why this x 1000 scaling?
             htriple1->Fill(ampFEB[0] * 1000);
@@ -223,7 +225,7 @@ int main()
     }
     
     /// --- TF1 Polya function ---
-    TF1 *fpolyaAmpl1 = new TF1("fpolyaAmpl1","([0]/[1])*((([2]+1)^([2]+1)*(x/[1])^[2])/(TMath::Gamma([2]+1)))*exp(-([2]+1)*x/[1])", 0, 800);
+    TF1 *fpolyaAmpl1 = new TF1("fpolyaAmpl1", "([0]/[1])*((([2]+1)^([2]+1)*(x/[1])^[2])/(TMath::Gamma([2]+1)))*exp(-([2]+1)*x/[1])", 0, 800);
     fpolyaAmpl1->SetTitle("Polya fit (ampl.)");
     fpolyaAmpl1->SetParName(0,"c");
     fpolyaAmpl1->SetParName(1,"#bar{Q}");
@@ -242,7 +244,7 @@ int main()
 
     // --- Tre canvas separati ---
     // Canvas 1
-    // AS: removed grid, I think the plots look nicer, but can be re-added if needed
+    // AS: removed grids, I think the plots look nicer, but can be re-added if needed
     TCanvas *c1 = new TCanvas("c1", "htriple1", 900, 700);
     htriple1->SetLineColor(kAzure+1);
     htriple1->SetLineWidth(3);
@@ -280,7 +282,6 @@ int main()
 
     // --- Canvas unico con tutti e tre ---
     TCanvas *cAll = new TCanvas("cAll", "All Histograms", 900, 700);
-    cAll->SetGrid();
 
     htriple1->SetLineColor(kAzure+1);
     htriple1->SetLineWidth(3);
@@ -306,7 +307,6 @@ int main()
     // ------------ Gaussian plot of the time difference ---------------
 
     TCanvas *ctime12 = new TCanvas("ctime12", "htriple1", 900, 700);
-    ctime12->SetGrid();
     htime20_12->SetLineColor(kAzure+1);
     htime20_12->SetLineWidth(3);
     htime20_12->SetFillColorAlpha(kAzure-4, 0.35);
@@ -325,7 +325,6 @@ int main()
     double e_sigma_12 = f->GetParError(2);
 
     TCanvas *ctime23 = new TCanvas("ctime23", "htriple1", 900, 700);
-    ctime23->SetGrid();
     htime20_23->SetLineColor(kAzure+1);
     htime20_23->SetLineWidth(3);
     htime20_23->SetFillColorAlpha(kAzure-4, 0.35);
@@ -344,7 +343,6 @@ int main()
     double e_sigma_23 = f2->GetParError(2);
 
     TCanvas *ctime13 = new TCanvas("ctime13", "htriple1", 900, 700);
-    ctime13->SetGrid();
     htime20_13->SetLineColor(kAzure+1);
     htime20_13->SetLineWidth(3);
     htime20_13->SetFillColorAlpha(kAzure-4, 0.35);
@@ -432,13 +430,13 @@ int main()
 
     cout.setf(std::ios::fixed); cout.precision(4);
     cout << "Results of time resolution with CFD = 20% (obtained from gaussian fits):\n"
-         << "sigma12 (fit) = " << s12 << " +/- " << es12 << " ns\n"
-         << "sigma23 (fit) = " << s23 << " +/- " << es23 << " ns\n"
-         << "sigma13 (fit) = " << s13 << " +/- " << es13 << " ns\n\n"
+         << "sigma12 (fit) = " << s12 << " +/- " << es12 << " ps\n"
+         << "sigma23 (fit) = " << s23 << " +/- " << es23 << " ps\n"
+         << "sigma13 (fit) = " << s13 << " +/- " << es13 << " ps\n\n"
          << "Derived per-detector resolutions (sigma):\n"
-         << "sigma1 = " << sigma_1 << " +/- " << e_sigma_1 << " ns\n"
-         << "sigma2 = " << sigma_2 << " +/- " << e_sigma_2 << " ns\n"
-         << "sigma3 = " << sigma_3 << " +/- " << e_sigma_3 << " ns\n";
+         << "sigma1 = " << sigma_1 << " +/- " << e_sigma_1 << " ps\n"
+         << "sigma2 = " << sigma_2 << " +/- " << e_sigma_2 << " ps\n"
+         << "sigma3 = " << sigma_3 << " +/- " << e_sigma_3 << " ps\n";
 
     // -----------------------
     //       Plot results
