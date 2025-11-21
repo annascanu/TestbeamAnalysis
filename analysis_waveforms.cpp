@@ -187,7 +187,7 @@ int main()
                 continue; // skip this event if something weird happened
             */
 
-            // Fill amplitude histograms           // AS: why this x 1000 scaling?
+            // Fill amplitude histograms           // AS: why this x 1000 scaling? -> To get values in mV
             htriple1->Fill(ampFEB[0] * 1000);
             htriple2->Fill(ampFEB[1] * 1000);
             htriple3->Fill(ampFEB[2] * 1000);
