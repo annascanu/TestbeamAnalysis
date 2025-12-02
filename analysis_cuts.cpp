@@ -72,7 +72,7 @@ int main()
     TH1D *hAmpTriple2_cut = new TH1D("hAmpTriple2_cut", "Triple hit pulse2 (after cut)", 400, 0, 400);
 
     // -----------------------------------------------------------------------
-    //     4. ANALISI CON IL CUT APPLICATO
+    //     Analysis with the applied cut
     // -----------------------------------------------------------------------
 
     int good = 0;

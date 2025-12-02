@@ -43,9 +43,6 @@ Processed files can be found at this path:
 #include <TGraph.h>
 #include <TStyle.h>
 #include <TAxis.h>
-
-
-
 using namespace std;
 
 int main()
@@ -58,8 +55,8 @@ int main()
     // -------------------------------------------------
 
     // TString filename = "/eos/experiment/neutplatform/enubet/testbeam2025/picosec_data/sampic_runs/rootSampicData/processed_waveforms/sampic_run22_final.root"; // Filename while running on lxplus
-    //TString filename = "/Users/anna/Developing/PhD/Testbeam2025/sampic_run22_final.root"; // Filename while running on Anna's machine
-     TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run19_final.root"; // Filename while running on Riccardo's machine
+    TString filename = "/Users/anna/Developing/PhD/Testbeam2025/sampic_run22_final.root"; // Filename while running on Anna's machine
+    // TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run19_final.root"; // Filename while running on Riccardo's machine
     cout << "Opening file: " << filename << endl;
 
     TFile *file = TFile::Open(filename, "READ");
@@ -196,17 +193,14 @@ int main()
                     continue;
                 }
 
-                if(pulses_integral[j]/pulses_amplitude[j] >0 && pulses_integral[j]/pulses_amplitude[j] < 30 )
-                {
-
-                ampFEB[det] = pulses_amplitude[j];
-                cfd10[det]  = pulses_time_cfd10[j];
-                cfd20[det]  = pulses_time_cfd20[j];
-                cfd30[det]  = pulses_time_cfd30[j];
-                integral[det]= pulses_integral[j];}
-                //cut
-
-
+                //if( pulses_integral[j]/pulses_amplitude[j] > 0 && pulses_integral[j]/pulses_amplitude[j] < 100 )
+                //{
+                    ampFEB[det] = pulses_amplitude[j];
+                    cfd10[det]  = pulses_time_cfd10[j];
+                    cfd20[det]  = pulses_time_cfd20[j];
+                    cfd30[det]  = pulses_time_cfd30[j];
+                    integral[det]= pulses_integral[j];
+                //}
             }
 
             /* // This is probably not needed anymore
@@ -252,22 +246,17 @@ int main()
             htime30_23->Fill(time30_23);
             htime30_13->Fill(time30_13);
 
-
-                ///Integral vs amplitude distribution
-
+            //Integral vs amplitude distribution
             hintegral1->SetPoint(hintegral1->GetN(),ampFEB[0],integral[0]);
             hintegral2->SetPoint(hintegral2->GetN(),ampFEB[1],integral[1]);
             hintegral3->SetPoint(hintegral3->GetN(),ampFEB[2],integral[2]);
-
-
-
-
         }
 
         // Progress indicator for sanity :)
         if (i % 100000 == 0) cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
     }
-                cout<<"till here is fine"<<endl;
+    
+    cout<<"till here is fine"<<endl;
 
     /// --- TF1 Polya function ---
     TF1 *fpolyaAmpl1 = new TF1("fpolyaAmpl1", "([0]/[1])*((([2]+1)^([2]+1)*(x/[1])^[2])/(TMath::Gamma([2]+1)))*exp(-([2]+1)*x/[1])", 0, 800);
@@ -350,83 +339,69 @@ int main()
     cAll->SaveAs("histAll.pdf");
 
     ///amplitude vs integral plot
-                cout<<"till here is fine"<<endl;
+    cout<<"till here is fine"<<endl;
 
     TCanvas *cintegral = new TCanvas("cintegral", "amplitudevsintegral", 900, 700);
     hintegral1->SetName("hintegral1");
-hintegral1->SetTitle("Amplitude vs Integral;amplitude;integral");
+    hintegral1->SetTitle("Amplitude vs Integral;amplitude;integral");
 
-// *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
-hintegral1->SetMarkerStyle(20);
-hintegral1->SetMarkerSize(1.0);
-hintegral1->SetMarkerColor(kAzure+2);
+    // *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
+    hintegral1->SetMarkerStyle(20);
+    hintegral1->SetMarkerSize(1.0);
+    hintegral1->SetMarkerColor(kAzure+2);
 
-hintegral1->SetLineColor(0);    // nessuna linea
-hintegral1->SetLineWidth(0);    // nessuna linea
-double xmin = hintegral1->GetXaxis()->GetXmin();
-double xmax = hintegral1->GetXaxis()->GetXmax();
+    hintegral1->SetLineColor(0);    // nessuna linea
+    hintegral1->SetLineWidth(0);    // nessuna linea
+    double xmin = hintegral1->GetXaxis()->GetXmin();
+    double xmax = hintegral1->GetXaxis()->GetXmax();
 
-TF1* avsi = new TF1("avsi", "[0] + [1]*x");
-avsi->SetNpx(500);
-avsi->SetParLimits(0, -5, 5);   // limite su p0 (intercetta)
-avsi->SetParLimits(1, 0, 3000);       // limite su p1 (pendenza)
+    TF1* avsi = new TF1("avsi", "[0] + [1]*x");
+    avsi->SetNpx(500);
+    avsi->SetParLimits(0, -5, 5);   // limite su p0 (intercetta)
+    avsi->SetParLimits(1, 0, 3000);       // limite su p1 (pendenza)
 
-hintegral1->Fit(avsi, "R");
-avsi->SetLineColor(kRed);
-avsi->SetLineWidth(2);
+    hintegral1->Fit(avsi, "R");
+    avsi->SetLineColor(kRed);
+    avsi->SetLineWidth(2);
 
-
-// *** SOLO ORA DISEGNA ***pulses_bad_pulse
-hintegral1->Draw("AP");
-avsi->Draw("same");
-
-
+    // *** SOLO ORA DISEGNA ***pulses_bad_pulse
+    hintegral1->Draw("AP");
+    avsi->Draw("same");
     cintegral->Update();
 
-            cout<<"till here is fine"<<endl;
+    cout<<"till here is fine"<<endl;
 
-
-   TCanvas *cintegral2 = new TCanvas("cintegral2", "amplitudevsintegral", 900, 700);
+    TCanvas *cintegral2 = new TCanvas("cintegral2", "amplitudevsintegral", 900, 700);
     hintegral2->SetName("hintegral1");
-hintegral2->SetTitle("Amplitude vs Integral;amplitude;integral");
+    hintegral2->SetTitle("Amplitude vs Integral;amplitude;integral");
 
-// *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
-hintegral2->SetMarkerStyle(20);
-hintegral2->SetMarkerSize(1.0);
-hintegral2->SetMarkerColor(kAzure+2);
+    // *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
+    hintegral2->SetMarkerStyle(20);
+    hintegral2->SetMarkerSize(1.0);
+    hintegral2->SetMarkerColor(kAzure+2);
 
-hintegral2->SetLineColor(0);    // nessuna linea
-hintegral2->SetLineWidth(0);    // nessuna linea
+    hintegral2->SetLineColor(0);    // nessuna linea
+    hintegral2->SetLineWidth(0);    // nessuna linea
 
-// *** SOLO ORA DISEGNA ***
-hintegral2->Draw("AP");
-
-
+    // *** SOLO ORA DISEGNA ***
+    hintegral2->Draw("AP");
     cintegral2->Update();
 
-
-
-
-   TCanvas *cintegral3 = new TCanvas("cintegral3", "amplitudevsintegral", 900, 700);
+    TCanvas *cintegral3 = new TCanvas("cintegral3", "amplitudevsintegral", 900, 700);
     hintegral3->SetName("hintegral1");
-hintegral3->SetTitle("Amplitude vs Integral;amplitude;integral");
+    hintegral3->SetTitle("Amplitude vs Integral;amplitude;integral");
 
-// *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
-hintegral3->SetMarkerStyle(20);
-hintegral3->SetMarkerSize(1.0);
-hintegral3->SetMarkerColor(kAzure+2);
+    // *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
+    hintegral3->SetMarkerStyle(20);
+    hintegral3->SetMarkerSize(1.0);
+    hintegral3->SetMarkerColor(kAzure+2);
 
-hintegral3->SetLineColor(0);    // nessuna linea
-hintegral3->SetLineWidth(0);    // nessuna linea
+    hintegral3->SetLineColor(0);    // nessuna linea
+    hintegral3->SetLineWidth(0);    // nessuna linea
 
-// *** SOLO ORA DISEGNA ***
-hintegral3->Draw("AP");
-
+    // *** SOLO ORA DISEGNA ***
+    hintegral3->Draw("AP");
     cintegral3->Update();
-
-
-
-
 
     // ------------ Gaussian plot of the time difference ---------------
 
@@ -601,7 +576,6 @@ hintegral3->Draw("AP");
     hintegral1->Write();
     hintegral2->Write();
     hintegral3->Write();
-
 
     fout->Close(); // Close output file
     file->Close(); // Close input file
