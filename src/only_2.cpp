@@ -44,6 +44,7 @@ Processed files can be found at this path:
 #include <TStyle.h>
 #include <TAxis.h>
 #include "TProfile.h"
+#include "TGraph2D.h"
 /*TGraph* gGraph = 0;
 Double_t myLine(Double_t *x, Double_t *par) {
     double xx = x[0];
@@ -115,7 +116,7 @@ int main()
     Int_t HitFeb[3], Board[MAXPULSES], Channel[MAXPULSES];
     int tot_hit_feb;
     Double_t time_12, time_23, time_13, time20_12, time20_13, time20_23;
-    Double_t time30_12, time30_13, time30_23, time50_12;
+    Double_t time30_12, time30_13, time30_23, time50_12, peso, peso2;
 
 
 
@@ -176,9 +177,9 @@ int main()
     TGraph *hintegral1 = new TGraph();
     TGraph *hintegral2 = new TGraph();
     TGraph *hintegral3 = new TGraph();
-    TGraph *timevsamplitude =new TGraph();
+    TGraph2D *timevsamplitude =new TGraph2D();
     TGraph *timevsintegral =new TGraph();
-    TGraph *timevsamplitude2 =new TGraph();
+    TGraph2D *timevsamplitude2 =new TGraph2D();
     TGraph *timevsintegral2 =new TGraph();
     TProfile *prof = new TProfile("prof", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0, 1);
 
@@ -291,12 +292,50 @@ if (ampFEB[0] <= 0 || ampFEB[1] <= 0) {
 //&& (Channel[0]<16 || Channel[0]>32)
 //&& cfd60[0]<3600 && Channel[0]==29 && Channel[1]==29
 // && cfd30[0]<3100 && cfd30[0]>2900 cut on cfd 30%  && integral[0]/ampFEB[0]>8 && integral[1]/ampFEB[1]>8    ///// && ampFEB[0]> 0.2 && cfd60[0]<3350 && cfd60[0]>3000ss
-if(integral[0]/ampFEB[0]<50 && integral[1]/ampFEB[1]<50 && Channel[1]>32){
+if(integral[0]/ampFEB[0]<50 && integral[1]/ampFEB[1]<50){
             // Fill amplitude histograms           // AS: why this x 1000 scaling? -> To get values in mV
             htriple1->Fill(ampFEB[0] );
             htriple2->Fill(ampFEB[1]);
             htriple3->Fill(ampFEB[2]);
 
+
+
+            if(Channel[0]<8)
+                peso=0;
+            if(Channel[0]>7 && Channel[0]<16)
+                peso=1;
+            if(Channel[0]>15 && Channel[0]<24)
+                peso=2;
+            if(Channel[0]>23 && Channel[0]<32)
+                peso=3;
+            if(Channel[0]>31 && Channel[0]<40)
+                peso=4;
+            if(Channel[0]>39 && Channel[0]<48)
+                peso=5;
+            if(Channel[0]>47 && Channel[0]<56)
+                peso=6;
+            if(Channel[0]>55)
+                peso=7;
+
+
+
+
+        if(Channel[1]<8)
+                peso2=0;
+            if(Channel[1]>7 && Channel[1]<16)
+                peso2=1;
+            if(Channel[1]>15 && Channel[1]<24)
+                peso2=2;
+            if(Channel[1]>23 && Channel[1]<32)
+                peso2=3;
+            if(Channel[1]>31 && Channel[1]<40)
+                peso2=4;
+            if(Channel[1]>39 && Channel[1]<48)
+                peso2=5;
+            if(Channel[1]>47 && Channel[1]<56)
+                peso2=6;
+            if(Channel[1]>55)
+                peso2=7;
             // CFD = 10%
             //time_12 = cfd60[0] - cfd60[1];
             //time_23 = cfd10[1] - cfd10[2];
@@ -329,8 +368,8 @@ if(integral[0]/ampFEB[0]<50 && integral[1]/ampFEB[1]<50 && Channel[1]>32){
 
                 ///Integral vs amplitude distribution
 
-timevsamplitude->SetPoint(timevsamplitude->GetN(), ampFEB[0], cfd60[0]);
-timevsamplitude2->SetPoint(timevsamplitude2->GetN(), ampFEB[1], cfd60[1]);
+timevsamplitude->SetPoint(timevsamplitude->GetN(), ampFEB[0], cfd60[0], peso);
+timevsamplitude2->SetPoint(timevsamplitude2->GetN(), ampFEB[1], cfd60[1], peso2);
 prof->Fill(ampFEB[0], cfd60[0]);
 timevsintegral->SetPoint(timevsintegral->GetN(), integral[0], cfd60[0]);
     if(integral[0]<40)
@@ -519,16 +558,18 @@ cout<<"time walk"<<endl;
 timevsamplitude->SetTitle("SAT vs amplitude; Amplitude; SAT[us]");
 
 // *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
-timevsamplitude->SetMarkerStyle(20);
+/*timevsamplitude->SetMarkerStyle(20);
 timevsamplitude->SetMarkerSize(1.0);
 timevsamplitude->SetMarkerColor(kAzure+2);
 
 timevsamplitude->SetLineColor(0);    // nessuna linea
-timevsamplitude->SetLineWidth(0);    // nessuna linea
+timevsamplitude->SetLineWidth(0);    // nessuna linea*/
 
+
+gStyle->SetPalette(kViridis);
 //timevsamplitude->Fit("timewalk", "R");
 // *** SOLO ORA DISEGNA ***
-timevsamplitude->Draw("AP");
+timevsamplitude->Draw("COLZ");
 
 
     ctimeamlitude->Update();
@@ -538,17 +579,20 @@ timevsamplitude->Draw("AP");
     timevsamplitude2->SetName("timeaplitude2");
 timevsamplitude2->SetTitle("SAT vs amplitude; Amplitude; SAT[us]");
 
+
 // *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
-timevsamplitude2->SetMarkerStyle(20);
-timevsamplitude2->SetMarkerSize(1.0);
-timevsamplitude2->SetMarkerColor(kAzure+2);
+/*timevsamplitude->SetMarkerStyle(20);
+timevsamplitude->SetMarkerSize(1.0);
+timevsamplitude->SetMarkerColor(kAzure+2);
 
-timevsamplitude2->SetLineColor(0);    // nessuna linea
-timevsamplitude2->SetLineWidth(0);    // nessuna linea
+timevsamplitude->SetLineColor(0);    // nessuna linea
+timevsamplitude->SetLineWidth(0);    // nessuna linea*/
 
+
+gStyle->SetPalette(kViridis);
 //timevsamplitude->Fit("timewalk", "R");
 // *** SOLO ORA DISEGNA ***
-timevsamplitude2->Draw("AP");
+timevsamplitude2->Draw("COLZ");
 
 
     ctimeamlitude2->Update();
