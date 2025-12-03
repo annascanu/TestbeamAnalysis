@@ -223,7 +223,7 @@ int main()
             double cfd30[3]   = {-9999.0, -9999.0, -9999.0};
             double cfd50[3]   = {-9999.0, -9999.0, -9999.0};
             double cfd60[3]   = {-9999.0, -9999.0, -9999.0};
-            double base[3]   = {-9999.0, -9999.0, -9999.0};
+            double base[3]    = {-9999.0, -9999.0, -9999.0};
 
             // Fill according to Board[]
             for (int j = 0; j < npulses; j++)
@@ -253,7 +253,6 @@ int main()
                 hTime50->Fill(pulses_time_cfd50[j]);
                 hTime60->Fill(cfd60[0]);
                 hTime60_2->Fill(cfd60[1]);
-
 
                 //cut[i]=true;}
             }
@@ -349,7 +348,6 @@ int main()
                 if(ampFEB[0]<0)
                     cout<< "Amplitude < 0; event number: " << i << endl;
                 cfdvschannel1->SetPoint(cfdvschannel1->GetN(), Channel[0], cfd60[0]);
-
             }
         }
 
@@ -572,14 +570,12 @@ int main()
     prof->Draw();
     cmediabin->Update();
 
-
-TCanvas *cmediabin2 = new TCanvas("cmediabin2", "Slewing Correction", 800, 600);
-//prof->Fit("pol3");
-TF1 *empirico2 = new TF1("empirico2", "[0] + [1]/x", 0, 1);
-prof2->Fit(empirico2, "R");
-
-prof2->Draw();
-cmediabin2->Update();
+    TCanvas *cmediabin2 = new TCanvas("cmediabin2", "Slewing Correction", 800, 600);
+    //prof->Fit("pol3");
+    TF1 *empirico2 = new TF1("empirico2", "[0] + [1]/x", 0, 1);
+    prof2->Fit(empirico2, "R");
+    prof2->Draw();
+    cmediabin2->Update();
 
     /*TCanvas *cintegral3 = new TCanvas("cintegral3", "amplitudevsintegral", 900, 700);
     hintegral3->SetName("hintegral1");
@@ -594,9 +590,6 @@ cmediabin2->Update();
     // *** SOLO ORA DISEGNA ***
     hintegral3->Draw("AP");
     cintegral3->Update();*/
-    
-    cout<<"till here its fine"<<endl;
-    cout<<"cavallo"<<endl;
 
     //baseline
     TCanvas *cbaseline = new TCanvas("cbaseline", "baseline", 900, 700);
@@ -626,7 +619,6 @@ cmediabin2->Update();
     hbaseline1->SetFillColorAlpha(kAzure-4, 0.35);
     hbaseline1->SetTitle("baseline");
     hbaseline1->Draw("HIST");
-
     cbaseline->Update();
 
     // 5. Estrai i risultati dal TF1 dopo il fit (usa l'oggetto f_gaus)
@@ -672,35 +664,27 @@ cmediabin2->Update();
     double e_mean_13  = f3->GetParError(1);
     double e_sigma_13 = f3->GetParError(2);*/
 
-TCanvas *ctimeperchannel = new TCanvas("ctimeperchannel", "Time vs Integral", 900, 700);
-ctvsint ->SetGrid();
+    TCanvas *ctimeperchannel = new TCanvas("ctimeperchannel", "Time vs Integral", 900, 700);
+    ctvsint ->SetGrid();
 
-cfdvschannel1->SetName("cfdvschannel1");
+    cfdvschannel1->SetName("cfdvschannel1");
+    cfdvschannel1->SetLineColor(0);
+    cfdvschannel1->SetLineWidth(0);
+    cfdvschannel1->SetMarkerStyle(20);
+    cfdvschannel1->SetMarkerSize(1.1);
+    cfdvschannel1->SetMarkerColor(kBlue+1);
+    cfdvschannel1->SetTitle("channel vs SAT;Channel;SAT [ps]");
+    cfdvschannel1->GetXaxis()->SetTitleSize(0.045);
+    cfdvschannel1->GetYaxis()->SetTitleSize(0.045);
+    cfdvschannel1->GetXaxis()->SetLabelSize(0.04);
+    cfdvschannel1->GetYaxis()->SetLabelSize(0.04);
+    cfdvschannel1->Draw("AP");
 
-// Stile linea/punti
-cfdvschannel1->SetLineColor(0);
-cfdvschannel1->SetLineWidth(0);
-cfdvschannel1->SetMarkerStyle(20);
-cfdvschannel1->SetMarkerSize(1.1);
-cfdvschannel1->SetMarkerColor(kBlue+1);
-
-// Titoli e assi
-cfdvschannel1->SetTitle("channel vs SAT;Channel;SAT [ps]");
-cfdvschannel1->GetXaxis()->SetTitleSize(0.045);
-cfdvschannel1->GetYaxis()->SetTitleSize(0.045);
-cfdvschannel1->GetXaxis()->SetLabelSize(0.04);
-cfdvschannel1->GetYaxis()->SetLabelSize(0.04);
-
-cfdvschannel1->Draw("AP");
-
-// Eventuale legenda
-/*auto leg = new TLegend(0.15, 0.75, 0.45, 0.88);
-leg->AddEntry(timevsintegral, "Misure", "lp");
-leg->Draw();*/
-
-ctimeperchannel->Update();
-
-
+    // Eventuale legenda
+    /*auto leg = new TLegend(0.15, 0.75, 0.45, 0.88);
+    leg->AddEntry(timevsintegral, "Misure", "lp");
+    leg->Draw();*/
+    ctimeperchannel->Update();
 
     // ------------ Gaussian plot of the time difference ---------------
 
@@ -783,8 +767,6 @@ ctimeperchannel->Update();
     // sigma1^2 = 1/2 * ( sigma_12^2 + sigma_13^2 - sigma_23^2 )
     // sigma2^2 = 1/2 * ( sigma_12^2 + sigma_23^2 - sigma_13^2 )
     // sigma3^2 = 1/2 * ( sigma_13^2 + sigma_23^2 - sigma_12^2 )
-    cout<<"till here its fine"<<endl;
-    cout<<"cavallo"<<endl;
 
     double s12 = sigma_12;
     /*double s13 = 0;
@@ -802,7 +784,7 @@ ctimeperchannel->Update();
         cout << "WARNING: sigma1^2 < 0 (" << s1sq << "). Setting to 0 to avoid NaN." << endl;
         s1sq = 0;
     }
-   /* if (s2sq < 0) {
+    /* if (s2sq < 0) {
         cout << "WARNING: sigma2^2 < 0 (" << s2sq << "). Setting to 0 to avoid NaN." << endl;
         s2sq = 0;
     }
@@ -879,8 +861,8 @@ ctimeperchannel->Update();
     hTime20->Write();
     hTime30->Write();
     hTime50->Write();
-     hTime60->Write();
-      hTime60_2->Write();
+    hTime60->Write();
+    hTime60_2->Write();
     //c->Write();
     c1->Write();
     htriple1->Write();
