@@ -143,6 +143,8 @@ int main()
     TH1F *hTime20   = new TH1F("hTime20", "Constant fraction discriminator set at 20% Time;Time [ps];Counts", 1000, 0, 10000);
     TH1F *hTime30    = new TH1F("hTime30", "Constant fraction discriminator set at 30% Time;Time [ps];Counts", 1000, 0, 10000);
     TH1F *hTime50    = new TH1F("hTime50", "Constant fraction discriminator set at 50% Time;Time [ps];Counts", 1000, 0, 10000);
+    TH1F *hTime60    = new TH1F("hTime60", "Constant fraction discriminator set at 60% Time;Time [ps];Counts", 1000, 0, 10000);
+    TH1F *hTime60_2   = new TH1F("hTime60_2", "Constant fraction discriminator set at 60% Time;Time [ps];Counts", 1000, 0, 10000);
 
     // Histograms for triple hits
     TH1F *htriple1  = new TH1F("htriple1", "amplitude of a triple", 1000, 0, 0.5);
@@ -174,6 +176,8 @@ int main()
     TGraph2D *timevsamplitude2 =new TGraph2D();
     TGraph *timevsintegral2 =new TGraph();
     TProfile *prof = new TProfile("prof", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0, 1);
+    TProfile *prof2 = new TProfile("prof2", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0, 1);
+    TGraph *cfdvschannel1 = new TGraph();
 
     // -----------------------
     //        Read tree
@@ -247,6 +251,9 @@ int main()
                 hTime20->Fill(pulses_time_cfd20[j]);
                 hTime30->Fill(pulses_time_cfd30[j]);
                 hTime50->Fill(pulses_time_cfd50[j]);
+                hTime60->Fill(cfd60[0]);
+                hTime60_2->Fill(cfd60[1]);
+
 
                 //cut[i]=true;}
             }
@@ -332,6 +339,7 @@ int main()
                 timevsamplitude->SetPoint(timevsamplitude->GetN(), ampFEB[0], cfd60[0], peso);
                 timevsamplitude2->SetPoint(timevsamplitude2->GetN(), ampFEB[1], cfd60[1], peso2);
                 prof->Fill(ampFEB[0], cfd60[0]);
+                prof2->Fill(ampFEB[1], cfd60[1]);
                 timevsintegral->SetPoint(timevsintegral->GetN(), integral[0], cfd60[0]);
                 if(integral[0]<40)
                     hintegral1->SetPoint(hintegral1->GetN(),ampFEB[0],integral[0]);
@@ -340,6 +348,8 @@ int main()
                     //hintegral3->SetPoint(hintegral3->GetN(),ampFEB[2],integral[2]);
                 if(ampFEB[0]<0)
                     cout<< "Amplitude < 0; event number: " << i << endl;
+                cfdvschannel1->SetPoint(cfdvschannel1->GetN(), Channel[0], cfd60[0]);
+
             }
         }
 
@@ -562,6 +572,15 @@ int main()
     prof->Draw();
     cmediabin->Update();
 
+
+TCanvas *cmediabin2 = new TCanvas("cmediabin2", "Slewing Correction", 800, 600);
+//prof->Fit("pol3");
+TF1 *empirico2 = new TF1("empirico2", "[0] + [1]/x", 0, 1);
+prof2->Fit(empirico2, "R");
+
+prof2->Draw();
+cmediabin2->Update();
+
     /*TCanvas *cintegral3 = new TCanvas("cintegral3", "amplitudevsintegral", 900, 700);
     hintegral3->SetName("hintegral1");
     hintegral3->SetTitle("Amplitude vs Integral;amplitude;integral");
@@ -652,6 +671,36 @@ int main()
     double e_amp_13   = f3->GetParError(0);
     double e_mean_13  = f3->GetParError(1);
     double e_sigma_13 = f3->GetParError(2);*/
+
+TCanvas *ctimeperchannel = new TCanvas("ctimeperchannel", "Time vs Integral", 900, 700);
+ctvsint ->SetGrid();
+
+cfdvschannel1->SetName("cfdvschannel1");
+
+// Stile linea/punti
+cfdvschannel1->SetLineColor(0);
+cfdvschannel1->SetLineWidth(0);
+cfdvschannel1->SetMarkerStyle(20);
+cfdvschannel1->SetMarkerSize(1.1);
+cfdvschannel1->SetMarkerColor(kBlue+1);
+
+// Titoli e assi
+cfdvschannel1->SetTitle("channel vs SAT;Channel;SAT [ps]");
+cfdvschannel1->GetXaxis()->SetTitleSize(0.045);
+cfdvschannel1->GetYaxis()->SetTitleSize(0.045);
+cfdvschannel1->GetXaxis()->SetLabelSize(0.04);
+cfdvschannel1->GetYaxis()->SetLabelSize(0.04);
+
+cfdvschannel1->Draw("AP");
+
+// Eventuale legenda
+/*auto leg = new TLegend(0.15, 0.75, 0.45, 0.88);
+leg->AddEntry(timevsintegral, "Misure", "lp");
+leg->Draw();*/
+
+ctimeperchannel->Update();
+
+
 
     // ------------ Gaussian plot of the time difference ---------------
 
@@ -830,6 +879,8 @@ int main()
     hTime20->Write();
     hTime30->Write();
     hTime50->Write();
+     hTime60->Write();
+      hTime60_2->Write();
     //c->Write();
     c1->Write();
     htriple1->Write();
@@ -852,7 +903,9 @@ int main()
     hbaseline1->Write();
     timevsintegral->Write();
     prof->Write();
+    prof2->Write();
     cmediabin->Write();
+    cfdvschannel1->Write();
 
     fout->Close(); // Close output file
     file->Close(); // Close input file
