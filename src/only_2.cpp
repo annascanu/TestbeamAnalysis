@@ -45,8 +45,12 @@ Processed files can be found at this path:
 #include <TAxis.h>
 #include "TProfile.h"
 #include "TGraph2D.h"
-/*TGraph* gGraph = 0;
-Double_t myLine(Double_t *x, Double_t *par) {
+
+// AS: What is this?
+/*
+TGraph* gGraph = 0;
+Double_t myLine(Double_t *x, Double_t *par) 
+{
     double xx = x[0];
 
     // Trovo l’indice del punto più vicino
@@ -54,14 +58,17 @@ Double_t myLine(Double_t *x, Double_t *par) {
     double gx, gy;
 
     // ROOT passa i punti in ordine → cerco il punto con la x corrispondente
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) 
+    {
         gGraph->GetPoint(i, gx, gy);
-        if (fabs(gx - xx) < 1e-9) {   // punto giusto
+        if (fabs(gx - xx) < 1e-9) 
+        {   // punto giusto
             // Limiti su y
             double ymin = 0;       // <-- METTI TU
             double ymax = 30;     // <-- METTI TU
 
-            if (gy < ymin || gy > ymax) {
+            if (gy < ymin || gy > ymax) 
+            {
                 TF1::RejectPoint();   // scarta il punto
                 return 0;
             }
@@ -72,11 +79,6 @@ Double_t myLine(Double_t *x, Double_t *par) {
     // Modello lineare
     return par[0] + par[1] * xx;
 }*/
-
-
-
-
-
 
 using namespace std;
 
@@ -118,8 +120,6 @@ int main()
     Double_t time_12, time_23, time_13, time20_12, time20_13, time20_23;
     Double_t time30_12, time30_13, time30_23, time50_12, peso, peso2;
 
-
-
     tree->SetBranchAddress("npulses", &npulses);
     tree->SetBranchAddress("pulses_amplitude", &pulses_amplitude);
     tree->SetBranchAddress("pulses_integral", &pulses_integral);
@@ -130,12 +130,9 @@ int main()
     tree->SetBranchAddress("HitFeb", &HitFeb);
     tree->SetBranchAddress("Board", &Board);
     tree->SetBranchAddress("pulses_time_cfd50", &pulses_time_cfd50);
-        tree->SetBranchAddress("pulses_time_cfd60", &pulses_time_cfd60);
-        tree->SetBranchAddress("Baseline", &Baseline);
-     tree->SetBranchAddress("Channel", &Channel);
-
-
-
+    tree->SetBranchAddress("pulses_time_cfd60", &pulses_time_cfd60);
+    tree->SetBranchAddress("Baseline", &Baseline);
+    tree->SetBranchAddress("Channel", &Channel);
 
     // ------------------------------
     //     Initialize histograms
@@ -146,7 +143,6 @@ int main()
     TH1F *hTime20   = new TH1F("hTime20", "Constant fraction discriminator set at 20% Time;Time [ps];Counts", 1000, 0, 10000);
     TH1F *hTime30    = new TH1F("hTime30", "Constant fraction discriminator set at 30% Time;Time [ps];Counts", 1000, 0, 10000);
     TH1F *hTime50    = new TH1F("hTime50", "Constant fraction discriminator set at 50% Time;Time [ps];Counts", 1000, 0, 10000);
-
 
     // Histograms for triple hits
     TH1F *htriple1  = new TH1F("htriple1", "amplitude of a triple", 1000, 0, 0.5);
@@ -166,14 +162,10 @@ int main()
     TH1F *htime30_13    = new TH1F("htime30_13", "time diff ;Time [ps];Counts", 100, -0.2, 0.2);
     TH1F *htime30_23    = new TH1F("htime30_23", "time diff ;Time [ps];Counts", 100, -0.2, 0.2);
 
-        TH1F *hbaseline1  = new TH1F("hbaseline", "baseline", 1000, 0, 0.009);
+    // Baseline histogram
+    TH1F *hbaseline1  = new TH1F("hbaseline", "baseline", 1000, 0, 0.009);
 
-    ///Amplitude vs integrale histogram
-
-    /*TGraph *hintegral1 = new TGraph("hintegral1", "amplitude vs integral det 1", 1000, 0, 200, 1000, 0, 3);
-    TGraph *hintegral2 = new TGraph("hintegral2", "amplitude vs integral det 2", 1000, 0, 500, 1000, 0, 500);
-    TGraph *hintegral3 = new TGraph("hintegral3", "amplitude vs integral det 3", 1000, 0, 500, 1000, 0, 500);*/
-
+    ///Amplitude vs integral histogram
     TGraph *hintegral1 = new TGraph();
     TGraph *hintegral2 = new TGraph();
     TGraph *hintegral3 = new TGraph();
@@ -182,12 +174,6 @@ int main()
     TGraph2D *timevsamplitude2 =new TGraph2D();
     TGraph *timevsintegral2 =new TGraph();
     TProfile *prof = new TProfile("prof", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0, 1);
-
-
-
-
-
-
 
     // -----------------------
     //        Read tree
@@ -211,8 +197,6 @@ int main()
             nGood++;
             idx = j;
             hAmpAll->Fill(pulses_amplitude[j]);
-
-
         }
 
         if (nGood == 1 && idx >= 0)
@@ -233,19 +217,16 @@ int main()
             double cfd10[3]   = {-9999.0, -9999.0, -9999.0};
             double cfd20[3]   = {-9999.0, -9999.0, -9999.0};
             double cfd30[3]   = {-9999.0, -9999.0, -9999.0};
-                        double cfd50[3]   = {-9999.0, -9999.0, -9999.0};
-                                                double cfd60[3]   = {-9999.0, -9999.0, -9999.0};
-
-
-                                                double base[3]   = {-9999.0, -9999.0, -9999.0};
-
+            double cfd50[3]   = {-9999.0, -9999.0, -9999.0};
+            double cfd60[3]   = {-9999.0, -9999.0, -9999.0};
+            double base[3]   = {-9999.0, -9999.0, -9999.0};
 
             // Fill according to Board[]
             for (int j = 0; j < npulses; j++)
             {
                 if (pulses_bad_pulse[j])
                     continue;
-                int det = Board[j];   // Which detector this pulse belongs to (either 0, 1, 2)
+                int det = Board[j]; // Which detector this pulse belongs to (either 0, 1, 2)
 
                 if (det < 0 || det > 2)
                 {
@@ -253,142 +234,120 @@ int main()
                     continue;
                 }
 
-              // if(pulses_amplitude[j]>0 && pulses_integral[j]/pulses_amplitude[j] < 2000 )
+                //if(pulses_amplitude[j]>0 && pulses_integral[j]/pulses_amplitude[j] < 2000 )
                 //{
-
                 ampFEB[det] = pulses_amplitude[j];
                 cfd10[det]  = pulses_time_cfd10[j];
                 cfd20[det]  = pulses_time_cfd20[j];
                 cfd30[det]  = pulses_time_cfd30[j];
                 integral[det]= pulses_integral[j];
                 cfd50[det]=pulses_time_cfd50[j];
-                                cfd60[det]=pulses_time_cfd60[j];
-                            base[det]=Baseline[j];
-                               hTime20->Fill(pulses_time_cfd20[j]);
-                                hTime30->Fill(pulses_time_cfd30[j]);
-                                                hTime50->Fill(pulses_time_cfd50[j]);
-
+                cfd60[det]=pulses_time_cfd60[j];
+                base[det]=Baseline[j];
+                hTime20->Fill(pulses_time_cfd20[j]);
+                hTime30->Fill(pulses_time_cfd30[j]);
+                hTime50->Fill(pulses_time_cfd50[j]);
 
                 //cut[i]=true;}
-
-
             }
 
-            /* // This is probably not needed anymore
-            // Sanity check to make sure we found valid entries for all three FEBs
-            bool validTriple = true;
-            for (int d = 0; d < 3; ++d)
-                if (ampFEB[d] < 0)
-                    validTriple = false;
-    
-            if (!validTriple) 
-                continue; // skip this event if something weird happened
-            */
-// Skip se un detector non ha dato segnale buono
-if (ampFEB[0] <= 0 || ampFEB[1] <= 0) {
-    continue;
+            // Skip se un detector non ha dato segnale buono
+            if (ampFEB[0] <= 0 || ampFEB[1] <= 0)                 
+                continue;
+            //&& (Channel[0]<16 || Channel[0]>32)
+            //&& cfd60[0]<3600 && Channel[0]==29 && Channel[1]==29
+            //&& cfd30[0]<3100 && cfd30[0]>2900 cut on cfd 30%  && integral[0]/ampFEB[0]>8 && integral[1]/ampFEB[1]>8    ///// && ampFEB[0]> 0.2 && cfd60[0]<3350 && cfd60[0]>3000ss
+            if(integral[0]/ampFEB[0]<50 && integral[1]/ampFEB[1]<50)
+            {
+                // Fill amplitude histograms           // AS: why this x 1000 scaling? -> To get values in mV
+                htriple1->Fill(ampFEB[0]);
+                htriple2->Fill(ampFEB[1]);
+                htriple3->Fill(ampFEB[2]);
 
-}
-//&& (Channel[0]<16 || Channel[0]>32)
-//&& cfd60[0]<3600 && Channel[0]==29 && Channel[1]==29
-// && cfd30[0]<3100 && cfd30[0]>2900 cut on cfd 30%  && integral[0]/ampFEB[0]>8 && integral[1]/ampFEB[1]>8    ///// && ampFEB[0]> 0.2 && cfd60[0]<3350 && cfd60[0]>3000ss
-if(integral[0]/ampFEB[0]<50 && integral[1]/ampFEB[1]<50){
-            // Fill amplitude histograms           // AS: why this x 1000 scaling? -> To get values in mV
-            htriple1->Fill(ampFEB[0] );
-            htriple2->Fill(ampFEB[1]);
-            htriple3->Fill(ampFEB[2]);
+                if(Channel[0]<8)
+                    peso=0;
+                if(Channel[0]>7 && Channel[0]<16)
+                    peso=1;
+                if(Channel[0]>15 && Channel[0]<24)
+                    peso=2;
+                if(Channel[0]>23 && Channel[0]<32)
+                    peso=3;
+                if(Channel[0]>31 && Channel[0]<40)
+                    peso=4;
+                if(Channel[0]>39 && Channel[0]<48)
+                    peso=5;
+                if(Channel[0]>47 && Channel[0]<56)
+                    peso=6;
+                if(Channel[0]>55)
+                    peso=7;
 
+                if(Channel[1]<8)
+                    peso2=0;
+                if(Channel[1]>7 && Channel[1]<16)
+                    peso2=1;
+                if(Channel[1]>15 && Channel[1]<24)
+                    peso2=2;
+                if(Channel[1]>23 && Channel[1]<32)
+                    peso2=3;
+                if(Channel[1]>31 && Channel[1]<40)
+                    peso2=4;
+                if(Channel[1]>39 && Channel[1]<48)
+                    peso2=5;
+                if(Channel[1]>47 && Channel[1]<56)
+                    peso2=6;
+                if(Channel[1]>55)
+                    peso2=7;
 
+                // CFD = 10%
+                //time_12 = cfd60[0] - cfd60[1];
+                //time_23 = cfd10[1] - cfd10[2];
+                //time_13 = cfd10[0] - cfd10[2];
 
-            if(Channel[0]<8)
-                peso=0;
-            if(Channel[0]>7 && Channel[0]<16)
-                peso=1;
-            if(Channel[0]>15 && Channel[0]<24)
-                peso=2;
-            if(Channel[0]>23 && Channel[0]<32)
-                peso=3;
-            if(Channel[0]>31 && Channel[0]<40)
-                peso=4;
-            if(Channel[0]>39 && Channel[0]<48)
-                peso=5;
-            if(Channel[0]>47 && Channel[0]<56)
-                peso=6;
-            if(Channel[0]>55)
-                peso=7;
+                //htime_12->Fill(time_12);
+                //htime_23->Fill(time_23);
+                //htime_13->Fill(time_13);
 
+                // CFD = 20%
+                //time20_12 = cfd20[0] - cfd20[1];
+                //if(fabs(time20_12)>)continue;
+                //time20_23 = cfd20[1] - cfd20[2];
+                //time20_13 = cfd20[0] - cfd20[2];
 
+                //htime20_12->Fill(time20_12);
+                //htime20_23->Fill(time20_23);
+                //htime20_13->Fill(time20_13);
 
+                // CFD = 30%
+                time30_12 = cfd60[0] - cfd60[1];
+                //time30_23 = cfd30[1] - cfd30[2];
+                //time30_13 = cfd30[0] - cfd30[2];
 
-        if(Channel[1]<8)
-                peso2=0;
-            if(Channel[1]>7 && Channel[1]<16)
-                peso2=1;
-            if(Channel[1]>15 && Channel[1]<24)
-                peso2=2;
-            if(Channel[1]>23 && Channel[1]<32)
-                peso2=3;
-            if(Channel[1]>31 && Channel[1]<40)
-                peso2=4;
-            if(Channel[1]>39 && Channel[1]<48)
-                peso2=5;
-            if(Channel[1]>47 && Channel[1]<56)
-                peso2=6;
-            if(Channel[1]>55)
-                peso2=7;
-            // CFD = 10%
-            //time_12 = cfd60[0] - cfd60[1];
-            //time_23 = cfd10[1] - cfd10[2];
-            //time_13 = cfd10[0] - cfd10[2];
+                htime30_12->Fill(time30_12);
+                //htime30_23->Fill(time30_23);
+                //htime30_13->Fill(time30_13);
 
-            //htime_12->Fill(time_12);
-            //htime_23->Fill(time_23);
-            //htime_13->Fill(time_13);
-
-            // CFD = 20%
-            //time20_12 = cfd20[0] - cfd20[1];
-            //if(fabs(time20_12)>)continue;
-            //time20_23 = cfd20[1] - cfd20[2];
-            //time20_13 = cfd20[0] - cfd20[2];
-
-            //htime20_12->Fill(time20_12);
-            //htime20_23->Fill(time20_23);
-            //htime20_13->Fill(time20_13);
-
-            // CFD = 30%
-            time30_12 = cfd60[0] - cfd60[1];
-            //time30_23 = cfd30[1] - cfd30[2];
-            //time30_13 = cfd30[0] - cfd30[2];
-
-            htime30_12->Fill(time30_12);
-            //htime30_23->Fill(time30_23);
-            //htime30_13->Fill(time30_13);
-
-            hbaseline1->Fill(base[0]);
+                hbaseline1->Fill(base[0]);
 
                 ///Integral vs amplitude distribution
-
-timevsamplitude->SetPoint(timevsamplitude->GetN(), ampFEB[0], cfd60[0], peso);
-timevsamplitude2->SetPoint(timevsamplitude2->GetN(), ampFEB[1], cfd60[1], peso2);
-prof->Fill(ampFEB[0], cfd60[0]);
-timevsintegral->SetPoint(timevsintegral->GetN(), integral[0], cfd60[0]);
-    if(integral[0]<40)
-            hintegral1->SetPoint(hintegral1->GetN(),ampFEB[0],integral[0]);
-    if(integral[1]<26)
-            hintegral2->SetPoint(hintegral2->GetN(),ampFEB[1],integral[1]);
-            //hintegral3->SetPoint(hintegral3->GetN(),ampFEB[2],integral[2]);
-            if(ampFEB[0]<0)
-            cout<< "amplitude negativa, evento numero: "<< i<<endl;
-
-
-
-
-        }}
+                timevsamplitude->SetPoint(timevsamplitude->GetN(), ampFEB[0], cfd60[0], peso);
+                timevsamplitude2->SetPoint(timevsamplitude2->GetN(), ampFEB[1], cfd60[1], peso2);
+                prof->Fill(ampFEB[0], cfd60[0]);
+                timevsintegral->SetPoint(timevsintegral->GetN(), integral[0], cfd60[0]);
+                if(integral[0]<40)
+                    hintegral1->SetPoint(hintegral1->GetN(),ampFEB[0],integral[0]);
+                if(integral[1]<26)
+                    hintegral2->SetPoint(hintegral2->GetN(),ampFEB[1],integral[1]);
+                    //hintegral3->SetPoint(hintegral3->GetN(),ampFEB[2],integral[2]);
+                if(ampFEB[0]<0)
+                    cout<< "Amplitude < 0; event number: " << i << endl;
+            }
+        }
 
         // Progress indicator for sanity :)
         if (i % 100000 == 0) cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
     }
-                cout<<"till here is fine"<<endl;
+    
+    cout << "Until here code works fine" << endl;
 
     /// --- TF1 Polya function ---
     TF1 *fpolyaAmpl1 = new TF1("fpolyaAmpl1", "([0]/[1])*((([2]+1)^([2]+1)*(x/[1])^[2])/(TMath::Gamma([2]+1)))*exp(-([2]+1)*x/[1])", 0, 800);
@@ -407,7 +366,6 @@ timevsintegral->SetPoint(timevsintegral->GetN(), integral[0], cfd60[0]);
 
     TF1 *fpolyaAmpl2 = (TF1*)fpolyaAmpl1->Clone("fpolyaAmpl2");
     TF1 *fpolyaAmpl3 = (TF1*)fpolyaAmpl1->Clone("fpolyaAmpl3");
-
     fpolyaAmpl2->SetParameter(2,1);
 
     // --- Tre canvas separati ---
@@ -473,239 +431,192 @@ timevsintegral->SetPoint(timevsintegral->GetN(), integral[0], cfd60[0]);
     cAll->SaveAs("histAll.pdf");
 
     ///amplitude vs integral plot
-                cout<<"till here is fine"<<endl;
+    cout<<"till here is fine"<<endl;
 
     TCanvas *cintegral = new TCanvas("cintegral", "amplitudevsintegral", 900, 700);
     hintegral1->SetName("hintegral1");
-hintegral1->SetTitle("Amplitude vs Integral;amplitude;integral");
+    hintegral1->SetTitle("Amplitude vs Integral;amplitude;integral");
 
-// *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
-hintegral1->SetMarkerStyle(20);
-hintegral1->SetMarkerSize(1.0);
-hintegral1->SetMarkerColor(kAzure+2);
+    // *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
+    hintegral1->SetMarkerStyle(20);
+    hintegral1->SetMarkerSize(1.0);
+    hintegral1->SetMarkerColor(kAzure+2);
 
-hintegral1->SetLineColor(0);    // nessuna linea
-hintegral1->SetLineWidth(0);    // nessuna linea
-double xmin = hintegral1->GetXaxis()->GetXmin();
-double xmax = hintegral1->GetXaxis()->GetXmax();
+    hintegral1->SetLineColor(0);    // nessuna linea
+    hintegral1->SetLineWidth(0);    // nessuna linea
+    double xmin = hintegral1->GetXaxis()->GetXmin();
+    double xmax = hintegral1->GetXaxis()->GetXmax();
 
-TF1* avsi = new TF1("avsi", "[0] + [1]*x");
-avsi->SetNpx(500);
-avsi->SetParameter(0,0);   // limite su p0 (intercetta)
-avsi->SetParameter(1, 31);       // limite su p1 (pendenza)
+    TF1* avsi = new TF1("avsi", "[0] + [1]*x");
+    avsi->SetNpx(500);
+    avsi->SetParameter(0,0);         // limite su p0 (intercetta)
+    avsi->SetParameter(1, 31);       // limite su p1 (pendenza)
 
-hintegral1->Fit(avsi, "R");
-avsi->SetLineColor(kRed);
-avsi->SetLineWidth(2);
+    hintegral1->Fit(avsi, "R");
+    avsi->SetLineColor(kRed);
+    avsi->SetLineWidth(2);
 
+    /*gGraph = hintegral1;   // gr è il tuo TGraph
+    TF1 *avsi = new TF1("avsi", myLine, hintegral1->GetX()[0], hintegral1->GetX()[hintegral1->GetN()-1], 2); // x range
+    avsi->SetParameters(0, 1);  // valori iniziali*/
 
-
-/*gGraph = hintegral1;   // gr è il tuo TGraph
-
-TF1 *avsi = new TF1("avsi", myLine,
-                    hintegral1->GetX()[0], hintegral1->GetX()[hintegral1->GetN()-1], 2); // x range
-
-avsi->SetParameters(0, 1);  // valori iniziali*/
-
-
-
-// *** SOLO ORA DISEGNA ***pulses_bad_pulse
-hintegral1->Draw("AP");
-avsi->Draw("same");
-/*hintegral1->Fit(avsi, "R");  // "R" = fit solo nell'intervallo di x specificato
-
-hintegral1->Draw("AP");
-avsi->Draw("same");          // adesso la linea del fit viene disegnata*/
-
-
+    // *** SOLO ORA DISEGNA ***pulses_bad_pulse
+    hintegral1->Draw("AP");
+    avsi->Draw("same");
+    /*hintegral1->Fit(avsi, "R");  // "R" = fit solo nell'intervallo di x specificato
+    hintegral1->Draw("AP");
+    avsi->Draw("same");          // adesso la linea del fit viene disegnata*/
 
     cintegral->Update();
 
-            cout<<"till here is fine"<<endl;
+    cout << "till here is fine" << endl;
 
-
-   TCanvas *cintegral2 = new TCanvas("cintegral2", "amplitudevsintegral", 900, 700);
-
+    TCanvas *cintegral2 = new TCanvas("cintegral2", "amplitudevsintegral", 900, 700);
     hintegral2->SetName("hintegral1");
-hintegral2->SetTitle("Amplitude vs Integral;amplitude;integral");
+    hintegral2->SetTitle("Amplitude vs Integral;amplitude;integral");
+    // *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
+    hintegral2->SetMarkerStyle(20);
+    hintegral2->SetMarkerSize(1.0);
+    hintegral2->SetMarkerColor(kAzure+2);
+    hintegral2->SetLineColor(0);    // nessuna linea
+    hintegral2->SetLineWidth(0); // nessuna linea
 
-// *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
-hintegral2->SetMarkerStyle(20);
-hintegral2->SetMarkerSize(1.0);
-hintegral2->SetMarkerColor(kAzure+2);
-
-hintegral2->SetLineColor(0);    // nessuna linea
-hintegral2->SetLineWidth(0); // nessuna linea
-
-
-TF1* avsi2 = new TF1("avsi2", "[0] + [1]*x");
-avsi->SetNpx(500);
-hintegral2->Fit(avsi2, "R");
-
-
-// *** SOLO ORA DISEGNA ***
-hintegral2->Draw("AP");
-
-
+    TF1* avsi2 = new TF1("avsi2", "[0] + [1]*x");
+    avsi->SetNpx(500);
+    hintegral2->Fit(avsi2, "R");
+    // *** SOLO ORA DISEGNA ***
+    hintegral2->Draw("AP");
     cintegral2->Update();
 
+    // ----------------------------------------------------------------------------------------------------
 
-
-cout<<"time walk"<<endl;
-   TCanvas *ctimeamlitude = new TCanvas("ctimeaplitude", "amplitudevsintegral", 900, 700);
-   //TF1 *timewalk = new TF1("timewalk", "[0]+[1]/x", 0, 800);
+    cout<<"time walk"<<endl;
+    TCanvas *ctimeamlitude = new TCanvas("ctimeaplitude", "amplitudevsintegral", 900, 700);
+    //TF1 *timewalk = new TF1("timewalk", "[0]+[1]/x", 0, 800);
     timevsamplitude->SetName("timeaplitude");
-timevsamplitude->SetTitle("SAT vs amplitude; Amplitude; SAT[us]");
+    timevsamplitude->SetTitle("SAT vs amplitude; Amplitude; SAT[us]");
 
-// *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
-/*timevsamplitude->SetMarkerStyle(20);
-timevsamplitude->SetMarkerSize(1.0);
-timevsamplitude->SetMarkerColor(kAzure+2);
+    // *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
+    /*timevsamplitude->SetMarkerStyle(20);
+    timevsamplitude->SetMarkerSize(1.0);
+    timevsamplitude->SetMarkerColor(kAzure+2);
 
-timevsamplitude->SetLineColor(0);    // nessuna linea
-timevsamplitude->SetLineWidth(0);    // nessuna linea*/
+    timevsamplitude->SetLineColor(0);    // nessuna linea
+    timevsamplitude->SetLineWidth(0);    // nessuna linea*/
 
-
-gStyle->SetPalette(kViridis);
-//timevsamplitude->Fit("timewalk", "R");
-// *** SOLO ORA DISEGNA ***
-timevsamplitude->Draw("COLZ");
-
-
+    gStyle->SetPalette(kViridis);
+    //timevsamplitude->Fit("timewalk", "R");
+    // *** SOLO ORA DISEGNA ***
+    timevsamplitude->Draw("COLZ");
     ctimeamlitude->Update();
 
-     TCanvas *ctimeamlitude2 = new TCanvas("ctimeaplitude2", "amplitudevsintegral", 900, 700);
-   //TF1 *timewalk = new TF1("timewalk", "[0]+[1]/x", 0, 800);
+    TCanvas *ctimeamlitude2 = new TCanvas("ctimeaplitude2", "amplitudevsintegral", 900, 700);
+    //TF1 *timewalk = new TF1("timewalk", "[0]+[1]/x", 0, 800);
     timevsamplitude2->SetName("timeaplitude2");
-timevsamplitude2->SetTitle("SAT vs amplitude; Amplitude; SAT[us]");
+    timevsamplitude2->SetTitle("SAT vs amplitude; Amplitude; SAT[us]");
 
+    // *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
+    /*timevsamplitude->SetMarkerStyle(20);
+    timevsamplitude->SetMarkerSize(1.0);
+    timevsamplitude->SetMarkerColor(kAzure+2);
+    timevsamplitude->SetLineColor(0);    // nessuna linea
+    timevsamplitude->SetLineWidth(0);    // nessuna linea*/
 
-// *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
-/*timevsamplitude->SetMarkerStyle(20);
-timevsamplitude->SetMarkerSize(1.0);
-timevsamplitude->SetMarkerColor(kAzure+2);
-
-timevsamplitude->SetLineColor(0);    // nessuna linea
-timevsamplitude->SetLineWidth(0);    // nessuna linea*/
-
-
-gStyle->SetPalette(kViridis);
-//timevsamplitude->Fit("timewalk", "R");
-// *** SOLO ORA DISEGNA ***
-timevsamplitude2->Draw("COLZ");
-
-
+    gStyle->SetPalette(kViridis);
+    //timevsamplitude->Fit("timewalk", "R");
+    // *** SOLO ORA DISEGNA ***
+    timevsamplitude2->Draw("COLZ");
     ctimeamlitude2->Update();
 
-
-
-
-
-
-
-
     TCanvas *ctvsint = new TCanvas("ctvsint", "Time vs Integral", 900, 700);
-ctvsint ->SetGrid();
+    ctvsint ->SetGrid();
 
-timevsintegral->SetName("timevsintegral");
+    timevsintegral->SetName("timevsintegral");
 
-// Stile linea/punti
-timevsintegral->SetLineColor(0);
-timevsintegral->SetLineWidth(0);
-timevsintegral->SetMarkerStyle(20);
-timevsintegral->SetMarkerSize(1.1);
-timevsintegral->SetMarkerColor(kBlue+1);
+    // Stile linea/punti
+    timevsintegral->SetLineColor(0);
+    timevsintegral->SetLineWidth(0);
+    timevsintegral->SetMarkerStyle(20);
+    timevsintegral->SetMarkerSize(1.1);
+    timevsintegral->SetMarkerColor(kBlue+1);
 
-// Titoli e assi
-timevsintegral->SetTitle("SAT vs integral;Integral;SAT [ps]");
-timevsintegral->GetXaxis()->SetTitleSize(0.045);
-timevsintegral->GetYaxis()->SetTitleSize(0.045);
-timevsintegral->GetXaxis()->SetLabelSize(0.04);
-timevsintegral->GetYaxis()->SetLabelSize(0.04);
+    // Titoli e assi
+    timevsintegral->SetTitle("SAT vs integral;Integral;SAT [ps]");
+    timevsintegral->GetXaxis()->SetTitleSize(0.045);
+    timevsintegral->GetYaxis()->SetTitleSize(0.045);
+    timevsintegral->GetXaxis()->SetLabelSize(0.04);
+    timevsintegral->GetYaxis()->SetLabelSize(0.04);
+    timevsintegral->Draw("AP");
 
-timevsintegral->Draw("AP");
+    // Eventuale legenda
+    /*auto leg = new TLegend(0.15, 0.75, 0.45, 0.88);
+    leg->AddEntry(timevsintegral, "Misure", "lp");
+    leg->Draw();*/
 
-// Eventuale legenda
-/*auto leg = new TLegend(0.15, 0.75, 0.45, 0.88);
-leg->AddEntry(timevsintegral, "Misure", "lp");
-leg->Draw();*/
+    ctvsint->Update();
 
-ctvsint->Update();
+    TCanvas *cmediabin = new TCanvas("cmediabin", "Slewing Correction", 800, 600);
+    //prof->Fit("pol3");
+    TF1 *empirico = new TF1("empirico", "[0] + [1]/x", 0, 1);
+    prof->Fit(empirico, "R");
+    prof->Draw();
+    cmediabin->Update();
 
-
-
-
-TCanvas *cmediabin = new TCanvas("cmediabin", "Slewing Correction", 800, 600);
-//prof->Fit("pol3");
-TF1 *empirico = new TF1("empirico", "[0] + [1]/x", 0, 1);
-prof->Fit(empirico, "R");
-
-prof->Draw();
-cmediabin->Update();
-
-
-
-
-/*   TCanvas *cintegral3 = new TCanvas("cintegral3", "amplitudevsintegral", 900, 700);
+    /*TCanvas *cintegral3 = new TCanvas("cintegral3", "amplitudevsintegral", 900, 700);
     hintegral3->SetName("hintegral1");
-hintegral3->SetTitle("Amplitude vs Integral;amplitude;integral");
+    hintegral3->SetTitle("Amplitude vs Integral;amplitude;integral");
 
-// *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
-hintegral3->SetMarkerStyle(20);
-hintegral3->SetMarkerSize(1.0);
-hintegral3->SetMarkerColor(kAzure+2);
-
-hintegral3->SetLineColor(0);    // nessuna linea
-hintegral3->SetLineWidth(0);    // nessuna linea
-
-// *** SOLO ORA DISEGNA ***
-hintegral3->Draw("AP");
-
+    // *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
+    hintegral3->SetMarkerStyle(20);
+    hintegral3->SetMarkerSize(1.0);
+    hintegral3->SetMarkerColor(kAzure+2);
+    hintegral3->SetLineColor(0);    // nessuna linea
+    hintegral3->SetLineWidth(0);    // nessuna linea
+    // *** SOLO ORA DISEGNA ***
+    hintegral3->Draw("AP");
     cintegral3->Update();*/
-cout<<"till here its fine"<<endl;
-cout<<"cavallo"<<endl;
+    
+    cout<<"till here its fine"<<endl;
+    cout<<"cavallo"<<endl;
 
+    //baseline
+    TCanvas *cbaseline = new TCanvas("cbaseline", "baseline", 900, 700);
+    //TCanvas *ctime12 = new TCanvas("ctime12", "htriple1", 900, 700);
 
+    // 1. Definisci e Configura la Funzione Gaussiana (TF1)
+    TF1 *f_gaus_b = new TF1("f_gaus", "gaus", 0.003, 0.009); // Definisci il nome, la formula, e il range iniziale del fit
 
-//baseline
+    // 2. Imposta il Parametro della Media (Indice 1)
+    // Il formato della gaus ROOT è: p0 * exp(-0.5 * ((x-p1)/p2)^2)
+    // p0 = Ampiezza (Indice 0)
+    // p1 = Media (Indice 1) <-- QUESTO E' QUELLO CHE VUOI IMPOSTARE
+    // p2 = Sigma (Indice 2)
+    //f_gaus->SetParameter(1, 300); // Esempio: imposta la media a 50.0
+    //f_gaus->SetParameter(2, 80);
+    // (Opzionale) Imposta i parametri iniziali per l'Ampiezza (0) e la Sigma (2) per un fit migliore
+    // f_gaus->SetParameter(0, 500.0); // Ampiezza iniziale
+    // f_gaus->SetParameter(2, 5.0);   // Sigma iniziale
 
-  TCanvas *cbaseline = new TCanvas("cbaseline", "baseline", 900, 700);
-   //TCanvas *ctime12 = new TCanvas("ctime12", "htriple1", 900, 700);
+    // 3. Esegui il Fit con la funzione predefinita
+    // Nota: Passiamo l'oggetto TF1 al Fit, non solo il nome "gaus"
+    hbaseline1->Fit(f_gaus_b, "R"); // "R" usa il range definito in TF1
 
-// 1. Definisci e Configura la Funzione Gaussiana (TF1)
-TF1 *f_gaus_b = new TF1("f_gaus", "gaus", 0.003, 0.009); // Definisci il nome, la formula, e il range iniziale del fit
+    // 4. Configurazione e Disegno (il resto del tuo codice)
+    hbaseline1->SetLineColor(kAzure+1);
+    hbaseline1->SetLineWidth(3);
+    hbaseline1->SetFillColorAlpha(kAzure-4, 0.35);
+    hbaseline1->SetTitle("baseline");
+    hbaseline1->Draw("HIST");
 
-// 2. Imposta il Parametro della Media (Indice 1)
-// Il formato della gaus ROOT è: p0 * exp(-0.5 * ((x-p1)/p2)^2)
-// p0 = Ampiezza (Indice 0)
-// p1 = Media (Indice 1) <-- QUESTO E' QUELLO CHE VUOI IMPOSTARE
-// p2 = Sigma (Indice 2)
-//f_gaus->SetParameter(1, 300); // Esempio: imposta la media a 50.0
-//f_gaus->SetParameter(2, 80);
-// (Opzionale) Imposta i parametri iniziali per l'Ampiezza (0) e la Sigma (2) per un fit migliore
-// f_gaus->SetParameter(0, 500.0); // Ampiezza iniziale
-// f_gaus->SetParameter(2, 5.0);   // Sigma iniziale
+    cbaseline->Update();
 
-// 3. Esegui il Fit con la funzione predefinita
-// Nota: Passiamo l'oggetto TF1 al Fit, non solo il nome "gaus"
-hbaseline1->Fit(f_gaus_b, "R"); // "R" usa il range definito in TF1
+    // 5. Estrai i risultati dal TF1 dopo il fit (usa l'oggetto f_gaus)
+    double amp_baseline   = f_gaus_b->GetParameter(0);
+    double mean_baseline  = f_gaus_b->GetParameter(1); // Questo sarà il risultato del fit
+    double sigma_baseline = f_gaus_b->GetParameter(2);
 
-// 4. Configurazione e Disegno (il resto del tuo codice)
-hbaseline1->SetLineColor(kAzure+1);
-hbaseline1->SetLineWidth(3);
-hbaseline1->SetFillColorAlpha(kAzure-4, 0.35);
-hbaseline1->SetTitle("baseline");
-hbaseline1->Draw("HIST");
-
-cbaseline->Update();
-
-// 5. Estrai i risultati dal TF1 dopo il fit (usa l'oggetto f_gaus)
-double amp_baseline   = f_gaus_b->GetParameter(0);
-double mean_baseline  = f_gaus_b->GetParameter(1); // Questo sarà il risultato del fit
-double sigma_baseline = f_gaus_b->GetParameter(2);
-
-// ... estrazione degli errori
-   /* TCanvas *ctime23 = new TCanvas("ctime23", "htriple1", 900, 700);
+    // ... estrazione degli errori
+    /* TCanvas *ctime23 = new TCanvas("ctime23", "htriple1", 900, 700);
     htime20_23->SetLineColor(kAzure+1);
     htime20_23->SetLineWidth(3);
     htime20_23->SetFillColorAlpha(kAzure-4, 0.35);
@@ -742,49 +653,44 @@ double sigma_baseline = f_gaus_b->GetParameter(2);
     double e_mean_13  = f3->GetParError(1);
     double e_sigma_13 = f3->GetParError(2);*/
 
-
-
-
-
     // ------------ Gaussian plot of the time difference ---------------
 
     TCanvas *ctime12 = new TCanvas("ctime12", "htriple1", 900, 700);
    //TCanvas *ctime12 = new TCanvas("ctime12", "htriple1", 900, 700);
 
-// 1. Definisci e Configura la Funzione Gaussiana (TF1)
-TF1 *f_gaus = new TF1("f_gaus", "gaus", -1000, 1000); // Definisci il nome, la formula, e il range iniziale del fit
+    // 1. Definisci e Configura la Funzione Gaussiana (TF1)
+    TF1 *f_gaus = new TF1("f_gaus", "gaus", -1000, 1000); // Definisci il nome, la formula, e il range iniziale del fit
 
-// 2. Imposta il Parametro della Media (Indice 1)
-// Il formato della gaus ROOT è: p0 * exp(-0.5 * ((x-p1)/p2)^2)
-// p0 = Ampiezza (Indice 0)
-// p1 = Media (Indice 1) <-- QUESTO E' QUELLO CHE VUOI IMPOSTARE
-// p2 = Sigma (Indice 2)
-//f_gaus->SetParameter(1, 300); // Esempio: imposta la media a 50.0
-//f_gaus->SetParameter(2, 80);
-// (Opzionale) Imposta i parametri iniziali per l'Ampiezza (0) e la Sigma (2) per un fit migliore
-// f_gaus->SetParameter(0, 500.0); // Ampiezza iniziale
-// f_gaus->SetParameter(2, 5.0);   // Sigma iniziale
+    // 2. Imposta il Parametro della Media (Indice 1)
+    // Il formato della gaus ROOT è: p0 * exp(-0.5 * ((x-p1)/p2)^2)
+    // p0 = Ampiezza (Indice 0)
+    // p1 = Media (Indice 1) <-- QUESTO E' QUELLO CHE VUOI IMPOSTARE
+    // p2 = Sigma (Indice 2)
+    //f_gaus->SetParameter(1, 300); // Esempio: imposta la media a 50.0
+    //f_gaus->SetParameter(2, 80);
+    // (Opzionale) Imposta i parametri iniziali per l'Ampiezza (0) e la Sigma (2) per un fit migliore
+    // f_gaus->SetParameter(0, 500.0); // Ampiezza iniziale
+    // f_gaus->SetParameter(2, 5.0);   // Sigma iniziale
 
-// 3. Esegui il Fit con la funzione predefinita
-// Nota: Passiamo l'oggetto TF1 al Fit, non solo il nome "gaus"
-htime30_12->Fit(f_gaus, "R"); // "R" usa il range definito in TF1
+    // 3. Esegui il Fit con la funzione predefinita
+    // Nota: Passiamo l'oggetto TF1 al Fit, non solo il nome "gaus"
+    htime30_12->Fit(f_gaus, "R"); // "R" usa il range definito in TF1
 
-// 4. Configurazione e Disegno (il resto del tuo codice)
-htime30_12->SetLineColor(kAzure+1);
-htime30_12->SetLineWidth(3);
-htime30_12->SetFillColorAlpha(kAzure-4, 0.35);
-htime30_12->SetTitle("time plot 20%");
-htime30_12->Draw("HIST");
+    // 4. Configurazione e Disegno (il resto del tuo codice)
+    htime30_12->SetLineColor(kAzure+1);
+    htime30_12->SetLineWidth(3);
+    htime30_12->SetFillColorAlpha(kAzure-4, 0.35);
+    htime30_12->SetTitle("time plot 20%");
+    htime30_12->Draw("HIST");
+    ctime12->Update();
 
-ctime12->Update();
+    // 5. Estrai i risultati dal TF1 dopo il fit (usa l'oggetto f_gaus)
+    double amp_12   = f_gaus->GetParameter(0);
+    double mean_12  = f_gaus->GetParameter(1); // Questo sarà il risultato del fit
+    double sigma_12 = f_gaus->GetParameter(2);
 
-// 5. Estrai i risultati dal TF1 dopo il fit (usa l'oggetto f_gaus)
-double amp_12   = f_gaus->GetParameter(0);
-double mean_12  = f_gaus->GetParameter(1); // Questo sarà il risultato del fit
-double sigma_12 = f_gaus->GetParameter(2);
-
-// ... estrazione degli errori
-   /* TCanvas *ctime23 = new TCanvas("ctime23", "htriple1", 900, 700);
+    // ... estrazione degli errori
+    /* TCanvas *ctime23 = new TCanvas("ctime23", "htriple1", 900, 700);
     htime20_23->SetLineColor(kAzure+1);
     htime20_23->SetLineWidth(3);
     htime20_23->SetFillColorAlpha(kAzure-4, 0.35);
@@ -828,19 +734,18 @@ double sigma_12 = f_gaus->GetParameter(2);
     // sigma1^2 = 1/2 * ( sigma_12^2 + sigma_13^2 - sigma_23^2 )
     // sigma2^2 = 1/2 * ( sigma_12^2 + sigma_23^2 - sigma_13^2 )
     // sigma3^2 = 1/2 * ( sigma_13^2 + sigma_23^2 - sigma_12^2 )
-cout<<"till here its fine"<<endl;
-cout<<"cavallo"<<endl;
-
+    cout<<"till here its fine"<<endl;
+    cout<<"cavallo"<<endl;
 
     double s12 = sigma_12;
     /*double s13 = 0;
     double s23 = 0;*/
 
     double es12 = sigma_12;
-   /*double es13 = 0;
-   double es23 = 0;*/
+    /*double es13 = 0;
+    double es23 = 0;*/
 
-   double s1sq = 0.5 * ( s12*s12 );
+    double s1sq = 0.5 * ( s12*s12 );
     /*double s2sq = 0.5 * ( s12*s12 + s23*s23 - s13*s13 );
     double s3sq = 0.5 * ( s13*s13 + s23*s23 - s12*s12 );*/
 
@@ -859,7 +764,7 @@ cout<<"cavallo"<<endl;
 
     double sigma_1 = TMath::Sqrt(s1sq);
     /*double sigma_2 = TMath::Sqrt(s2sq);
-   double sigma_3 = TMath::Sqrt(s3sq);*/
+    double sigma_3 = TMath::Sqrt(s3sq);*/
 
     // Error propagation:
     // S1 = sigma1^2 = 1/2*(a + b - c), with a = s12^2, b = s13^2, c = s23^2
@@ -869,8 +774,8 @@ cout<<"cavallo"<<endl;
     // then error on sigma1: e_sigma1 = sqrt(var(S1)) / (2*sigma1)
 
     double varS1 = s12*s12*es12*es12 ;
-   /* double varS2 = s12*s12*es12*es12 + s23*s23*es23*es23 + s13*s13*es13*es13; // same form, ordering irrelevant
-   double varS3 = s13*s13*es13*es13 + s23*s23*es23*es23 + s12*s12*es12*es12;*/
+    /* double varS2 = s12*s12*es12*es12 + s23*s23*es23*es23 + s13*s13*es13*es13; // same form, ordering irrelevant
+    double varS3 = s13*s13*es13*es13 + s23*s23*es23*es23 + s12*s12*es12*es12;*/
 
     double e_sigma_1 = 0.0;
     //double e_sigma_2 = 0.0;
@@ -881,7 +786,7 @@ cout<<"cavallo"<<endl;
     else 
         e_sigma_1 = 0.0;
 
-  /*  if (sigma_2 > 0)
+    /*if (sigma_2 > 0)
         e_sigma_2 = TMath::Sqrt(varS2) / (2.0 * sigma_2);
     else 
         e_sigma_2 = 0.0;

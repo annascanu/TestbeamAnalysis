@@ -84,7 +84,6 @@ int main()
     Double_t time30_12, time30_13, time30_23;
     //Bool cut
 
-
     tree->SetBranchAddress("npulses", &npulses);
     tree->SetBranchAddress("pulses_amplitude", &pulses_amplitude);
     tree->SetBranchAddress("pulses_integral", &pulses_integral);
