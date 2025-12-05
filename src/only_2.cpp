@@ -131,7 +131,7 @@ int main()
     tree->SetBranchAddress("Board", &Board);
     tree->SetBranchAddress("pulses_time_cfd50", &pulses_time_cfd50);
     tree->SetBranchAddress("pulses_time_cfd60", &pulses_time_cfd60);
-    tree->SetBranchAddress("Baseline", &Baseline);
+    tree->SetBranchAddress("pulses_baseline", &Baseline);
     tree->SetBranchAddress("Channel", &Channel);
     tree->SetBranchAddress("pulses_peak_time", &pulses_peak_time);
     tree->SetBranchAddress("pulses_rise_time", &pulses_rise_time);
@@ -169,11 +169,15 @@ int main()
     TH1F *htime30_23    = new TH1F("htime30_23", "time diff ;Time [ps];Counts", 100, -0.2, 0.2);
 
     // Baseline histogram
-    TH1F *hcharge1  = new TH1F("hcharge1", "charge1", 1000, 0, 0.009);
-    TH1F *hcharge2  = new TH1F("hcharge2", "charge2", 1000, 0, 0.009);
-    TH1F *hrisetime1  = new TH1F("hrisetime1", "risetime1", 1000, 0, 0.009);
-    TH1F *hrisetime2  = new TH1F("hrisetime2", "risetime2", 1000, 0, 0.009);
-    TH1F *hbaseline1  = new TH1F("hbaseline", "baseline", 1000, 0, 0.009);
+    TH1F *hcharge1  = new TH1F("hcharge1", "charge1", 1000, 0, 10);
+    TH1F *hcharge2  = new TH1F("hcharge2", "charge2", 1000, 0, 10);
+    TH1F *hrisetime1  = new TH1F("hrisetime1", "risetime1", 1000, -2000, 2000);
+    TH1F *hrisetime2  = new TH1F("hrisetime2", "risetime2", 1000, -2000, 2000);
+    TH1F *hbaseline1  = new TH1F("hbaseline", "baseline", 1000, 0.9, 1.1);
+
+    TH1F *hbaseline2  = new TH1F("hbaseline2", "baseline2", 1000, 0.9, 1.1);
+    TH1F *hpeaktime1  = new TH1F("hpeaktime1", "peaktime1", 1000, -20000, 20000);
+    TH1F *hpeaktime2  = new TH1F("hpeaktime2", "peaktime2", 1000, -20000, 20000);
 
 
     ///Amplitude vs integral histogram
@@ -224,6 +228,9 @@ int main()
         // also see the hitfeb = [1, 1, anything] (otherwise we lose statistics because of smaller geometrical acceptance of 3rd detector)
         //i want hitfeb[2]==1
         if (HitFeb[0] == 1 && HitFeb[1] == 1 && nGood == 2)
+       // if (HitFeb[0] == 1 && HitFeb[1] == 1 && nGood == 3 && HitFeb[2]==1)
+        //if (HitFeb[0] == 1 && HitFeb[1] == 1 && nGood >= 2) //condizione che mi garantisce hit sulle prime due e whatever sull'ultim detector'
+        //if (HitFeb[0] == 1 && HitFeb[1] == 1 && HitFeb[2] == 1 && nGood == 3) //triple per check
         {
             // Arrays indexed by FEB number (0,1,2)
             double ampFEB[3]  = {-1.0, -1.0, -1.0};
@@ -234,8 +241,8 @@ int main()
             double cfd60[3]   = {-9999.0, -9999.0, -9999.0};
             double base[3]    = {-9999.0, -9999.0, -9999.0};
             double peak_time[3]  = {-9999.0, -9999.0, -9999.0};
-            double risetime1[3] = {-9999.0, -9999.0, -9999.0};
-            double risetime2[3] = = {-9999.0, -9999.0, -9999.0};
+            double risetime[3] = {-9999.0, -9999.0, -9999.0};
+
             // Fill according to Board[]
             for (int j = 0; j < npulses; j++)
             {
@@ -260,12 +267,17 @@ int main()
                 cfd60[det]=pulses_time_cfd60[j];
                 base[det]=Baseline[j];
                 peak_time[det]= pulses_peak_time[j];
-                risetime1[det]= pul
+                risetime[det]= pulses_rise_time[j];
                 hTime20->Fill(cfd20[0]);// questi tre prima erano riempiti con j non corretti
                 hTime30->Fill(cfd30[0]);
                 hTime50->Fill(cfd50[0]);//
                 hTime60->Fill(cfd60[0]);
                 hTime60_2->Fill(cfd60[1]);
+                hcharge1->Fill(integral[0]);
+                hcharge2->Fill(integral[1]);
+                hrisetime1->Fill(risetime[0]);
+                hrisetime2->Fill(risetime[1]);
+
 
 
                 //cut[i]=true;}
@@ -277,7 +289,9 @@ int main()
             //&& (Channel[0]<16 || Channel[0]>32)
             //&& cfd60[0]<3600 && Channel[0]==29 && Channel[1]==29
             //&& cfd30[0]<3100 && cfd30[0]>2900 cut on cfd 30%  && integral[0]/ampFEB[0]>8 && integral[1]/ampFEB[1]>8    ///// && ampFEB[0]> 0.2 && cfd60[0]<3350 && cfd60[0]>3000ss
-           if(Channel[1]<16 || Channel[1]>23){
+           //if(Channel[1]<16 || Channel[1]>23) nonnfunziona: && (ampFEB[0]<0.03 || ampFEB[0]>0.03) &&(ampFEB[1]<0.03 || ampFEB[1]>0.05)
+            if(peak_time[1]<0)
+                continue;
                 // Fill amplitude histograms           // AS: why this x 1000 scaling? -> To get values in mV
                 htriple1->Fill(ampFEB[0]);
                 htriple2->Fill(ampFEB[1]);
@@ -335,7 +349,8 @@ int main()
                 //htime20_12->Fill(time20_12);
                 //htime20_23->Fill(time20_23);
                 //htime20_13->Fill(time20_13);
-
+hpeaktime1->Fill(peak_time[0]);
+                hpeaktime2->Fill(peak_time[1]);
 
 
                 // CFD = 60%
@@ -343,11 +358,16 @@ int main()
                 //time30_23 = cfd30[1] - cfd30[2];
                 //time30_13 = cfd30[0] - cfd30[2];
 
+
+
                 htime30_12->Fill(time30_12);
                 //htime30_23->Fill(time30_23);
                 //htime30_13->Fill(time30_13);
 
                 hbaseline1->Fill(base[0]);
+                hbaseline2->Fill(base[1]);
+
+
 
                 ///Integral vs amplitude distribution
                 timevsamplitude->SetPoint(timevsamplitude->GetN(), ampFEB[0], cfd60[0], peso);
@@ -363,7 +383,7 @@ int main()
                 if(ampFEB[0]<0)
                     cout<< "Amplitude < 0; event number: " << i << endl;
                 cfdvschannel1->SetPoint(cfdvschannel1->GetN(), Channel[0], cfd60[0]);
-          }
+
         }
 
         // Progress indicator for sanity :)
@@ -389,7 +409,11 @@ int main()
 
     TF1 *fpolyaAmpl2 = (TF1*)fpolyaAmpl1->Clone("fpolyaAmpl2");
     TF1 *fpolyaAmpl3 = (TF1*)fpolyaAmpl1->Clone("fpolyaAmpl3");
-    fpolyaAmpl2->SetParameter(2,1);
+    TF1 *fpolyacharge1 = (TF1*)fpolyaAmpl1->Clone("fpolyacharge1");
+    TF1 *fpolyacharge2 = (TF1*)fpolyaAmpl1->Clone("fpolyacharge2");
+
+
+    //fpolyaAmpl2->SetParameter(2,1);
 
     // --- Tre canvas separati ---
     // Canvas 1
@@ -418,7 +442,7 @@ int main()
     c2->SaveAs("hist2.pdf");
 
     // Canvas 3
-    /*TCanvas *c3 = new TCanvas("c3", "htriple3", 800, 600);
+    TCanvas *c3 = new TCanvas("c3", "htriple3", 800, 600);
     htriple3->SetLineColor(kRed+1);
     htriple3->SetLineWidth(3);
     htriple3->SetFillColorAlpha(kRed-4, 0.35);
@@ -427,7 +451,89 @@ int main()
     htriple3->Fit(fpolyaAmpl3,"R"); // Fit su htriple3
     //fpolyaAmpl3->Draw("SAME");
     c3->Update();
-    c3->SaveAs("hist3.pdf");*/
+    c3->SaveAs("hist3.pdf");
+
+
+    TCanvas *ccharge1 = new TCanvas("ccharge1", "charge1", 900, 700);
+    hcharge1->SetLineColor(kAzure+1);
+    hcharge1->SetLineWidth(3);
+    hcharge1->SetFillColorAlpha(kAzure-4, 0.35);
+    hcharge1->SetTitle("Amplitudes of waveforms on the first FEB");
+    hcharge1->Draw("HIST");
+    hcharge1->Fit(fpolyacharge1,"R"); // Fit su htriple1
+    //fpolyaAmpl1->Draw("SAME");
+    ccharge1->Update();
+
+
+
+TCanvas *ccharge2 = new TCanvas("ccharge2", "charge2", 900, 700);
+    hcharge2->SetLineColor(kAzure+1);
+    hcharge2->SetLineWidth(3);
+    hcharge2->SetFillColorAlpha(kAzure-4, 0.35);
+    hcharge2->SetTitle("Amplitudes of waveforms on the first FEB");
+    hcharge2->Draw("HIST");
+    hcharge2->Fit(fpolyacharge2,"R"); // Fit su htriple1
+    //fpolyaAmpl1->Draw("SAME");
+    ccharge2->Update();
+
+
+
+TCanvas *crisetime1 = new TCanvas("crisetime1", "risetime1", 900, 700);
+    hrisetime1->SetLineColor(kAzure+1);
+    hrisetime1->SetLineWidth(3);
+    hrisetime1->SetFillColorAlpha(kAzure-4, 0.35);
+    hrisetime1->SetTitle("Amplitudes of waveforms on the first FEB");
+    hrisetime1->Draw("HIST");
+    crisetime1->Update();
+
+
+
+
+TCanvas *crisetime2 = new TCanvas("crisetime2", "risetime2", 900, 700);
+    hrisetime2->SetLineColor(kAzure+1);
+    hrisetime2->SetLineWidth(3);
+    hrisetime2->SetFillColorAlpha(kAzure-4, 0.35);
+    hrisetime2->SetTitle("Amplitudes of waveforms on the first FEB");
+    hrisetime2->Draw("HIST");
+    crisetime2->Update();
+
+
+TCanvas *cpeaketime1 = new TCanvas("cpeaktime1", "peaktime1", 900, 700);
+    hpeaktime1->SetLineColor(kAzure+1);
+    hpeaktime1->SetLineWidth(3);
+    hpeaktime1->SetFillColorAlpha(kAzure-4, 0.35);
+    hpeaktime1->SetTitle("Amplitudes of waveforms on the first FEB");
+    hpeaktime1->Draw("HIST");
+    cpeaketime1->Update();
+
+
+
+TCanvas *cpeaketime2 = new TCanvas("cpeaktime2", "peaktime2", 900, 700);
+    hpeaktime2->SetLineColor(kAzure+1);
+    hpeaktime2->SetLineWidth(3);
+    hpeaktime2->SetFillColorAlpha(kAzure-4, 0.35);
+    hpeaktime2->SetTitle("Amplitudes of waveforms on the first FEB");
+    hpeaktime2->Draw("HIST");
+    cpeaketime2->Update();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // --- Canvas unico con tutti e tre ---
     TCanvas *cAll = new TCanvas("cAll", "All Histograms", 900, 700);
@@ -522,6 +628,28 @@ cintegral->Update();
     avsi2->Draw("same");          // adesso la linea del fit viene disegnata*/
 
     cintegral2->Update();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // ----------------------------------------------------------------------------------------------------
 
@@ -652,6 +780,46 @@ cintegral->Update();
     double amp_baseline   = f_gaus_b->GetParameter(0);
     double mean_baseline  = f_gaus_b->GetParameter(1); // Questo sarà il risultato del fit
     double sigma_baseline = f_gaus_b->GetParameter(2);
+
+
+
+
+
+    //baseline
+    TCanvas *cbaseline2 = new TCanvas("cbaseline2", "baseline2", 900, 700);
+    //TCanvas *ctime12 = new TCanvas("ctime12", "htriple1", 900, 700);
+
+    // 1. Definisci e Configura la Funzione Gaussiana (TF1)
+    TF1 *f_gaus_b2 = new TF1("f_gaus", "gaus2", 0.003, 0.009); // Definisci il nome, la formula, e il range iniziale del fit
+
+    // 2. Imposta il Parametro della Media (Indice 1)
+    // Il formato della gaus ROOT è: p0 * exp(-0.5 * ((x-p1)/p2)^2)
+    // p0 = Ampiezza (Indice 0)
+    // p1 = Media (Indice 1) <-- QUESTO E' QUELLO CHE VUOI IMPOSTARE
+    // p2 = Sigma (Indice 2)
+    //f_gaus->SetParameter(1, 300); // Esempio: imposta la media a 50.0
+    //f_gaus->SetParameter(2, 80);
+    // (Opzionale) Imposta i parametri iniziali per l'Ampiezza (0) e la Sigma (2) per un fit migliore
+    // f_gaus->SetParameter(0, 500.0); // Ampiezza iniziale
+    // f_gaus->SetParameter(2, 5.0);   // Sigma iniziale
+
+    // 3. Esegui il Fit con la funzione predefinita
+    // Nota: Passiamo l'oggetto TF1 al Fit, non solo il nome "gaus"
+    hbaseline1->Fit(f_gaus_b2, "R"); // "R" usa il range definito in TF1
+
+    // 4. Configurazione e Disegno (il resto del tuo codice)
+    hbaseline2->SetLineColor(kAzure+1);
+    hbaseline2->SetLineWidth(3);
+    hbaseline2->SetFillColorAlpha(kAzure-4, 0.35);
+    hbaseline2->SetTitle("baseline");
+    hbaseline2->Draw("HIST");
+    cbaseline2->Update();
+
+    // 5. Estrai i risultati dal TF1 dopo il fit (usa l'oggetto f_gaus)
+    double amp_baseline2   = f_gaus_b2->GetParameter(0);
+    double mean_baseline2 = f_gaus_b2->GetParameter(1); // Questo sarà il risultato del fit
+    double sigma_baseline2 = f_gaus_b2->GetParameter(2);
+
 
     // ... estrazione degli errori
     /* TCanvas *ctime23 = new TCanvas("ctime23", "htriple1", 900, 700);
@@ -881,7 +1049,7 @@ cintegral->Update();
     // -----------------------
     //     Save everything
     // -----------------------
-    TFile *fout = new TFile("muon_run_only2_TProfile.root", "RECREATE");
+    TFile *fout = new TFile("muon_run_only2_TProfile_run19.root", "RECREATE");
     hAmpAll->Write();
     hAmp1Hit->Write();
     hQ->Write();
@@ -907,9 +1075,16 @@ cintegral->Update();
     hintegral1->Write();
     hintegral2->Write();
     //hintegral3->Write();
+    hcharge1->Write();
+    hcharge2->Write();
+    hrisetime1->Write();
+    hrisetime2->Write();
+    hpeaktime1->Write();
+    hpeaktime2->Write();
     timevsamplitude->Write();
     timevsamplitude2->Write();
     hbaseline1->Write();
+    hbaseline2->Write();
     timevsintegral->Write();
     prof->Write();
     prof2->Write();
