@@ -90,7 +90,7 @@ int main()
 
     // TString filename = "/eos/experiment/neutplatform/enubet/testbeam2025/picosec_data/sampic_runs/rootSampicData/processed_waveforms/sampic_run22_final.root"; // Filename while running on lxplus
     //TString filename = "/Users/anna/Developing/PhD/Testbeam2025/sampic_run22_final.root"; // Filename while running on Anna's machine
-     TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run19_final_new.root"; // Filename while running on Riccardo's machine
+     TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run19_final.root"; // Filename while running on Riccardo's machine
     cout << "Opening file: " << filename << endl;
 
     TFile *file = TFile::Open(filename, "READ");
@@ -288,7 +288,7 @@ if (ampFEB[0] <= 0 || ampFEB[1] <= 0) {
 //&& Channel[0]==29 && Channel[1]==29 canale check time res 90 pico
 //&& cfd60[0]<3600 cut per togliere cluster +alto && ampFEB[0]>0.3 per togliere quelli bassi
 // && cfd30[0]<3100 && cfd30[0]>2900 cut on cfd 30%  && integral[0]/ampFEB[0]>8 && integral[1]/ampFEB[1]>8    ///// && ampFEB[0]> 0.2 && cfd60[0]<3350 && cfd60[0]>3000ss
-if(integral[0]/ampFEB[0]<50 && integral[1]/ampFEB[1]<50 && Channel[0]>16 && Channel[0]<32){
+if(Channel[0]==29 && Channel[1]==29 ){
             // Fill amplitude histograms           // AS: why this x 1000 scaling? -> To get values in mV
             htriple1->Fill(ampFEB[0] );
             htriple2->Fill(ampFEB[1]);
@@ -297,8 +297,8 @@ if(integral[0]/ampFEB[0]<50 && integral[1]/ampFEB[1]<50 && Channel[0]>16 && Chan
 
 
 
-            double cfd60_co=cfd60[0]-(3459-30.23/ampFEB[0]);
-            double cfd60_co1=cfd60[1]-(3459-30.23/ampFEB[1]);
+            double cfd60_co=cfd60[0]-(3664-26.17/ampFEB[0]);
+            double cfd60_co1=cfd60[1]-(3801-25.78/ampFEB[1]);
             // CFD = 10%
             //time_12 = cfd60[0] - cfd60[1];
             //time_23 = cfd10[1] - cfd10[2];

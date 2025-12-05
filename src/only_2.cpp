@@ -93,7 +93,7 @@ int main()
 
     // TString filename = "/eos/experiment/neutplatform/enubet/testbeam2025/picosec_data/sampic_runs/rootSampicData/processed_waveforms/sampic_run22_final.root"; // Filename while running on lxplus
     //TString filename = "/Users/anna/Developing/PhD/Testbeam2025/sampic_run22_final.root"; // Filename while running on Anna's machine
-     TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run19_final_new.root"; // Filename while running on Riccardo's machine
+     TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run19_final.root"; // Filename while running on Riccardo's machine
     cout << "Opening file: " << filename << endl;
 
     TFile *file = TFile::Open(filename, "READ");
@@ -113,7 +113,7 @@ int main()
     const int MAXPULSES = 200; // Maybe could be less.
     Int_t npulses;
 
-    Double_t pulses_amplitude[MAXPULSES], pulses_integral[MAXPULSES], pulses_time_cfd10[MAXPULSES], pulses_time_cfd20[MAXPULSES], pulses_time_cfd30[MAXPULSES], integral[MAXPULSES], pulses_time_cfd50[MAXPULSES], pulses_time_cfd60[MAXPULSES], Baseline[MAXPULSES];
+    Double_t pulses_amplitude[MAXPULSES], pulses_integral[MAXPULSES], pulses_time_cfd10[MAXPULSES], pulses_time_cfd20[MAXPULSES], pulses_time_cfd30[MAXPULSES], integral[MAXPULSES], pulses_time_cfd50[MAXPULSES], pulses_time_cfd60[MAXPULSES], Baseline[MAXPULSES], pulses_peak_time[MAXPULSES],  pulses_rise_time[MAXPULSES];
     Bool_t  pulses_bad_pulse[MAXPULSES];
     Int_t HitFeb[3], Board[MAXPULSES], Channel[MAXPULSES];
     int tot_hit_feb;
@@ -133,6 +133,10 @@ int main()
     tree->SetBranchAddress("pulses_time_cfd60", &pulses_time_cfd60);
     tree->SetBranchAddress("Baseline", &Baseline);
     tree->SetBranchAddress("Channel", &Channel);
+    tree->SetBranchAddress("pulses_peak_time", &pulses_peak_time);
+    tree->SetBranchAddress("pulses_rise_time", &pulses_rise_time);
+
+
 
     // ------------------------------
     //     Initialize histograms
@@ -165,7 +169,12 @@ int main()
     TH1F *htime30_23    = new TH1F("htime30_23", "time diff ;Time [ps];Counts", 100, -0.2, 0.2);
 
     // Baseline histogram
+    TH1F *hcharge1  = new TH1F("hcharge1", "charge1", 1000, 0, 0.009);
+    TH1F *hcharge2  = new TH1F("hcharge2", "charge2", 1000, 0, 0.009);
+    TH1F *hrisetime1  = new TH1F("hrisetime1", "risetime1", 1000, 0, 0.009);
+    TH1F *hrisetime2  = new TH1F("hrisetime2", "risetime2", 1000, 0, 0.009);
     TH1F *hbaseline1  = new TH1F("hbaseline", "baseline", 1000, 0, 0.009);
+
 
     ///Amplitude vs integral histogram
     TGraph *hintegral1 = new TGraph();
@@ -224,7 +233,9 @@ int main()
             double cfd50[3]   = {-9999.0, -9999.0, -9999.0};
             double cfd60[3]   = {-9999.0, -9999.0, -9999.0};
             double base[3]    = {-9999.0, -9999.0, -9999.0};
-
+            double peak_time[3]  = {-9999.0, -9999.0, -9999.0};
+            double risetime1[3] = {-9999.0, -9999.0, -9999.0};
+            double risetime2[3] = = {-9999.0, -9999.0, -9999.0};
             // Fill according to Board[]
             for (int j = 0; j < npulses; j++)
             {
@@ -248,11 +259,14 @@ int main()
                 cfd50[det]=pulses_time_cfd50[j];
                 cfd60[det]=pulses_time_cfd60[j];
                 base[det]=Baseline[j];
-                hTime20->Fill(pulses_time_cfd20[j]);
-                hTime30->Fill(pulses_time_cfd30[j]);
-                hTime50->Fill(pulses_time_cfd50[j]);
+                peak_time[det]= pulses_peak_time[j];
+                risetime1[det]= pul
+                hTime20->Fill(cfd20[0]);// questi tre prima erano riempiti con j non corretti
+                hTime30->Fill(cfd30[0]);
+                hTime50->Fill(cfd50[0]);//
                 hTime60->Fill(cfd60[0]);
                 hTime60_2->Fill(cfd60[1]);
+
 
                 //cut[i]=true;}
             }
@@ -263,8 +277,7 @@ int main()
             //&& (Channel[0]<16 || Channel[0]>32)
             //&& cfd60[0]<3600 && Channel[0]==29 && Channel[1]==29
             //&& cfd30[0]<3100 && cfd30[0]>2900 cut on cfd 30%  && integral[0]/ampFEB[0]>8 && integral[1]/ampFEB[1]>8    ///// && ampFEB[0]> 0.2 && cfd60[0]<3350 && cfd60[0]>3000ss
-            if(integral[0]/ampFEB[0]<50 && integral[1]/ampFEB[1]<50)
-            {
+           if(Channel[1]<16 || Channel[1]>23){
                 // Fill amplitude histograms           // AS: why this x 1000 scaling? -> To get values in mV
                 htriple1->Fill(ampFEB[0]);
                 htriple2->Fill(ampFEB[1]);
@@ -323,8 +336,10 @@ int main()
                 //htime20_23->Fill(time20_23);
                 //htime20_13->Fill(time20_13);
 
-                // CFD = 30%
-                time30_12 = cfd60[0] - cfd60[1];
+
+
+                // CFD = 60%
+                time30_12 = cfd60[0]-cfd60[1];
                 //time30_23 = cfd30[1] - cfd30[2];
                 //time30_13 = cfd30[0] - cfd30[2];
 
@@ -340,15 +355,15 @@ int main()
                 prof->Fill(ampFEB[0], cfd60[0]);
                 prof2->Fill(ampFEB[1], cfd60[1]);
                 timevsintegral->SetPoint(timevsintegral->GetN(), integral[0], cfd60[0]);
-                if(integral[0]<40)
+                //if(integral[0]<40)
                     hintegral1->SetPoint(hintegral1->GetN(),ampFEB[0],integral[0]);
-                if(integral[1]<26)
+                //if(integral[1]<26)
                     hintegral2->SetPoint(hintegral2->GetN(),ampFEB[1],integral[1]);
                     //hintegral3->SetPoint(hintegral3->GetN(),ampFEB[2],integral[2]);
                 if(ampFEB[0]<0)
                     cout<< "Amplitude < 0; event number: " << i << endl;
                 cfdvschannel1->SetPoint(cfdvschannel1->GetN(), Channel[0], cfd60[0]);
-            }
+          }
         }
 
         // Progress indicator for sanity :)
@@ -442,45 +457,49 @@ int main()
     cout<<"till here is fine"<<endl;
 
     TCanvas *cintegral = new TCanvas("cintegral", "amplitudevsintegral", 900, 700);
-    hintegral1->SetName("hintegral1");
-    hintegral1->SetTitle("Amplitude vs Integral;amplitude;integral");
 
-    // *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
-    hintegral1->SetMarkerStyle(20);
-    hintegral1->SetMarkerSize(1.0);
-    hintegral1->SetMarkerColor(kAzure+2);
+hintegral1->SetTitle("Amplitude vs Integral;amplitude;integral");
+hintegral1->SetName("hintegral1");
 
-    hintegral1->SetLineColor(0);    // nessuna linea
-    hintegral1->SetLineWidth(0);    // nessuna linea
-    double xmin = hintegral1->GetXaxis()->GetXmin();
-    double xmax = hintegral1->GetXaxis()->GetXmax();
+hintegral1->SetMarkerStyle(20);
+hintegral1->SetMarkerSize(1.0);
+hintegral1->SetMarkerColor(kAzure+2);
+hintegral1->SetLineColor(0);    // nessuna linea
+hintegral1->SetLineWidth(0); // nessuna linea
 
-    TF1* avsi = new TF1("avsi", "[0] + [1]*x");
-    avsi->SetNpx(500);
-    avsi->SetParameter(0,0);         // limite su p0 (intercetta)
-    avsi->SetParameter(1, 31);       // limite su p1 (pendenza)
+double xmin = hintegral1->GetXaxis()->GetXmin();
+double xmax = hintegral1->GetXaxis()->GetXmax();
 
-    hintegral1->Fit(avsi, "R");
-    avsi->SetLineColor(kRed);
-    avsi->SetLineWidth(2);
+// --- Configurazione della Funzione di Fit (TF1) ---
+TF1* avsi = new TF1("avsi", "[0]+[1]*x", 0, 2);
+//avsi->SetParameter(0, 0.0);    // intercetta iniziale
+avsi->SetParLimits(1, 12, 26);   // pendenza iniziale stimata
+avsi->SetNpx(5000);
 
-    /*gGraph = hintegral1;   // gr è il tuo TGraph
-    TF1 *avsi = new TF1("avsi", myLine, hintegral1->GetX()[0], hintegral1->GetX()[hintegral1->GetN()-1], 2); // x range
-    avsi->SetParameters(0, 1);  // valori iniziali*/
+// 1. ESEGUI IL FIT (Questa è la parte critica)
+// L'opzione "Q" (quiet) può essere utile se il fit è rumoroso,
+// ma per ora usiamo la chiamata standard.
+hintegral1->Fit(avsi);
 
-    // *** SOLO ORA DISEGNA ***pulses_bad_pulse
-    hintegral1->Draw("AP");
-    avsi->Draw("same");
-    /*hintegral1->Fit(avsi, "R");  // "R" = fit solo nell'intervallo di x specificato
-    hintegral1->Draw("AP");
-    avsi->Draw("same");          // adesso la linea del fit viene disegnata*/
+// 2. DISEGNA IL TGRAPH (disegna i punti e crea gli assi)
+// Usa "AP" che è corretto per i punti e gli assi.
+hintegral1->Draw("AP");
 
-    cintegral->Update();
+// 3. DISEGNA LA LINEA DI FIT SOPRA (aggiungi la linea di fit appena calcolata)
+avsi->SetLineColor(kRed);
+avsi->SetLineWidth(2);
+// Disegna solo la linea di fit senza ricalcolare nulla
+avsi->Draw("same");
+
+// 4. Aggiorna il Canvas
+cintegral->Update();
+// cintegral->Draw(); // A volte serve anche questo, prova se Update non basta.
+
 
     cout << "till here is fine" << endl;
 
     TCanvas *cintegral2 = new TCanvas("cintegral2", "amplitudevsintegral", 900, 700);
-    hintegral2->SetName("hintegral1");
+    hintegral2->SetName("hintegral2");
     hintegral2->SetTitle("Amplitude vs Integral;amplitude;integral");
     // *** IMPOSTAZIONE STILE PRIMA DEL DRAW ***
     hintegral2->SetMarkerStyle(20);
@@ -490,10 +509,18 @@ int main()
     hintegral2->SetLineWidth(0); // nessuna linea
 
     TF1* avsi2 = new TF1("avsi2", "[0] + [1]*x");
-    avsi->SetNpx(500);
+    avsi2->SetNpx(500);
     hintegral2->Fit(avsi2, "R");
+    avsi2->SetLineColor(kRed);
+    avsi2->SetLineWidth(2);
+
     // *** SOLO ORA DISEGNA ***
     hintegral2->Draw("AP");
+
+    hintegral2->Fit(avsi, "R");  // "R" = fit solo nell'intervallo di x specificato
+    hintegral2->Draw("AP");
+    avsi2->Draw("same");          // adesso la linea del fit viene disegnata*/
+
     cintegral2->Update();
 
     // ----------------------------------------------------------------------------------------------------
@@ -879,7 +906,7 @@ int main()
     //htime30_13->Write();
     hintegral1->Write();
     hintegral2->Write();
-    hintegral3->Write();
+    //hintegral3->Write();
     timevsamplitude->Write();
     timevsamplitude2->Write();
     hbaseline1->Write();
@@ -888,6 +915,9 @@ int main()
     prof2->Write();
     cmediabin->Write();
     cfdvschannel1->Write();
+    cintegral->Write();
+    cintegral2->Write();
+
 
     fout->Close(); // Close output file
     file->Close(); // Close input file
