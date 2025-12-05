@@ -45,6 +45,17 @@ Processed files can be found at this path:
 #include <TAxis.h>
 #include "TProfile.h"
 #include "TGraph2D.h"
+#include <vector>
+using namespace std;
+
+double media(const vector<double>& v) {
+    if (v.empty()) return 0; // evitare divisione per zero
+    double somma = 0;
+    for (double x : v) {
+        somma += x;
+    }
+    return somma / v.size();
+}
 
 // AS: What is this?
 /*
@@ -80,7 +91,7 @@ Double_t myLine(Double_t *x, Double_t *par)
     return par[0] + par[1] * xx;
 }*/
 
-using namespace std;
+
 
 int main()
 {
@@ -107,18 +118,21 @@ int main()
         return 1;
     }
 
+
     // -----------------------
     //    Set up branches
     // -----------------------
     const int MAXPULSES = 200; // Maybe could be less.
     Int_t npulses;
 
-    Double_t pulses_amplitude[MAXPULSES], pulses_integral[MAXPULSES], pulses_time_cfd10[MAXPULSES], pulses_time_cfd20[MAXPULSES], pulses_time_cfd30[MAXPULSES], integral[MAXPULSES], pulses_time_cfd50[MAXPULSES], pulses_time_cfd60[MAXPULSES], Baseline[MAXPULSES], pulses_peak_time[MAXPULSES],  pulses_rise_time[MAXPULSES];
+    Double_t pulses_amplitude[MAXPULSES], pulses_integral[MAXPULSES], pulses_time_cfd10[MAXPULSES], pulses_time_cfd20[MAXPULSES], pulses_time_cfd30[MAXPULSES], integral[MAXPULSES], pulses_time_cfd50[MAXPULSES], pulses_time_cfd60[MAXPULSES], Baseline[MAXPULSES], pulses_peak_time[MAXPULSES],  pulses_rise_time[MAXPULSES], mean_1[MAXPULSES], mean_2[MAXPULSES];
     Bool_t  pulses_bad_pulse[MAXPULSES];
     Int_t HitFeb[3], Board[MAXPULSES], Channel[MAXPULSES];
     int tot_hit_feb;
     Double_t time_12, time_23, time_13, time20_12, time20_13, time20_23;
     Double_t time30_12, time30_13, time30_23, time50_12, peso, peso2;
+    vector<vector<double>> tabella1(64);
+     vector<vector<double>> tabella2(64);
 
     tree->SetBranchAddress("npulses", &npulses);
     tree->SetBranchAddress("pulses_amplitude", &pulses_amplitude);
@@ -135,6 +149,7 @@ int main()
     tree->SetBranchAddress("Channel", &Channel);
     tree->SetBranchAddress("pulses_peak_time", &pulses_peak_time);
     tree->SetBranchAddress("pulses_rise_time", &pulses_rise_time);
+
 
 
 
@@ -331,6 +346,30 @@ int main()
                 if(Channel[1]>55)
                     peso2=7;
 
+            //mean for every channel
+
+
+                for(int i=0; i<64; i++){
+                    if(Channel[0]==i){
+                        tabella1[i].push_back(peak_time[0]);
+
+                    }
+                }
+
+
+                for(int i=0; i<64; i++){
+                    if(Channel[1]==i){
+                        tabella2[i].push_back(peak_time[1]);
+
+                    }
+                }
+
+
+
+
+
+
+
                 // CFD = 10%
                 //time_12 = cfd60[0] - cfd60[1];
                 //time_23 = cfd10[1] - cfd10[2];
@@ -349,11 +388,13 @@ int main()
                 //htime20_12->Fill(time20_12);
                 //htime20_23->Fill(time20_23);
                 //htime20_13->Fill(time20_13);
-hpeaktime1->Fill(peak_time[0]);
+                hpeaktime1->Fill(peak_time[0]);
                 hpeaktime2->Fill(peak_time[1]);
 
 
                 // CFD = 60%
+                //double timedif1= peak_time[0]-cfd60[0];
+                //double timedif2= peak_time[1]-cfd60[1];
                 time30_12 = cfd60[0]-cfd60[1];
                 //time30_23 = cfd30[1] - cfd30[2];
                 //time30_13 = cfd30[0] - cfd30[2];
@@ -384,12 +425,38 @@ hpeaktime1->Fill(peak_time[0]);
                     cout<< "Amplitude < 0; event number: " << i << endl;
                 cfdvschannel1->SetPoint(cfdvschannel1->GetN(), Channel[0], cfd60[0]);
 
+
+
         }
 
         // Progress indicator for sanity :)
         if (i % 100000 == 0) cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
     }
     
+
+
+
+       for(int i=0; i<64; i++){
+                        mean_1[i]=media(tabella1[i]);
+                        //cout << "media canali primo riv:  "<< mean_1[i] <<endl;
+
+                }
+
+
+
+            for(int i=0; i<64; i++){
+                        mean_2[i]=media(tabella2[i]);
+                                                //cout << "media canali secondo riv:  "<< mean_2[i] <<endl;
+
+                }
+                  //for the new tree
+    //TTree *copy = tree->CloneTree();
+    TTree *tout = new TTree("channelMeans", "Medie per canale");
+    tout->Branch("mean_1", mean_1, "mean_1[64]/D");
+    tout->Branch("mean_2", mean_2, "mean_2[64]/D");
+
+
+        tout->Fill();
     cout << "Until here code works fine" << endl;
 
     /// --- TF1 Polya function ---
@@ -1092,6 +1159,8 @@ cintegral->Update();
     cfdvschannel1->Write();
     cintegral->Write();
     cintegral2->Write();
+    tout->Write();
+   // copy->Write();
 
 
     fout->Close(); // Close output file
