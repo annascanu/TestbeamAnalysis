@@ -525,7 +525,7 @@ int main()
     hcharge1->SetLineColor(kAzure+1);
     hcharge1->SetLineWidth(3);
     hcharge1->SetFillColorAlpha(kAzure-4, 0.35);
-    hcharge1->SetTitle("Amplitudes of waveforms on the first FEB");
+    hcharge1->SetTitle("Charge of waveforms on the first FEB");
     hcharge1->Draw("HIST");
     hcharge1->Fit(fpolyacharge1,"R"); // Fit su htriple1
     //fpolyaAmpl1->Draw("SAME");
@@ -537,7 +537,7 @@ TCanvas *ccharge2 = new TCanvas("ccharge2", "charge2", 900, 700);
     hcharge2->SetLineColor(kAzure+1);
     hcharge2->SetLineWidth(3);
     hcharge2->SetFillColorAlpha(kAzure-4, 0.35);
-    hcharge2->SetTitle("Amplitudes of waveforms on the first FEB");
+    hcharge2->SetTitle("Charge of waveforms on the second FEB");
     hcharge2->Draw("HIST");
     hcharge2->Fit(fpolyacharge2,"R"); // Fit su htriple1
     //fpolyaAmpl1->Draw("SAME");
@@ -549,7 +549,7 @@ TCanvas *crisetime1 = new TCanvas("crisetime1", "risetime1", 900, 700);
     hrisetime1->SetLineColor(kAzure+1);
     hrisetime1->SetLineWidth(3);
     hrisetime1->SetFillColorAlpha(kAzure-4, 0.35);
-    hrisetime1->SetTitle("Amplitudes of waveforms on the first FEB");
+    hrisetime1->SetTitle("risetime of waveforms on the first FEB");
     hrisetime1->Draw("HIST");
     crisetime1->Update();
 
@@ -560,7 +560,7 @@ TCanvas *crisetime2 = new TCanvas("crisetime2", "risetime2", 900, 700);
     hrisetime2->SetLineColor(kAzure+1);
     hrisetime2->SetLineWidth(3);
     hrisetime2->SetFillColorAlpha(kAzure-4, 0.35);
-    hrisetime2->SetTitle("Amplitudes of waveforms on the first FEB");
+    hrisetime2->SetTitle("risetime of waveforms on the second FEB");
     hrisetime2->Draw("HIST");
     crisetime2->Update();
 
@@ -569,7 +569,7 @@ TCanvas *cpeaketime1 = new TCanvas("cpeaktime1", "peaktime1", 900, 700);
     hpeaktime1->SetLineColor(kAzure+1);
     hpeaktime1->SetLineWidth(3);
     hpeaktime1->SetFillColorAlpha(kAzure-4, 0.35);
-    hpeaktime1->SetTitle("Amplitudes of waveforms on the first FEB");
+    hpeaktime1->SetTitle("peaktime of waveforms on the first FEB");
     hpeaktime1->Draw("HIST");
     cpeaketime1->Update();
 
@@ -579,7 +579,7 @@ TCanvas *cpeaketime2 = new TCanvas("cpeaktime2", "peaktime2", 900, 700);
     hpeaktime2->SetLineColor(kAzure+1);
     hpeaktime2->SetLineWidth(3);
     hpeaktime2->SetFillColorAlpha(kAzure-4, 0.35);
-    hpeaktime2->SetTitle("Amplitudes of waveforms on the first FEB");
+    hpeaktime2->SetTitle("peaktime of waveforms on the second FEB");
     hpeaktime2->Draw("HIST");
     cpeaketime2->Update();
 
@@ -631,7 +631,7 @@ TCanvas *cpeaketime2 = new TCanvas("cpeaktime2", "peaktime2", 900, 700);
 
     TCanvas *cintegral = new TCanvas("cintegral", "amplitudevsintegral", 900, 700);
 
-hintegral1->SetTitle("Amplitude vs Integral;amplitude;integral");
+hintegral1->SetTitle("Amplitude vs Integral;amplitude(V);integral");
 hintegral1->SetName("hintegral1");
 
 hintegral1->SetMarkerStyle(20);
@@ -839,7 +839,7 @@ cintegral->Update();
     hbaseline1->SetLineColor(kAzure+1);
     hbaseline1->SetLineWidth(3);
     hbaseline1->SetFillColorAlpha(kAzure-4, 0.35);
-    hbaseline1->SetTitle("baseline");
+    hbaseline1->SetTitle("baseline fist det");
     hbaseline1->Draw("HIST");
     cbaseline->Update();
 
@@ -878,7 +878,7 @@ cintegral->Update();
     hbaseline2->SetLineColor(kAzure+1);
     hbaseline2->SetLineWidth(3);
     hbaseline2->SetFillColorAlpha(kAzure-4, 0.35);
-    hbaseline2->SetTitle("baseline");
+    hbaseline2->SetTitle("baseline second det");
     hbaseline2->Draw("HIST");
     cbaseline2->Update();
 
