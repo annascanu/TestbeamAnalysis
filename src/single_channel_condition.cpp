@@ -125,7 +125,7 @@ int main()
     const int MAXPULSES = 200; // Maybe could be less.
     Int_t npulses;
 
-    Double_t pulses_amplitude[MAXPULSES], pulses_integral[MAXPULSES], pulses_time_cfd10[MAXPULSES], pulses_time_cfd20[MAXPULSES], pulses_time_cfd30[MAXPULSES], integral[MAXPULSES], pulses_time_cfd50[MAXPULSES], pulses_time_cfd60[MAXPULSES], Baseline[MAXPULSES], pulses_peak_time[MAXPULSES],  pulses_rise_time[MAXPULSES], mean_1[MAXPULSES], mean_2[MAXPULSES];
+    Double_t pulses_amplitude[MAXPULSES], pulses_integral[MAXPULSES], pulses_time_cfd10[MAXPULSES], pulses_time_cfd20[MAXPULSES], pulses_time_cfd30[MAXPULSES], integral[MAXPULSES], pulses_time_cfd50[MAXPULSES], pulses_time_cfd60[MAXPULSES], Baseline[MAXPULSES], pulses_peak_time[MAXPULSES],  pulses_rise_time[MAXPULSES], mean_1[MAXPULSES], mean_2[MAXPULSES], conteggi_canali1[64], conteggi_canali2[64] ;
     Bool_t  pulses_bad_pulse[MAXPULSES];
     Int_t HitFeb[3], Board[MAXPULSES], Channel[MAXPULSES];
     int tot_hit_feb;
@@ -166,9 +166,9 @@ int main()
     TH1F *hTime60_2   = new TH1F("hTime60_2", "Constant fraction discriminator set at 60% Time;Time [ps];Counts", 1000, 0, 10000);
 
     // Histograms for triple hits
-    TH1F *htriple1  = new TH1F("htriple1", "amplitude of a triple", 1000, 0, 0.5);
-    TH1F *htriple2  = new TH1F("htriple2", "amplitude of a triple", 1000, 0, 0.5);
-    TH1F *htriple3  = new TH1F("htriple3", "amplitude of a triple", 1000, 0, 0.5);
+    TH1F *htriple1  = new TH1F("htriple1", "amplitude of a triple", 100, 0, 0.5);
+    TH1F *htriple2  = new TH1F("htriple2", "amplitude of a triple", 100, 0, 0.5);
+    TH1F *htriple3  = new TH1F("htriple3", "amplitude of a triple", 100, 0, 0.5);
 
     // Histograms for time differences for the different values of CDF
     TH1F *htime_12    = new TH1F("htime_12", "time diff ;Time [ps];Counts", 100, -2000, 2000);
@@ -180,8 +180,8 @@ int main()
     TH1F *htime20_23    = new TH1F("htime20_23", "time diff ;Time [ps];Counts", 100, -0.2, 0.2);
 
     TH1F *htime30_12    = new TH1F("htime30_12", "time diff ;Time [ps];Counts", 100, -2000, 2000);
-    TH1F *htime30_13    = new TH1F("htime30_13", "time diff ;Time [ps];Counts", 100, -0.2, 0.2);
-    TH1F *htime30_23    = new TH1F("htime30_23", "time diff ;Time [ps];Counts", 100, -0.2, 0.2);
+    TH1F *htime30_13    = new TH1F("htime30_13", "time diff ;Time [ps];Counts", 100, -2000, 2000);
+    TH1F *htime30_23    = new TH1F("htime30_23", "time diff ;Time [ps];Counts", 100, -2000, 2000);
 
     // Baseline histogram
     TH1F *hcharge1  = new TH1F("hcharge1", "charge1", 1000, 0, 10);
@@ -194,6 +194,11 @@ int main()
     TH1F *hpeaktime1  = new TH1F("hpeaktime1", "peaktime1", 1000, -20000, 20000);
     TH1F *hpeaktime2  = new TH1F("hpeaktime2", "peaktime2", 1000, -20000, 20000);
 
+    TH1F *conteggixcanale1  = new TH1F("conteggixcanale1", "conteggixcanale1", 1000, 0, 64);
+    TH1F *conteggixcanale2  = new TH1F("conteggixcanale2", "conteggixcanale2", 1000, 0, 64);
+    TH1F *conteggixcanale3  = new TH1F("conteggixcanale3", "conteggixcanale3", 100, 0, 7);
+
+
 
     ///Amplitude vs integral histogram
     TGraph *hintegral1 = new TGraph();
@@ -203,8 +208,12 @@ int main()
     TGraph *timevsintegral =new TGraph();
     TGraph2D *timevsamplitude2 =new TGraph2D();
     TGraph *timevsintegral2 =new TGraph();
+    TGraph *timevsamplitude3 = new TGraph();
+
     TProfile *prof = new TProfile("prof", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0, 1);
     TProfile *prof2 = new TProfile("prof2", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0, 1);
+    TProfile *prof3 = new TProfile("prof3", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0, 1);
+
     TGraph *cfdvschannel1 = new TGraph();
 
     // -----------------------
@@ -242,8 +251,8 @@ int main()
         // AS: Replaced assumption about pulse index ordering with explicit Board[] mapping
         // also see the hitfeb = [1, 1, anything] (otherwise we lose statistics because of smaller geometrical acceptance of 3rd detector)
         //i want hitfeb[2]==1
-        if (HitFeb[0] == 1 && HitFeb[1] == 1 && nGood == 2)
-       // if (HitFeb[0] == 1 && HitFeb[1] == 1 && nGood == 3 && HitFeb[2]==1)
+       // if (HitFeb[0] == 1 && HitFeb[1] == 1 && nGood == 2)
+        if (HitFeb[0] == 1 && HitFeb[1] == 1 && nGood == 3 && HitFeb[2]==1)
         //if (HitFeb[0] == 1 && HitFeb[1] == 1 && nGood >= 2) //condizione che mi garantisce hit sulle prime due e whatever sull'ultim detector'
         //if (HitFeb[0] == 1 && HitFeb[1] == 1 && HitFeb[2] == 1 && nGood == 3) //triple per check
         {
@@ -284,7 +293,7 @@ int main()
                 peak_time[det]= pulses_peak_time[j];
                 risetime[det]= pulses_rise_time[j];
                 hTime20->Fill(cfd20[0]);// questi tre prima erano riempiti con j non corretti
-                hTime30->Fill(cfd30[0]);
+
                 hTime50->Fill(cfd50[0]);//
                 hTime60->Fill(cfd60[0]);
                 hTime60_2->Fill(cfd60[1]);
@@ -299,15 +308,31 @@ int main()
             }
 
             // Skip se un detector non ha dato segnale buono
-            if (ampFEB[0] <= 0 || ampFEB[1] <= 0)
+            if (ampFEB[0] <= 0 || ampFEB[1] <= 0 || ampFEB[2] <=0)
                 continue;
             //&& (Channel[0]<16 || Channel[0]>32)
-            //&& cfd60[0]<3600 && Channel[0]==29 && Channel[1]==29
+            //&& cfd60[0]<3600 &&
             //&& cfd30[0]<3100 && cfd30[0]>2900 cut on cfd 30%  && integral[0]/ampFEB[0]>8 && integral[1]/ampFEB[1]>8    ///// && ampFEB[0]> 0.2 && cfd60[0]<3350 && cfd60[0]>3000ss
-           //if(Channel[1]<16 || Channel[1]>23) nonnfunziona: && (ampFEB[0]<0.03 || ampFEB[0]>0.03) &&(ampFEB[1]<0.03 || ampFEB[1]>0.05)
-           // if(Channel[0]==29 && Channel[1]==29){
+           //if(Channel[1]<16 || Channel[1]>23) nonnfunziona: && (ampFEB[0]<0.03 || ampFEB[0]>0.03) &&(ampFEB[1]<0.03 || ampFEB[1]>0.0
+
+
+
+            ///boolean condition
+            bool same1, same2, near1, near2, total_condition;
+            same1=(Channel[0]==11 && Channel[1]==11);
+            same2=(Channel[0]==12 && Channel[1]==12);
+            near1=(Channel[0]==11 && Channel[1]==12);
+            near2=(Channel[0]==12 && Channel[1]==12);
+    total_condition= same1||same2||near1||near2;
+
+
+
+
+
+        if(total_condition){
             if(peak_time[1]<0)
                 continue;
+
                 // Fill amplitude histograms           // AS: why this x 1000 scaling? -> To get values in mV
                 htriple1->Fill(ampFEB[0]);
                 htriple2->Fill(ampFEB[1]);
@@ -353,6 +378,7 @@ int main()
                 for(int i=0; i<64; i++){
                     if(Channel[0]==i){
                         tabella1[i].push_back(peak_time[0]);
+                       // conteggi_canali1[i] += 1;
 
                     }
                 }
@@ -361,6 +387,7 @@ int main()
                 for(int i=0; i<64; i++){
                     if(Channel[1]==i){
                         tabella2[i].push_back(peak_time[1]);
+                        //conteggi_canali2[i] += 1;
 
                     }
                 }
@@ -368,8 +395,7 @@ int main()
 
 
 
-
-
+hTime30->Fill(cfd30[0]);
 
                 // CFD = 10%
                 //time_12 = cfd60[0] - cfd60[1];
@@ -396,15 +422,15 @@ int main()
                 // CFD = 60%
                 //double timedif1= peak_time[0]-cfd60[0];
                 //double timedif2= peak_time[1]-cfd60[1];
-                time30_12 = cfd60[0]-cfd60[1];
-                //time30_23 = cfd30[1] - cfd30[2];
-                //time30_13 = cfd30[0] - cfd30[2];
+                time30_12 = cfd30[0]-cfd30[1];
+                time30_23 = cfd30[1] - cfd30[2];
+                time30_13 = cfd30[0] - cfd30[2];
 
 
 
                 htime30_12->Fill(time30_12);
-                //htime30_23->Fill(time30_23);
-                //htime30_13->Fill(time30_13);
+                htime30_23->Fill(time30_23);
+                htime30_13->Fill(time30_13);
 
                 hbaseline1->Fill(base[0]);
                 hbaseline2->Fill(base[1]);
@@ -412,23 +438,47 @@ int main()
 
 
                 ///Integral vs amplitude distribution
-                timevsamplitude->SetPoint(timevsamplitude->GetN(), ampFEB[0], cfd60[0], peso);
-                timevsamplitude2->SetPoint(timevsamplitude2->GetN(), ampFEB[1], cfd60[1], peso2);
+                timevsamplitude->SetPoint(timevsamplitude->GetN(), ampFEB[0], cfd30[0], peso);
+                timevsamplitude2->SetPoint(timevsamplitude2->GetN(), ampFEB[1], cfd30[1], peso2);
+                timevsamplitude3->SetPoint(timevsamplitude3->GetN(), ampFEB[2], cfd30[2]);
+
                 prof->Fill(ampFEB[0], cfd60[0]);
                 prof2->Fill(ampFEB[1], cfd60[1]);
+                prof3->Fill(ampFEB[2], cfd60[2]);
                 timevsintegral->SetPoint(timevsintegral->GetN(), integral[0], cfd60[0]);
                 //if(integral[0]<40)
                     hintegral1->SetPoint(hintegral1->GetN(),ampFEB[0],integral[0]);
                 //if(integral[1]<26)
                     hintegral2->SetPoint(hintegral2->GetN(),ampFEB[1],integral[1]);
-                    //hintegral3->SetPoint(hintegral3->GetN(),ampFEB[2],integral[2]);
+                    hintegral3->SetPoint(hintegral3->GetN(),ampFEB[2],integral[2]);
+
+
+
+                    conteggixcanale1->Fill(Channel[0]);
+                    conteggixcanale2->Fill(Channel[1]);
+                    conteggixcanale3->Fill(Channel[2]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 if(ampFEB[0]<0)
                     cout<< "Amplitude < 0; event number: " << i << endl;
                 cfdvschannel1->SetPoint(cfdvschannel1->GetN(), Channel[0], cfd60[0]);
 
 
 
-        }//}
+        }
+        }
 
         // Progress indicator for sanity :)
         if (i % 100000 == 0) cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
@@ -702,17 +752,73 @@ cintegral->Update();
 
 
 
+TCanvas *cconteggi = new TCanvas("cconteggi", "cconteggi", 900, 700);
+    conteggixcanale1->SetLineColor(kAzure+1);
+    conteggixcanale1->SetLineWidth(3);
+    conteggixcanale1->SetFillColorAlpha(kAzure-4, 0.35);
+    conteggixcanale1->SetTitle("eventi per canale");
+   // htriple1->Draw("HIST");
+    //htriple1->Fit(fpolyaAmpl1,"R"); // Fit su htriple1
+    //fpolyaAmpl1->Draw("SAME");
+    cconteggi->Update();
+    //cconteggi->SaveAs("hist1.pdf");
+
+
+TCanvas *cconteggi2 = new TCanvas("cconteggi2", "cconteggi2", 900, 700);
+    conteggixcanale2->SetLineColor(kAzure+1);
+    conteggixcanale2->SetLineWidth(3);
+    conteggixcanale2->SetFillColorAlpha(kAzure-4, 0.35);
+    conteggixcanale2->SetTitle("eventi per canale");
+   // htriple1->Draw("HIST");
+    //htriple1->Fit(fpolyaAmpl1,"R"); // Fit su htriple1
+    //fpolyaAmpl1->Draw("SAME");
+    cconteggi2->Update();
+    //cconteggi->SaveAs("hist1.pdf");
 
 
 
+TCanvas *cconteggi3 = new TCanvas("cconteggi3", "cconteggi3", 900, 700);
+    conteggixcanale3->SetLineColor(kAzure+1);
+    conteggixcanale3->SetLineWidth(3);
+    conteggixcanale3->SetFillColorAlpha(kAzure-4, 0.35);
+    conteggixcanale3->SetTitle("eventi per canale");
+   // htriple1->Draw("HIST");
+    //htriple1->Fit(fpolyaAmpl1,"R"); // Fit su htriple1
+    //fpolyaAmpl1->Draw("SAME");
+    cconteggi3->Update();
+    //cconteggi->SaveAs("hist1.pdf");
 
 
 
+TCanvas *cAmpVsTime = new TCanvas("cAmpVsTime", "Amplitude vs Time", 900, 700);
+cAmpVsTime->SetGrid();
+cAmpVsTime->SetTickx();
+cAmpVsTime->SetTicky();
 
+// Stile del grafico
+timevsamplitude3->SetTitle("Amplitude vs Time CFD 30%;Amplitude [a.u.];Time [ps]");
+timevsamplitude3->SetMarkerStyle(20);
+timevsamplitude3->SetMarkerSize(1.3);
+timevsamplitude3->SetMarkerColor(kAzure+2);
+timevsamplitude3->SetLineColor(kAzure+1);
+timevsamplitude3->SetLineWidth(2);
 
+timevsamplitude3->GetXaxis()->SetTitleSize(0.045);
+timevsamplitude3->GetYaxis()->SetTitleSize(0.045);
+timevsamplitude3->GetXaxis()->SetLabelSize(0.04);
+timevsamplitude3->GetYaxis()->SetLabelSize(0.04);
 
+// Disegno
+timevsamplitude3->Draw("AP");
 
+// Legenda
+/*auto leg = new TLegend(0.15, 0.80, 0.45, 0.92);
+leg->SetBorderSize(0);
+leg->SetFillStyle(0);
+leg->AddEntry(timevsamplitude3, "Measured points", "lp");
+leg->Draw();*/
 
+cAmpVsTime->Update();
 
 
 
@@ -799,6 +905,13 @@ cintegral->Update();
     prof2->Fit(empirico2, "R");
     prof2->Draw();
     cmediabin2->Update();
+
+     TCanvas *cmediabin3 = new TCanvas("cmediabin2", "Slewing Correction", 800, 600);
+    //prof->Fit("pol3");
+    TF1 *empirico3 = new TF1("empirico3", "[0] + [1]/x", 0, 1);
+    prof3->Fit(empirico3, "R");
+    prof3->Draw();
+    cmediabin3->Update();
 
     /*TCanvas *cintegral3 = new TCanvas("cintegral3", "amplitudevsintegral", 900, 700);
     hintegral3->SetName("hintegral1");
@@ -985,17 +1098,23 @@ cintegral->Update();
     double mean_12  = f_gaus->GetParameter(1); // Questo sarà il risultato del fit
     double sigma_12 = f_gaus->GetParameter(2);
 
+
+    double e_amp_12   = f_gaus->GetParError(0);
+    double e_mean_12  = f_gaus->GetParError(1);
+    double e_sigma_12 = f_gaus->GetParError(2);
+
+
     // ... estrazione degli errori
-    /* TCanvas *ctime23 = new TCanvas("ctime23", "htriple1", 900, 700);
-    htime20_23->SetLineColor(kAzure+1);
-    htime20_23->SetLineWidth(3);
-    htime20_23->SetFillColorAlpha(kAzure-4, 0.35);
-    htime20_23->SetTitle("Amplitude");
-    htime20_23->Draw("HIST");
-    htime20_23->Fit("gaus"); // Fit su htime20_23
+     TCanvas *ctime23 = new TCanvas("ctime23", "htriple1", 900, 700);
+    htime30_23->SetLineColor(kAzure+1);
+    htime30_23->SetLineWidth(3);
+    htime30_23->SetFillColorAlpha(kAzure-4, 0.35);
+    htime30_23->SetTitle("Amplitude");
+    htime30_23->Draw("HIST");
+    htime30_23->Fit("gaus"); // Fit su htime20_23
     ctime23->Update();
 
-    TF1 *f2 = htime20_23->GetFunction("gaus");
+    TF1 *f2 = htime30_23->GetFunction("gaus");
     double amp_23   = f2->GetParameter(0);  ///taking gaus parameters
     double mean_23  = f2->GetParameter(1);
     double sigma_23 = f2->GetParameter(2);
@@ -1005,23 +1124,23 @@ cintegral->Update();
     double e_sigma_23 = f2->GetParError(2);
 
     TCanvas *ctime13 = new TCanvas("ctime13", "htriple1", 900, 700);
-    htime20_13->SetLineColor(kAzure+1);
-    htime20_13->SetLineWidth(3);
-    htime20_13->SetFillColorAlpha(kAzure-4, 0.35);
-    htime20_13->SetTitle("Amplitude");
-    htime20_13->Draw("HIST");
-    htime20_13->Fit("gaus"); // Fit su htime20_13
+    htime30_13->SetLineColor(kAzure+1);
+    htime30_13->SetLineWidth(3);
+    htime30_13->SetFillColorAlpha(kAzure-4, 0.35);
+    htime30_13->SetTitle("Amplitude");
+    htime30_13->Draw("HIST");
+    htime30_13->Fit("gaus"); // Fit su htime20_13
     ctime13->Update();
 
     // Take gaussian from the correct histogram htime20_13
-    TF1 *f3 = htime20_13->GetFunction("gaus");
+    TF1 *f3 = htime30_13->GetFunction("gaus");
     double amp_13   = f3->GetParameter(0);  // taking gaus parameters
     double mean_13  = f3->GetParameter(1);
     double sigma_13 = f3->GetParameter(2);
 
     double e_amp_13   = f3->GetParError(0);
     double e_mean_13  = f3->GetParError(1);
-    double e_sigma_13 = f3->GetParError(2);*/
+    double e_sigma_13 = f3->GetParError(2);
 
     // --------------- Time resolution (with error propagation) ---------------
 
@@ -1032,33 +1151,33 @@ cintegral->Update();
     // sigma3^2 = 1/2 * ( sigma_13^2 + sigma_23^2 - sigma_12^2 )
 
     double s12 = sigma_12;
-    /*double s13 = 0;
-    double s23 = 0;*/
+    double s13 = sigma_13;
+    double s23 = sigma_23;
 
-    double es12 = sigma_12;
-    /*double es13 = 0;
-    double es23 = 0;*/
+    double es12 = e_sigma_12;
+    double es13 = e_sigma_13;
+    double es23 = e_sigma_23;
 
-    double s1sq = 0.5 * ( s12*s12 );
-    /*double s2sq = 0.5 * ( s12*s12 + s23*s23 - s13*s13 );
-    double s3sq = 0.5 * ( s13*s13 + s23*s23 - s12*s12 );*/
+    double s1sq = 0.5 * ( s12*s12 + s13*s13 - s23*s23 );
+    double s2sq = 0.5 * ( s12*s12 + s23*s23 - s13*s13 );
+    double s3sq = 0.5 * ( s13*s13 + s23*s23 - s12*s12 );
 
     if (s1sq < 0) {
         cout << "WARNING: sigma1^2 < 0 (" << s1sq << "). Setting to 0 to avoid NaN." << endl;
         s1sq = 0;
     }
-    /* if (s2sq < 0) {
+    if (s2sq < 0) {
         cout << "WARNING: sigma2^2 < 0 (" << s2sq << "). Setting to 0 to avoid NaN." << endl;
         s2sq = 0;
     }
     if (s3sq < 0) {
         cout << "WARNING: sigma3^2 < 0 (" << s3sq << "). Setting to 0 to avoid NaN." << endl;
         s3sq = 0;
-    }*/
+    }
 
     double sigma_1 = TMath::Sqrt(s1sq);
-    /*double sigma_2 = TMath::Sqrt(s2sq);
-    double sigma_3 = TMath::Sqrt(s3sq);*/
+    double sigma_2 = TMath::Sqrt(s2sq);
+    double sigma_3 = TMath::Sqrt(s3sq);
 
     // Error propagation:
     // S1 = sigma1^2 = 1/2*(a + b - c), with a = s12^2, b = s13^2, c = s23^2
@@ -1067,20 +1186,20 @@ cintegral->Update();
     // => var(S1) = s12^2*es12^2 + s13^2*es13^2 + s23^2*es23^2
     // then error on sigma1: e_sigma1 = sqrt(var(S1)) / (2*sigma1)
 
-    double varS1 = s12*s12*es12*es12 ;
-    /* double varS2 = s12*s12*es12*es12 + s23*s23*es23*es23 + s13*s13*es13*es13; // same form, ordering irrelevant
-    double varS3 = s13*s13*es13*es13 + s23*s23*es23*es23 + s12*s12*es12*es12;*/
+    double varS1 = s12*s12*es12*es12 + s13*s13*es13*es13 + s23*s23*es23*es23;
+    double varS2 = s12*s12*es12*es12 + s23*s23*es23*es23 + s13*s13*es13*es13; // same form, ordering irrelevant
+    double varS3 = s13*s13*es13*es13 + s23*s23*es23*es23 + s12*s12*es12*es12;
 
     double e_sigma_1 = 0.0;
-    //double e_sigma_2 = 0.0;
-    //double e_sigma_3 = 0.0;
+    double e_sigma_2 = 0.0;
+    double e_sigma_3 = 0.0;
 
     if (sigma_1 > 0)
         e_sigma_1 = TMath::Sqrt(varS1) / (2.0 * sigma_1);
     else
         e_sigma_1 = 0.0;
 
-    /*if (sigma_2 > 0)
+    if (sigma_2 > 0)
         e_sigma_2 = TMath::Sqrt(varS2) / (2.0 * sigma_2);
     else
         e_sigma_2 = 0.0;
@@ -1088,17 +1207,17 @@ cintegral->Update();
     if (sigma_3 > 0)
         e_sigma_3 = TMath::Sqrt(varS3) / (2.0 * sigma_3);
     else
-        e_sigma_3 = 0.0;*/
+        e_sigma_3 = 0.0;
 
     cout.setf(std::ios::fixed); cout.precision(4);
     cout << "Results of time resolution with CFD = 20% (obtained from gaussian fits):\n"
-         << "sigma12 (fit) = " << s12 << " +/- " << es12 << " ps\n";
-        /* << "sigma23 (fit) = " << s23 << " +/- " << es23 << " ps\n"
+         << "sigma12 (fit) = " << s12 << " +/- " << es12 << " ps\n"
+         << "sigma23 (fit) = " << s23 << " +/- " << es23 << " ps\n"
          << "sigma13 (fit) = " << s13 << " +/- " << es13 << " ps\n\n"
          << "Derived per-detector resolutions (sigma):\n"
          << "sigma1 = " << sigma_1 << " +/- " << e_sigma_1 << " ps\n"
          << "sigma2 = " << sigma_2 << " +/- " << e_sigma_2 << " ps\n"
-         << "sigma3 = " << sigma_3 << " +/- " << e_sigma_3 << " ps\n";*/
+         << "sigma3 = " << sigma_3 << " +/- " << e_sigma_3 << " ps\n";
 
     // -----------------------
     //       Plot results
@@ -1117,7 +1236,7 @@ cintegral->Update();
     // -----------------------
     //     Save everything
     // -----------------------
-    TFile *fout = new TFile("muon_run_only2_TProfile_run19.root", "RECREATE");
+    TFile *fout = new TFile("muon_run_only2_TProfile_run19_trple_channel11et12.root", "RECREATE");
     hAmpAll->Write();
     hAmp1Hit->Write();
     hQ->Write();
@@ -1138,11 +1257,11 @@ cintegral->Update();
     //htime20_23->Write();
     //htime20_13->Write();
     htime30_12->Write();
-    //htime30_23->Write();
-    //htime30_13->Write();
+    htime30_23->Write();
+    htime30_13->Write();
     hintegral1->Write();
     hintegral2->Write();
-    //hintegral3->Write();
+    hintegral3->Write();
     hcharge1->Write();
     hcharge2->Write();
     hrisetime1->Write();
@@ -1151,17 +1270,23 @@ cintegral->Update();
     hpeaktime2->Write();
     timevsamplitude->Write();
     timevsamplitude2->Write();
+    timevsamplitude3->Write();
     hbaseline1->Write();
     hbaseline2->Write();
     timevsintegral->Write();
     prof->Write();
     prof2->Write();
+    prof3->Write();
     cmediabin->Write();
     cfdvschannel1->Write();
     cintegral->Write();
     cintegral2->Write();
     tout->Write();
    // copy->Write();
+    conteggixcanale1->Write();
+    conteggixcanale2->Write();
+    conteggixcanale3->Write();
+    cAmpVsTime->Write();
 
 
     fout->Close(); // Close output file

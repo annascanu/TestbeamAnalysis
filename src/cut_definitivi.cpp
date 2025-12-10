@@ -297,7 +297,7 @@ if(Channel[0]==29 && Channel[1]==29 ){
 
 
 
-            double cfd60_co=cfd60[0]-(3664-26.17/ampFEB[0]);
+            double cfd60_co=cfd60[0]-(3464-26.17/ampFEB[0]);
             double cfd60_co1=cfd60[1]-(3801-25.78/ampFEB[1]);
             // CFD = 10%
             //time_12 = cfd60[0] - cfd60[1];
