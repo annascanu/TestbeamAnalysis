@@ -104,7 +104,7 @@ int main()
 
     // TString filename = "/eos/experiment/neutplatform/enubet/testbeam2025/picosec_data/sampic_runs/rootSampicData/processed_waveforms/sampic_run22_final.root"; // Filename while running on lxplus
     //TString filename = "/Users/anna/Developing/PhD/Testbeam2025/sampic_run22_final.root"; // Filename while running on Anna's machine
-     TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run19_final.root"; // Filename while running on Riccardo's machine
+     TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run23_final.root"; // Filename while running on Riccardo's machine
     cout << "Opening file: " << filename << endl;
 
     TFile *file = TFile::Open(filename, "READ");
@@ -212,9 +212,9 @@ int main()
      TGraph *timevsamplitude =new TGraph();
       TGraph *timevsamplitude2 =new TGraph();
 
-    TProfile *prof = new TProfile("prof", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0, 1);
-    TProfile *prof2 = new TProfile("prof2", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0, 1);
-    TProfile *prof3 = new TProfile("prof3", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0, 1);
+    TProfile *prof = new TProfile("prof", "Mean time per amplitude bin;Amplitude;Time", 50, 0, 1);
+    TProfile *prof2 = new TProfile("prof2", "Mean time per amplitude bin;Amplitude;Time", 50, 0, 1);
+    TProfile *prof3 = new TProfile("prof3", "Mean time per amplitude bin;Amplitude;Time", 50, 0, 1);
 
     TGraph *cfdvschannel1 = new TGraph();
 
@@ -253,10 +253,10 @@ int main()
         // AS: Replaced assumption about pulse index ordering with explicit Board[] mapping
         // also see the hitfeb = [1, 1, anything] (otherwise we lose statistics because of smaller geometrical acceptance of 3rd detector)
         //i want hitfeb[2]==1
-       // if (HitFeb[0] == 1 && HitFeb[1] == 1 && nGood == 2)
-        if (HitFeb[0] == 1 && HitFeb[1] == 1 && nGood == 3 && HitFeb[2]==1)
+        //if (HitFeb[0] == 1 && HitFeb[1] == 1 && nGood == 2)
+        //if ()
         //if (HitFeb[0] == 1 && HitFeb[1] == 1 && nGood >= 2) //condizione che mi garantisce hit sulle prime due e whatever sull'ultim detector'
-        //if (HitFeb[0] == 1 && HitFeb[1] == 1 && HitFeb[2] == 1 && nGood == 3) //triple per check
+        if (HitFeb[0] == 1 && HitFeb[1] == 1 && HitFeb[2] == 1 && nGood == 3) //triple per check
         {
             // Arrays indexed by FEB number (0,1,2)
             double ampFEB[3]  = {-1.0, -1.0, -1.0};
@@ -321,9 +321,9 @@ int main()
 
 
 
-           if(Channel[0]==12 && Channel[1]==12 && Channel[2]==5){
-            if(peak_time[1]<0)
-                continue;
+          // if(Channel[2]=4){
+            /*if(peak_time[1]<0)
+                continue*/;
 
                 // Fill amplitude histograms           // AS: why this x 1000 scaling? -> To get values in mV
                 htriple1->Fill(ampFEB[0]);
@@ -469,7 +469,7 @@ hTime30->Fill(cfd30[0]);
 
 
 
-        }
+        //}
         }
 
         // Progress indicator for sanity :)
@@ -529,12 +529,13 @@ hTime30->Fill(cfd30[0]);
     // Canvas 1
     // AS: removed grids, I think the plots look nicer, but can be re-added if needed
     TCanvas *c1 = new TCanvas("c1", "htriple1", 900, 700);
+    htriple1->GetListOfFunctions()->Clear();
     htriple1->SetLineColor(kAzure+1);
     htriple1->SetLineWidth(3);
     htriple1->SetFillColorAlpha(kAzure-4, 0.35);
     htriple1->SetTitle("Amplitudes of waveforms on the first FEB");
     htriple1->Draw("HIST");
-    htriple1->Fit(fpolyaAmpl1,"R"); // Fit su htriple1
+    //htriple1->Fit(fpolyaAmpl1,"R"); // Fit su htriple1
     //fpolyaAmpl1->Draw("SAME");
     c1->Update();
     c1->SaveAs("hist1.pdf");
@@ -546,8 +547,8 @@ hTime30->Fill(cfd30[0]);
     htriple2->SetFillColorAlpha(kGreen-4, 0.35);
     htriple2->SetTitle("Amplitudes of waveforms on the second FEB");
     htriple2->Draw("HIST");
-    htriple2->Fit(fpolyaAmpl2,"R"); // Fit su htriple2
-    fpolyaAmpl2->Draw("SAME");
+    //htriple2->Fit(fpolyaAmpl2,"R"); // Fit su htriple2
+    //fpolyaAmpl2->Draw("SAME");
     c2->Update();
     c2->SaveAs("hist2.pdf");
 
@@ -558,7 +559,7 @@ hTime30->Fill(cfd30[0]);
     htriple3->SetFillColorAlpha(kRed-4, 0.35);
     htriple3->SetTitle("Amplitudes of waveforms on the third FEB");
     htriple3->Draw("HIST");
-    htriple3->Fit(fpolyaAmpl3,"R"); // Fit su htriple3
+    //htriple3->Fit(fpolyaAmpl3,"R"); // Fit su htriple3
     //fpolyaAmpl3->Draw("SAME");
     c3->Update();
     c3->SaveAs("hist3.pdf");
@@ -570,7 +571,7 @@ hTime30->Fill(cfd30[0]);
     hcharge1->SetFillColorAlpha(kAzure-4, 0.35);
     hcharge1->SetTitle("Charge of waveforms on the first FEB");
     hcharge1->Draw("HIST");
-    hcharge1->Fit(fpolyacharge1,"R"); // Fit su htriple1
+    //hcharge1->Fit(fpolyacharge1,"R"); // Fit su htriple1
     //fpolyaAmpl1->Draw("SAME");
     ccharge1->Update();
 
@@ -582,7 +583,7 @@ TCanvas *ccharge2 = new TCanvas("ccharge2", "charge2", 900, 700);
     hcharge2->SetFillColorAlpha(kAzure-4, 0.35);
     hcharge2->SetTitle("Charge of waveforms on the second FEB");
     hcharge2->Draw("HIST");
-    hcharge2->Fit(fpolyacharge2,"R"); // Fit su htriple1
+    //hcharge2->Fit(fpolyacharge2,"R"); // Fit su htriple1
     //fpolyaAmpl1->Draw("SAME");
     ccharge2->Update();
 
@@ -1287,7 +1288,7 @@ cAmpVsTime->Update();
     // -----------------------
     //     Save everything
     // -----------------------
-    TFile *fout = new TFile("muon_run_only2_TProfile_run19_trple_channel12_channel5.root", "RECREATE");
+    TFile *fout = new TFile("muon_run_only2_TProfile_run19_trple_allchannel_run23.root", "RECREATE");
     hAmpAll->Write();
     hAmp1Hit->Write();
     hQ->Write();

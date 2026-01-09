@@ -104,7 +104,7 @@ int main()
 
     // TString filename = "/eos/experiment/neutplatform/enubet/testbeam2025/picosec_data/sampic_runs/rootSampicData/processed_waveforms/sampic_run22_final.root"; // Filename while running on lxplus
     //TString filename = "/Users/anna/Developing/PhD/Testbeam2025/sampic_run22_final.root"; // Filename while running on Anna's machine
-     TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run19_final.root"; // Filename while running on Riccardo's machine
+     TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run22_final.root"; // Filename while running on Riccardo's machine
     cout << "Opening file: " << filename << endl;
 
     TFile *file = TFile::Open(filename, "READ");
@@ -125,7 +125,7 @@ int main()
     const int MAXPULSES = 200; // Maybe could be less.
     Int_t npulses;
 
-    Double_t pulses_amplitude[MAXPULSES], pulses_integral[MAXPULSES], pulses_time_cfd10[MAXPULSES], pulses_time_cfd20[MAXPULSES], pulses_time_cfd30[MAXPULSES], integral[MAXPULSES], pulses_time_cfd50[MAXPULSES], pulses_time_cfd60[MAXPULSES], Baseline[MAXPULSES], pulses_peak_time[MAXPULSES],  pulses_rise_time[MAXPULSES], mean_1[MAXPULSES], mean_2[MAXPULSES];
+    Double_t pulses_amplitude[MAXPULSES], pulses_integral[MAXPULSES], pulses_time_cfd10[MAXPULSES], pulses_time_cfd20[MAXPULSES], pulses_time_cfd30[MAXPULSES], integral[MAXPULSES], pulses_time_cfd50[MAXPULSES], pulses_time_cfd60[MAXPULSES], Baseline[MAXPULSES], pulses_peak_time[MAXPULSES],  pulses_rise_time[MAXPULSES], mean_1[MAXPULSES], mean_2[MAXPULSES], pulses_channel_x[MAXPULSES], pulses_channel_y[MAXPULSES];
     Bool_t  pulses_bad_pulse[MAXPULSES];
     Int_t HitFeb[3], Board[MAXPULSES], Channel[MAXPULSES];
     int tot_hit_feb;
@@ -133,6 +133,7 @@ int main()
     Double_t time30_12, time30_13, time30_23, time50_12, peso, peso2;
     vector<vector<double>> tabella1(64);
      vector<vector<double>> tabella2(64);
+     int conta;
 
     tree->SetBranchAddress("npulses", &npulses);
     tree->SetBranchAddress("pulses_amplitude", &pulses_amplitude);
@@ -149,6 +150,8 @@ int main()
     tree->SetBranchAddress("Channel", &Channel);
     tree->SetBranchAddress("pulses_peak_time", &pulses_peak_time);
     tree->SetBranchAddress("pulses_rise_time", &pulses_rise_time);
+    tree->SetBranchAddress("pulses_channel_x", &pulses_channel_x);
+    tree->SetBranchAddress("pulses_channel_y", &pulses_channel_y);
 
 
 
@@ -195,6 +198,14 @@ int main()
     TH1F *hpeaktime2  = new TH1F("hpeaktime2", "peaktime2", 1000, -20000, 20000);
 
 
+    TH1F *conteggixcanale1  = new TH1F("conteggixcanale1", "conteggixcanale1", 1000, 0, 64);
+    TH1F *conteggixcanale2  = new TH1F("conteggixcanale2", "conteggixcanale2", 1000, 0, 64);
+    TH1F *conteggixcanale3  = new TH1F("conteggixcanale3", "conteggixcanale3", 100, 0, 7);
+    //h2 = new TH2F("h2","Heatmap;X;Y", 50,0,10, 50,0,10);
+    TH2F *mapdet1 = new TH2F("heatmapdet1", "heatmapdet1;X;Y", 8,0,8,8,0,8);
+    TH2F *mapdet2 = new TH2F("heatmapdet2", "heatmapdet2;X;Y", 8,0,8,8,0,8);
+
+
     ///Amplitude vs integral histogram
     TGraph *hintegral1 = new TGraph();
     TGraph *hintegral2 = new TGraph();
@@ -223,8 +234,8 @@ int main()
 
         for (int j = 0; j < npulses; j++) // Loop inside the event
         {
-            if (pulses_bad_pulse[j])
-                continue; // Skip events where the fit didn't work
+            //if (pulses_bad_pulse[j])
+              //  continue; // Skip events where the fit didn't work
 
             nGood++;
             idx = j;
@@ -242,9 +253,9 @@ int main()
         // AS: Replaced assumption about pulse index ordering with explicit Board[] mapping
         // also see the hitfeb = [1, 1, anything] (otherwise we lose statistics because of smaller geometrical acceptance of 3rd detector)
         //i want hitfeb[2]==1
-        if (HitFeb[0] == 1 && HitFeb[1] == 1 && nGood == 2)
+       // if (HitFeb[0] == 1 && HitFeb[1] == 1 && nGood == 2 && HitFeb[2] == 0)
        // if (HitFeb[0] == 1 && HitFeb[1] == 1 && nGood == 3 && HitFeb[2]==1)
-        //if (HitFeb[0] == 1 && HitFeb[1] == 1 && nGood >= 2) //condizione che mi garantisce hit sulle prime due e whatever sull'ultim detector'
+        if (HitFeb[0] == 1 && HitFeb[1] == 1) //condizione che mi garantisce hit sulle prime due e whatever sull'ultim detector'
         //if (HitFeb[0] == 1 && HitFeb[1] == 1 && HitFeb[2] == 1 && nGood == 3) //triple per check
         {
             // Arrays indexed by FEB number (0,1,2)
@@ -257,12 +268,13 @@ int main()
             double base[3]    = {-9999.0, -9999.0, -9999.0};
             double peak_time[3]  = {-9999.0, -9999.0, -9999.0};
             double risetime[3] = {-9999.0, -9999.0, -9999.0};
+            int canale[3];
 
             // Fill according to Board[]
             for (int j = 0; j < npulses; j++)
             {
-                if (pulses_bad_pulse[j])
-                    continue;
+                //if (pulses_bad_pulse[j])
+                  //  continue;
                 int det = Board[j]; // Which detector this pulse belongs to (either 0, 1, 2)
 
                 if (det < 0 || det > 2)
@@ -283,6 +295,9 @@ int main()
                 base[det]=Baseline[j];
                 peak_time[det]= pulses_peak_time[j];
                 risetime[det]= pulses_rise_time[j];
+                canale[det]=Channel[j];
+
+
                 hTime20->Fill(cfd20[0]);// questi tre prima erano riempiti con j non corretti
                 hTime30->Fill(cfd30[0]);
                 hTime50->Fill(cfd50[0]);//
@@ -295,19 +310,21 @@ int main()
 
 
 
-                //cut[i]=true;}
+                //cut[i]=true;
+
             }
 
+
             // Skip se un detector non ha dato segnale buono
-            if (ampFEB[0] <= 0 || ampFEB[1] <= 0)
-                continue;
+           // if (ampFEB[0] <= 0 || ampFEB[1] <= 0)
+             //   continue;
             //&& (Channel[0]<16 || Channel[0]>32)
             //&& cfd60[0]<3600 && Channel[0]==29 && Channel[1]==29
             //&& cfd30[0]<3100 && cfd30[0]>2900 cut on cfd 30%  && integral[0]/ampFEB[0]>8 && integral[1]/ampFEB[1]>8    ///// && ampFEB[0]> 0.2 && cfd60[0]<3350 && cfd60[0]>3000ss
            //if(Channel[1]<16 || Channel[1]>23) nonnfunziona: && (ampFEB[0]<0.03 || ampFEB[0]>0.03) &&(ampFEB[1]<0.03 || ampFEB[1]>0.05)
            // if(Channel[0]==29 && Channel[1]==29){
-            if(peak_time[1]<0)
-                continue;
+           // if(peak_time[1]<0)
+             //   continue;
                 // Fill amplitude histograms           // AS: why this x 1000 scaling? -> To get values in mV
                 htriple1->Fill(ampFEB[0]);
                 htriple2->Fill(ampFEB[1]);
@@ -366,8 +383,18 @@ int main()
                 }
 
 
+                if(canale[0]==43){
+                    conta++;}
+                //heatmap
+                int coor_x1 = canale[0] % 8;           // colonna
+                int coor_y1 = 7 - (canale[0] / 8);     // riga (ribaltata)
 
 
+                int coor_x2 = canale[1] % 8;           // colonna
+                int coor_y2 = 7 - (canale[1] / 8);     // riga (ribaltata)
+
+                mapdet1->Fill(coor_x1, coor_y1);
+                mapdet2->Fill(coor_x2, coor_y2);
 
 
 
@@ -422,6 +449,14 @@ int main()
                 //if(integral[1]<26)
                     hintegral2->SetPoint(hintegral2->GetN(),ampFEB[1],integral[1]);
                     //hintegral3->SetPoint(hintegral3->GetN(),ampFEB[2],integral[2]);
+
+
+
+                    conteggixcanale1->Fill(Channel[0]);
+                    conteggixcanale2->Fill(Channel[1]);
+                    conteggixcanale3->Fill(Channel[2]);
+
+
                 if(ampFEB[0]<0)
                     cout<< "Amplitude < 0; event number: " << i << endl;
                 cfdvschannel1->SetPoint(cfdvschannel1->GetN(), Channel[0], cfd60[0]);
@@ -431,11 +466,11 @@ int main()
         }//}
 
         // Progress indicator for sanity :)
-        if (i % 100000 == 0) cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
+       // if (i % 100000 == 0) cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
     }
 
 
-
+cout<< " il valore di conta:" << conta << endl;
 
        for(int i=0; i<64; i++){
                         mean_1[i]=media(tabella1[i]);
@@ -701,12 +736,85 @@ cintegral->Update();
 
 
 
+TCanvas *cconteggi = new TCanvas("cconteggi", "cconteggi", 900, 700);
+    conteggixcanale1->SetLineColor(kAzure+1);
+    conteggixcanale1->SetLineWidth(3);
+    conteggixcanale1->SetFillColorAlpha(kAzure-4, 0.35);
+    conteggixcanale1->SetTitle("eventi per canale");
+   // htriple1->Draw("HIST");
+    //htriple1->Fit(fpolyaAmpl1,"R"); // Fit su htriple1
+    //fpolyaAmpl1->Draw("SAME");
+    cconteggi->Update();
+    //cconteggi->SaveAs("hist1.pdf");
+
+
+TCanvas *cconteggi2 = new TCanvas("cconteggi2", "cconteggi2", 900, 700);
+    conteggixcanale2->SetLineColor(kAzure+1);
+    conteggixcanale2->SetLineWidth(3);
+    conteggixcanale2->SetFillColorAlpha(kAzure-4, 0.35);
+    conteggixcanale2->SetTitle("eventi per canale");
+   // htriple1->Draw("HIST");
+    //htriple1->Fit(fpolyaAmpl1,"R"); // Fit su htriple1
+    //fpolyaAmpl1->Draw("SAME");
+    cconteggi2->Update();
+    //cconteggi->SaveAs("hist1.pdf");
 
 
 
+TCanvas *cconteggi3 = new TCanvas("cconteggi3", "cconteggi3", 900, 700);
+    conteggixcanale3->SetLineColor(kAzure+1);
+    conteggixcanale3->SetLineWidth(3);
+    conteggixcanale3->SetFillColorAlpha(kAzure-4, 0.35);
+    conteggixcanale3->SetTitle("eventi per canale");
+   // htriple1->Draw("HIST");
+    //htriple1->Fit(fpolyaAmpl1,"R"); // Fit su htriple1
+    //fpolyaAmpl1->Draw("SAME");
+    cconteggi3->Update();
+    //cconteggi->SaveAs("hist1.pdf");
 
 
 
+auto cmap1 = new TCanvas("cmap1","Detector map",800,750);
+cmap1->SetRightMargin(0.15);
+cmap1->SetLeftMargin(0.12);
+cmap1->SetBottomMargin(0.12);
+cmap1->SetTopMargin(0.08);
+
+gStyle->SetOptStat(0);
+gStyle->SetPalette(kViridis);
+gStyle->SetNumberContours(50);
+
+mapdet1->GetXaxis()->SetTitle("X");
+mapdet1->GetYaxis()->SetTitle("Y");
+mapdet1->GetXaxis()->SetNdivisions(8,false);
+mapdet1->GetYaxis()->SetNdivisions(8,false);
+
+mapdet1->SetLineColor(kBlack);
+mapdet1->SetMinimum(0);
+
+mapdet1->Draw("COLZ TEXT");
+
+
+
+auto cmap2 = new TCanvas("cmap2","Detector map",800,750);
+cmap2->SetRightMargin(0.15);
+cmap2->SetLeftMargin(0.12);
+cmap2->SetBottomMargin(0.12);
+cmap2->SetTopMargin(0.08);
+
+gStyle->SetOptStat(0);
+gStyle->SetPalette(kViridis);
+gStyle->SetNumberContours(50);
+
+mapdet2->GetXaxis()->SetTitle("X");
+mapdet2->GetYaxis()->SetTitle("Y");
+mapdet2->GetXaxis()->SetNdivisions(8,false);
+mapdet2->GetYaxis()->SetNdivisions(8,false);
+
+mapdet2->SetLineColor(kBlack);
+mapdet2->SetMinimum(0);
+
+mapdet2->Draw("COLZ TEXT");
 
 
 
@@ -722,6 +830,11 @@ cintegral->Update();
     // ----------------------------------------------------------------------------------------------------
 
     cout<<"time walk"<<endl;
+        cout<<"time walk"<<endl;
+    cout<<"time walk"<<endl;
+    cout<<"time walk"<<endl;
+    cout<<"time walk"<<endl;
+
     TCanvas *ctimeamlitude = new TCanvas("ctimeaplitude", "amplitudevsintegral", 900, 700);
     //TF1 *timewalk = new TF1("timewalk", "[0]+[1]/x", 0, 800);
     timevsamplitude->SetName("timeaplitude");
@@ -735,13 +848,13 @@ cintegral->Update();
     timevsamplitude->SetLineColor(0);    // nessuna linea
     timevsamplitude->SetLineWidth(0);    // nessuna linea*/
 
-    gStyle->SetPalette(kViridis);
+    //gStyle->SetPalette(kViridis);
     //timevsamplitude->Fit("timewalk", "R");
     // *** SOLO ORA DISEGNA ***
-    timevsamplitude->Draw("COLZ");
+   // timevsamplitude->Draw("AF");
     ctimeamlitude->Update();
 
-    TCanvas *ctimeamlitude2 = new TCanvas("ctimeaplitude2", "amplitudevsintegral", 900, 700);
+    TCanvas *ctimeamlitude2 = new TCanvas("ctimeaplitude2", "amplitudevsintegral2", 900, 700);
     //TF1 *timewalk = new TF1("timewalk", "[0]+[1]/x", 0, 800);
     timevsamplitude2->SetName("timeaplitude2");
     timevsamplitude2->SetTitle("SAT vs amplitude; Amplitude; SAT[us]");
@@ -753,10 +866,10 @@ cintegral->Update();
     timevsamplitude->SetLineColor(0);    // nessuna linea
     timevsamplitude->SetLineWidth(0);    // nessuna linea*/
 
-    gStyle->SetPalette(kViridis);
+    //gStyle->SetPalette(kViridis);
     //timevsamplitude->Fit("timewalk", "R");
     // *** SOLO ORA DISEGNA ***
-    timevsamplitude2->Draw("COLZ");
+    //timevsamplitude2->Draw("AF");
     ctimeamlitude2->Update();
 
     TCanvas *ctvsint = new TCanvas("ctvsint", "Time vs Integral", 900, 700);
@@ -1117,7 +1230,7 @@ cintegral->Update();
     // -----------------------
     //     Save everything
     // -----------------------
-    TFile *fout = new TFile("muon_run_only2_TProfile_run19.root", "RECREATE");
+    TFile *fout = new TFile("muon_run_mappign_run22_triple.root", "RECREATE");
     hAmpAll->Write();
     hAmp1Hit->Write();
     hQ->Write();
@@ -1160,7 +1273,14 @@ cintegral->Update();
     cfdvschannel1->Write();
     cintegral->Write();
     cintegral2->Write();
+     conteggixcanale1->Write();
+    conteggixcanale2->Write();
+    conteggixcanale3->Write();
     tout->Write();
+    cmap1->Write();
+        cmap2->Write();
+mapdet1->Write();
+mapdet2->Write();
    // copy->Write();
 
 

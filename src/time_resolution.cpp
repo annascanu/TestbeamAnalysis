@@ -179,9 +179,9 @@ int main()
     TH1F *htime20_13    = new TH1F("htime20_13", "time diff ;Time [ps];Counts", 100, -100, 100);
     TH1F *htime20_23    = new TH1F("htime20_23", "time diff ;Time [ps];Counts", 100, -0.2, 0.2);
 
-    TH1F *htime30_12    = new TH1F("htime30_12", "time diff ;Time [ps];Counts", 100, -2000, 2000);
-    TH1F *htime30_13    = new TH1F("htime30_13", "time diff ;Time [ps];Counts", 100, -2000, 2000);
-    TH1F *htime30_23    = new TH1F("htime30_23", "time diff ;Time [ps];Counts", 100, -2000, 2000);
+    TH1F *htime30_12    = new TH1F("htime30_12", "time diff ;Time [ps];Counts", 500, -2000, 2000);
+    TH1F *htime30_13    = new TH1F("htime30_13", "time diff ;Time [ps];Counts", 500, -2000, 2000);
+    TH1F *htime30_23    = new TH1F("htime30_23", "time diff ;Time [ps];Counts", 500, -2000, 2000);
 
     // Baseline histogram
     TH1F *hcharge1  = new TH1F("hcharge1", "charge1", 1000, 0, 10);
@@ -1077,7 +1077,7 @@ cAmpVsTime->Update();
     htime30_12->SetLineColor(kAzure+1);
     htime30_12->SetLineWidth(3);
     htime30_12->SetFillColorAlpha(kAzure-4, 0.35);
-    htime30_12->SetTitle("time plot 20%");
+    htime30_12->SetTitle("time difference 1&2 detector");
     htime30_12->Draw("HIST");
     ctime12->Update();
 
@@ -1097,7 +1097,7 @@ cAmpVsTime->Update();
     htime30_23->SetLineColor(kAzure+1);
     htime30_23->SetLineWidth(3);
     htime30_23->SetFillColorAlpha(kAzure-4, 0.35);
-    htime30_23->SetTitle("Amplitude");
+    htime30_23->SetTitle("time difference 2&3 detector");
     htime30_23->Draw("HIST");
     htime30_23->Fit("gaus"); // Fit su htime20_23
     ctime23->Update();
@@ -1115,7 +1115,7 @@ cAmpVsTime->Update();
     htime30_13->SetLineColor(kAzure+1);
     htime30_13->SetLineWidth(3);
     htime30_13->SetFillColorAlpha(kAzure-4, 0.35);
-    htime30_13->SetTitle("Amplitude");
+    htime30_13->SetTitle("time difference 1&3 detector");
     htime30_13->Draw("HIST");
     htime30_13->Fit("gaus"); // Fit su htime20_13
     ctime13->Update();
