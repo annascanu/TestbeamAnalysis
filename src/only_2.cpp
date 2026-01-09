@@ -104,7 +104,7 @@ int main()
 
     // TString filename = "/eos/experiment/neutplatform/enubet/testbeam2025/picosec_data/sampic_runs/rootSampicData/processed_waveforms/sampic_run22_final.root"; // Filename while running on lxplus
     //TString filename = "/Users/anna/Developing/PhD/Testbeam2025/sampic_run22_final.root"; // Filename while running on Anna's machine
-     TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run22_final.root"; // Filename while running on Riccardo's machine
+     TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run24_final(1).root"; // Filename while running on Riccardo's machine
     cout << "Opening file: " << filename << endl;
 
     TFile *file = TFile::Open(filename, "READ");
@@ -268,6 +268,8 @@ int main()
             double base[3]    = {-9999.0, -9999.0, -9999.0};
             double peak_time[3]  = {-9999.0, -9999.0, -9999.0};
             double risetime[3] = {-9999.0, -9999.0, -9999.0};
+            double x_pulses[3] = {-9999.0, -9999.0, -9999.0};
+            double y_pulses[3] = {-9999.0, -9999.0, -9999.0};
             int canale[3];
 
             // Fill according to Board[]
@@ -296,6 +298,8 @@ int main()
                 peak_time[det]= pulses_peak_time[j];
                 risetime[det]= pulses_rise_time[j];
                 canale[det]=Channel[j];
+                x_pulses[det]=pulses_channel_x[j];
+                y_pulses[det]=pulses_channel_y[j];
 
 
                 hTime20->Fill(cfd20[0]);// questi tre prima erano riempiti con j non corretti
@@ -393,9 +397,13 @@ int main()
                 int coor_x2 = canale[1] % 8;           // colonna
                 int coor_y2 = 7 - (canale[1] / 8);     // riga (ribaltata)
 
-                mapdet1->Fill(coor_x1, coor_y1);
-                mapdet2->Fill(coor_x2, coor_y2);
+               // mapdet1->Fill(coor_x1, coor_y1);
+              //  mapdet2->Fill(coor_x2, coor_y2);
+                mapdet1->Fill(x_pulses[0], y_pulses[0]);
+                mapdet2->Fill(x_pulses[1], y_pulses[1]);
 
+
+                cout<< pulses_channel_y[1] << " è il valore di pulses x" <<endl;
 
 
                 // CFD = 10%
@@ -1230,7 +1238,7 @@ mapdet2->Draw("COLZ TEXT");
     // -----------------------
     //     Save everything
     // -----------------------
-    TFile *fout = new TFile("muon_run_mappign_run22_triple.root", "RECREATE");
+    TFile *fout = new TFile("muon_run_mappign_run24_triple.root", "RECREATE");
     hAmpAll->Write();
     hAmp1Hit->Write();
     hQ->Write();
