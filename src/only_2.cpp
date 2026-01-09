@@ -125,7 +125,8 @@ int main()
     const int MAXPULSES = 200; // Maybe could be less.
     Int_t npulses;
 
-    Double_t pulses_amplitude[MAXPULSES], pulses_integral[MAXPULSES], pulses_time_cfd10[MAXPULSES], pulses_time_cfd20[MAXPULSES], pulses_time_cfd30[MAXPULSES], integral[MAXPULSES], pulses_time_cfd50[MAXPULSES], pulses_time_cfd60[MAXPULSES], Baseline[MAXPULSES], pulses_peak_time[MAXPULSES],  pulses_rise_time[MAXPULSES], mean_1[MAXPULSES], mean_2[MAXPULSES], pulses_channel_x[MAXPULSES], pulses_channel_y[MAXPULSES];
+    Double_t pulses_amplitude[MAXPULSES], pulses_integral[MAXPULSES], pulses_time_cfd10[MAXPULSES], pulses_time_cfd20[MAXPULSES], pulses_time_cfd30[MAXPULSES], integral[MAXPULSES], pulses_time_cfd50[MAXPULSES], pulses_time_cfd60[MAXPULSES], Baseline[MAXPULSES], pulses_peak_time[MAXPULSES],  pulses_rise_time[MAXPULSES], mean_1[MAXPULSES], mean_2[MAXPULSES], pulses_channel_x[MAXPULSES];
+    //float_t pulses_channel_y[MAXPULSES];
     Bool_t  pulses_bad_pulse[MAXPULSES];
     Int_t HitFeb[3], Board[MAXPULSES], Channel[MAXPULSES];
     int tot_hit_feb;
@@ -135,6 +136,9 @@ int main()
      vector<vector<double>> tabella2(64);
      int conta;
 
+     Long64_t pulses_channel_y[MAXPULSES];
+     //vector<int>* pulses_channel_y = nullptr;
+tree->Print();
     tree->SetBranchAddress("npulses", &npulses);
     tree->SetBranchAddress("pulses_amplitude", &pulses_amplitude);
     tree->SetBranchAddress("pulses_integral", &pulses_integral);
@@ -268,8 +272,8 @@ int main()
             double base[3]    = {-9999.0, -9999.0, -9999.0};
             double peak_time[3]  = {-9999.0, -9999.0, -9999.0};
             double risetime[3] = {-9999.0, -9999.0, -9999.0};
-            double x_pulses[3] = {-9999.0, -9999.0, -9999.0};
-            double y_pulses[3] = {-9999.0, -9999.0, -9999.0};
+            float x_pulses[3] ;
+            float y_pulses[3] ;
             int canale[3];
 
             // Fill according to Board[]
@@ -402,8 +406,9 @@ int main()
                 mapdet1->Fill(x_pulses[0], y_pulses[0]);
                 mapdet2->Fill(x_pulses[1], y_pulses[1]);
 
+               // cout<< pulses_channel_x[1] << " è il valore di pulses x" <<endl;
 
-                cout<< pulses_channel_y[1] << " è il valore di pulses x" <<endl;
+//                cout<< pulses_channel_y[1] << " è il valore di pulses y" <<endl;
 
 
                 // CFD = 10%
