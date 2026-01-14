@@ -68,7 +68,7 @@ int main()
 
     //TString filename = "/eos/experiment/neutplatform/enubet/testbeam2025/picosec_data/sampic_runs/rootSampicData/processed_waveforms/sampic_run22_final.root"; // Filename while running on lxplus
     //TString filename = "/Users/anna/Developing/PhD/Testbeam2025/sampic_run22_final.root"; // Filename while running on Anna's machine
-    TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run24_final(1).root"; // Filename while running on Riccardo's machine
+    TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run24_final.root"; // Filename while running on Riccardo's machine
     cout << "Opening file: " << filename << endl;
 
     TFile *file = TFile::Open(filename, "READ");
@@ -211,7 +211,7 @@ int main()
 
         // ---- Double hits for 1-2 FEBs ----
         // See hitfeb = [1, 1, anything] (otherwise we lose statistics because of smaller geometrical acceptance of 3rd detector)
-        if (HitFeb[0] == 1 && HitFeb[1] == 1) // Condizione che mi garantisce hit sulle prime due e whatever sull'ultimo detector
+        if (HitFeb[0] >= 1 && HitFeb[1] >= 1) // Condizione che mi garantisce hit sulle prime due e whatever sull'ultimo detector
         {
             // Arrays indexed by FEB number (0,1,2)
             double ampFEB[3]  = {-1.0, -1.0, -1.0}; 
@@ -264,6 +264,12 @@ int main()
                 hcharge2->Fill(integral[1]);
                 hrisetime1->Fill(risetime[0]);
                 hrisetime2->Fill(risetime[1]);
+
+                if(det==0)
+                {
+                mapdet1->Fill(pulses_channel_x[j], pulses_channel_y[j]);}
+                if(det==1){
+                mapdet2->Fill(pulses_channel_x[j], pulses_channel_y[j]);}
             }
 
             // Skip se un detector non ha dato segnale buono
@@ -297,8 +303,8 @@ int main()
             }
 
             // Hit map for first two detectors
-            mapdet1->Fill(x_pulses[0], y_pulses[0]);
-            mapdet2->Fill(x_pulses[1], y_pulses[1]);
+           // mapdet1->Fill(x_pulses[0], y_pulses[0]);
+            //mapdet2->Fill(x_pulses[1], y_pulses[1]);
 
             // Constant fraction discriminator time differences to evaluate time resolution later on
             // CFD = 10%
@@ -337,8 +343,8 @@ int main()
             hbaseline2->Fill(base[1]);
 
             // Integral vs amplitude distribution
-            timevsamplitude->SetPoint(timevsamplitude->GetN(), ampFEB[0], cfd60[0]); // In caso togliere peso!!
-            timevsamplitude2->SetPoint(timevsamplitude2->GetN(), ampFEB[1], cfd60[1], peso2);
+           // timevsamplitude->SetPoint(timevsamplitude->GetN(), ampFEB[0], cfd60[0]); // In caso togliere peso!!
+            //timevsamplitude2->SetPoint(timevsamplitude2->GetN(), ampFEB[1], cfd60[1], peso2);
             prof->Fill(ampFEB[0], cfd60[0]);
             prof2->Fill(ampFEB[1], cfd60[1]);
             timevsintegral->SetPoint(timevsintegral->GetN(), integral[0], cfd60[0]);
@@ -753,7 +759,7 @@ int main()
     // -----------------------
     //     Save everything
     // -----------------------
-    TFile *fout = new TFile("muon_run_mappign_run24_triple.root", "RECREATE");
+    TFile *fout = new TFile("pion_mapping_run24_new_version.root", "RECREATE");
     hTime20->Write(); // CFD at 20% for first detector 
     hTime30->Write();
     hTime50->Write();

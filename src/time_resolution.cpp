@@ -125,7 +125,7 @@ int main()
     const int MAXPULSES = 200; // Maybe could be less.
     Int_t npulses;
 
-    Double_t pulses_amplitude[MAXPULSES], pulses_integral[MAXPULSES], pulses_time_cfd10[MAXPULSES], pulses_time_cfd20[MAXPULSES], pulses_time_cfd30[MAXPULSES], integral[MAXPULSES], pulses_time_cfd50[MAXPULSES], pulses_time_cfd60[MAXPULSES], Baseline[MAXPULSES], pulses_peak_time[MAXPULSES],  pulses_rise_time[MAXPULSES], mean_1[MAXPULSES], mean_2[MAXPULSES], conteggi_canali1[64], conteggi_canali2[64] ;
+    Double_t pulses_amplitude[MAXPULSES], pulses_integral[MAXPULSES], pulses_time_cfd10[MAXPULSES], pulses_time_cfd20[MAXPULSES], pulses_time_cfd30[MAXPULSES], integral[MAXPULSES], pulses_time_cfd50[MAXPULSES], pulses_time_cfd60[MAXPULSES], Baseline[MAXPULSES], pulses_peak_time[MAXPULSES],  pulses_rise_time[MAXPULSES], mean_1[MAXPULSES], mean_2[MAXPULSES], conteggi_canali1[64], conteggi_canali2[64], pulses_channel_x[MAXPULSES] ;
     Bool_t  pulses_bad_pulse[MAXPULSES];
     Int_t HitFeb[3], Board[MAXPULSES], Channel[MAXPULSES];
     int tot_hit_feb;
@@ -133,6 +133,7 @@ int main()
     Double_t time30_12, time30_13, time30_23, time50_12, peso, peso2;
     vector<vector<double>> tabella1(64);
      vector<vector<double>> tabella2(64);
+      Long64_t pulses_channel_y[MAXPULSES];
 
     tree->SetBranchAddress("npulses", &npulses);
     tree->SetBranchAddress("pulses_amplitude", &pulses_amplitude);
@@ -149,6 +150,9 @@ int main()
     tree->SetBranchAddress("Channel", &Channel);
     tree->SetBranchAddress("pulses_peak_time", &pulses_peak_time);
     tree->SetBranchAddress("pulses_rise_time", &pulses_rise_time);
+     tree->SetBranchAddress("pulses_channel_x", &pulses_channel_x);
+    tree->SetBranchAddress("pulses_channel_y", &pulses_channel_y);
+
 
 
 
@@ -266,6 +270,8 @@ int main()
             double base[3]    = {-9999.0, -9999.0, -9999.0};
             double peak_time[3]  = {-9999.0, -9999.0, -9999.0};
             double risetime[3] = {-9999.0, -9999.0, -9999.0};
+            float x_pulses[3] ;
+            float y_pulses[3] ;
 
             // Fill according to Board[]
             for (int j = 0; j < npulses; j++)
@@ -301,6 +307,9 @@ int main()
                 hcharge2->Fill(integral[1]);
                 hrisetime1->Fill(risetime[0]);
                 hrisetime2->Fill(risetime[1]);
+                x_pulses[det]=pulses_channel_x[j];
+                y_pulses[det]=pulses_channel_y[j];
+
 
 
 
@@ -314,7 +323,8 @@ int main()
             //&& cfd60[0]<3600 &&
             //&& cfd30[0]<3100 && cfd30[0]>2900 cut on cfd 30%  && integral[0]/ampFEB[0]>8 && integral[1]/ampFEB[1]>8    ///// && ampFEB[0]> 0.2 && cfd60[0]<3350 && cfd60[0]>3000ss
            //if(Channel[1]<16 || Channel[1]>23) nonnfunziona: && (ampFEB[0]<0.03 || ampFEB[0]>0.03) &&(ampFEB[1]<0.03 || ampFEB[1]>0.05)
-            if(Channel[0]==12 && Channel[1]==12 && Channel[2]==5){
+            //if(Channel[0]==12 && Channel[1]==12 && Channel[2]==5){
+            if(x_pulses[0]==3 && y_pulses[0]==3 && x_pulses[1]==2 && y_pulses[1]==3){
             if(peak_time[1]<0)
                 continue;
                 // Fill amplitude histograms           // AS: why this x 1000 scaling? -> To get values in mV
@@ -378,9 +388,9 @@ int main()
 
 
 
-            double cfd30_co=cfd30[0]-(3438-27.53/ampFEB[0]);
-            double cfd30_co1=cfd30[1]-(3819-30.49/ampFEB[1]);
-            double cfd30_co2=cfd30[2]-(3902-24.2/ampFEB[2]);
+            double cfd30_co=cfd30[0]-(3848-20.03/ampFEB[0]);
+            double cfd30_co1=cfd30[1]-(3261-14.53/ampFEB[1]);
+            double cfd30_co2=cfd30[2]-(3703-27.41/ampFEB[2]);
 
 
 
