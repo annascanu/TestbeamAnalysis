@@ -4,27 +4,9 @@
                                Authors: A. Scanu, R. Speziali
 -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
-Goal: obtain time resolution of picosec detectors.
-To compile: c++ analysis_waveforms.cpp `root-config --cflags --libs` -o analysis.out
-Roadmap:
-- [x] work on amplitude plotting
-- [] understand what threshold to use for t_0 determination (ongoing)
-- [] understand how to deal with charge sharing (not started)
-- [] ...
+This code analyzes single channels from the testbeam data to apply slewing corrections based on amplitude.
+To compile: c++ single_channel.cpp `root-config --cflags --libs` -o singleChannel.out
 
-Things we are trying to understand or need to ask:
-- Q: Order of pulse_time and pulse_amplitude inside the array (probably understood: should use Board to discriminate?)
-  A: Tentative answer is to try and use the Board array to identify which pulse corresponds to which FEB. What I (Anna) don't understand is if
-- Q: how to take into account the RMS baseline value for the CDF threshold?
-  A: (still in progress)
-*/
-
-/*
-IMPORTANT NOTE ABOUT FILE PATHS:
-Processed files can be found at this path:
-/eos/experiment/neutplatform/enubet/testbeam2025/picosec_data/sampic_runs/rootSampicData/processed_waveforms/
-- Muon runs: run 19, 20, 21, 22
-- 15 GeV pion runs: run 23, ...
 */
 
 #include <TFile.h>
@@ -57,42 +39,6 @@ double media(const vector<double>& v) {
     return somma / v.size();
 }
 
-// AS: What is this?
-/*
-TGraph* gGraph = 0;
-Double_t myLine(Double_t *x, Double_t *par)
-{
-    double xx = x[0];
-
-    // Trovo l’indice del punto più vicino
-    int n = gGraph->GetN();
-    double gx, gy;
-
-    // ROOT passa i punti in ordine → cerco il punto con la x corrispondente
-    for (int i = 0; i < n; i++)
-    {
-        gGraph->GetPoint(i, gx, gy);
-        if (fabs(gx - xx) < 1e-9)
-        {   // punto giusto
-            // Limiti su y
-            double ymin = 0;       // <-- METTI TU
-            double ymax = 30;     // <-- METTI TU
-
-            if (gy < ymin || gy > ymax)
-            {
-                TF1::RejectPoint();   // scarta il punto
-                return 0;
-            }
-            break;
-        }
-    }
-
-    // Modello lineare
-    return par[0] + par[1] * xx;
-}*/
-
-
-
 int main()
 {
     // gROOT->SetBatch(kFALSE);
@@ -118,11 +64,10 @@ int main()
         return 1;
     }
 
-
     // -----------------------
     //    Set up branches
     // -----------------------
-    const int MAXPULSES = 200; // Maybe could be less.
+    const int MAXPULSES = 200; // Maybe could be less?
     Int_t npulses;
 
     Double_t pulses_amplitude[MAXPULSES], pulses_integral[MAXPULSES], pulses_time_cfd10[MAXPULSES], pulses_time_cfd20[MAXPULSES], pulses_time_cfd30[MAXPULSES], integral[MAXPULSES], pulses_time_cfd50[MAXPULSES], pulses_time_cfd60[MAXPULSES], Baseline[MAXPULSES], pulses_peak_time[MAXPULSES],  pulses_rise_time[MAXPULSES], mean_1[MAXPULSES], mean_2[MAXPULSES], conteggi_canali1[64], conteggi_canali2[64] ;
@@ -212,6 +157,7 @@ int main()
      TGraph *timevsamplitude =new TGraph();
       TGraph *timevsamplitude2 =new TGraph();
 
+    // Slewing correction profiles
     TProfile *prof = new TProfile("prof", "Mean time per amplitude bin;Amplitude;Time", 50, 0, 1);
     TProfile *prof2 = new TProfile("prof2", "Mean time per amplitude bin;Amplitude;Time", 50, 0, 1);
     TProfile *prof3 = new TProfile("prof3", "Mean time per amplitude bin;Amplitude;Time", 50, 0, 1);
