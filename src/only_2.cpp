@@ -48,27 +48,27 @@ Processed files can be found at this path:
 #include <vector>
 using namespace std;
 
-double media(const vector<double>& v) 
+double average(const vector<double>& v) 
 {
-    if (v.empty()) return 0; // evitare divisione per zero
-    double somma = 0;
+    if (v.empty()) return 0; // Avoid division by zero
+    double sum = 0;
     for (double x : v) {
-        somma += x;
+        sum += x;
     }
-    return somma / v.size();
+    return sum / v.size();
 }
 
 int main()
 {
     gStyle->SetOptStat(0);
 
-    // -------------------------------------------------
+    // ------------------------------------------------
     //     Load run file with processed waveforms
-    // -------------------------------------------------
+    // ------------------------------------------------
 
-    //TString filename = "/eos/experiment/neutplatform/enubet/testbeam2025/picosec_data/sampic_runs/rootSampicData/processed_waveforms/sampic_run22_final.root"; // Filename while running on lxplus
-    //TString filename = "/Users/anna/Developing/PhD/Testbeam2025/sampic_run22_final.root"; // Filename while running on Anna's machine
-    TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run24_final.root"; // Filename while running on Riccardo's machine
+    //TString filename = "/eos/experiment/neutplatform/enubet/testbeam2025/picosec_data/sampic_runs/rootSampicData/processed_waveforms/sampic_run22_final.root"; // Filename when running on lxplus
+    TString filename = "/Users/anna/Developing/PhD/Testbeam2025/sampic_run22_final.root"; // Filename when running on Anna's machine
+    //TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run24_final.root"; // Filename when running on Riccardo's machine
     cout << "Opening file: " << filename << endl;
 
     TFile *file = TFile::Open(filename, "READ");
@@ -82,15 +82,15 @@ int main()
         return 1;
     }
 
-    // -----------------------
-    //    Set up branches
-    // -----------------------
+    // ---------------------------------------
+    //    Set up branches to read from tree
+    // ---------------------------------------
     const int MAXPULSES = 200; // Maybe could be less?
     Double_t pulses_amplitude[MAXPULSES], pulses_integral[MAXPULSES], pulses_time_cfd10[MAXPULSES], 
              pulses_time_cfd20[MAXPULSES], pulses_time_cfd30[MAXPULSES], integral[MAXPULSES], 
              pulses_time_cfd50[MAXPULSES], pulses_time_cfd60[MAXPULSES], Baseline[MAXPULSES], 
-             pulses_peak_time[MAXPULSES],  pulses_rise_time[MAXPULSES], mean_1[MAXPULSES], 
-             mean_2[MAXPULSES], pulses_channel_x[MAXPULSES];
+             pulses_peak_time[MAXPULSES],  pulses_rise_time[MAXPULSES], average_1[MAXPULSES], 
+             average_2[MAXPULSES], pulses_channel_x[MAXPULSES];
     Double_t time_12, time_23, time_13, time20_12, time20_13, time20_23;
     Double_t time30_12, time30_13, time30_23, time50_12, peso, peso2;
     Long64_t pulses_channel_y[MAXPULSES];
@@ -130,39 +130,38 @@ int main()
     TH1F *hTime60  = new TH1F("hTime60", "Constant fraction discriminator set at 60% Time;Time [ps];Counts", 1000, 0, 10000);
     TH1F *hTime60_2 = new TH1F("hTime60_2", "Constant fraction discriminator set at 60% Time;Time [ps];Counts", 1000, 0, 10000);
 
-    // Histograms for triple hits
-    TH1F *htriple1  = new TH1F("htriple1", "amplitude of a triple", 1000, 0, 0.5);
-    TH1F *htriple2  = new TH1F("htriple2", "amplitude of a triple", 1000, 0, 0.5);
-    TH1F *htriple3  = new TH1F("htriple3", "amplitude of a triple", 1000, 0, 0.5);
+    // Histograms for triple hits (e.g. events where all three detectors saw at least one hit)
+    TH1F *htriple1  = new TH1F("htriple1", "Pulse amplitude for first detector", 1000, 0, 0.5);
+    TH1F *htriple2  = new TH1F("htriple2", "Pulse amplitude for second detector", 1000, 0, 0.5);
+    TH1F *htriple3  = new TH1F("htriple3", "Pulse amplitude for third detector", 1000, 0, 0.5);
 
-    // Histograms for time differences for the different values of CDF
-    TH1F *htime_12    = new TH1F("htime_12", "time diff ;Time [ps];Counts", 100, -2000, 2000);
-    TH1F *htime_13    = new TH1F("htime_13", "time diff ;Time [ps];Counts", 100, -0.2, 0.2);
-    TH1F *htime_23    = new TH1F("htime_23", "time diff ;Time [ps];Counts", 100, -0.2, 0.2);
+    // Histograms for time differences for different values of CDF
+    TH1F *htime_12    = new TH1F("htime_12", "Time difference;Time [ps];Counts", 100, -2000, 2000);
+    TH1F *htime_13    = new TH1F("htime_13", "Time difference;Time [ps];Counts", 100, -0.2, 0.2);
+    TH1F *htime_23    = new TH1F("htime_23", "Time difference;Time [ps];Counts", 100, -0.2, 0.2);
 
-    TH1F *htime20_12    = new TH1F("htime20_12", "time diff ;Time [ps];Counts", 100, -2000, 2000);//unico gragfico che sto considereando
-    TH1F *htime20_13    = new TH1F("htime20_13", "time diff ;Time [ps];Counts", 100, -100, 100);
-    TH1F *htime20_23    = new TH1F("htime20_23", "time diff ;Time [ps];Counts", 100, -0.2, 0.2);
+    TH1F *htime20_12    = new TH1F("htime20_12", "Time difference;Time [ps];Counts", 100, -2000, 2000);
+    TH1F *htime20_13    = new TH1F("htime20_13", "Time difference;Time [ps];Counts", 100, -100, 100);
+    TH1F *htime20_23    = new TH1F("htime20_23", "Time difference;Time [ps];Counts", 100, -0.2, 0.2);
 
-    TH1F *htime30_12    = new TH1F("htime30_12", "time diff ;Time [ps];Counts", 100, -2000, 2000);
-    TH1F *htime30_13    = new TH1F("htime30_13", "time diff ;Time [ps];Counts", 100, -0.2, 0.2);
-    TH1F *htime30_23    = new TH1F("htime30_23", "time diff ;Time [ps];Counts", 100, -0.2, 0.2);
+    TH1F *htime30_12    = new TH1F("htime30_12", "Time difference;Time [ps];Counts", 100, -2000, 2000);
+    TH1F *htime30_13    = new TH1F("htime30_13", "Time difference;Time [ps];Counts", 100, -0.2, 0.2);
+    TH1F *htime30_23    = new TH1F("htime30_23", "Time difference;Time [ps];Counts", 100, -0.2, 0.2);
 
-    // Baseline histogram
+    // Baseline, peak time, rise time, charge histograms
     TH1F *hcharge1  = new TH1F("hcharge1", "charge1", 1000, 0, 10);
     TH1F *hcharge2  = new TH1F("hcharge2", "charge2", 1000, 0, 10);
     TH1F *hrisetime1  = new TH1F("hrisetime1", "risetime1", 1000, -2000, 2000);
     TH1F *hrisetime2  = new TH1F("hrisetime2", "risetime2", 1000, -2000, 2000);
     TH1F *hbaseline1  = new TH1F("hbaseline", "baseline", 1000, 0.9, 1.1);
-
     TH1F *hbaseline2  = new TH1F("hbaseline2", "baseline2", 1000, 0.9, 1.1);
     TH1F *hpeaktime1  = new TH1F("hpeaktime1", "peaktime1", 1000, -20000, 20000);
     TH1F *hpeaktime2  = new TH1F("hpeaktime2", "peaktime2", 1000, -20000, 20000);
 
-    // Histograms for channel-wise counting and hit-maps
-    TH1F *conteggixcanale1  = new TH1F("conteggixcanale1", "conteggixcanale1", 1000, 0, 64);
-    TH1F *conteggixcanale2  = new TH1F("conteggixcanale2", "conteggixcanale2", 1000, 0, 64);
-    TH1F *conteggixcanale3  = new TH1F("conteggixcanale3", "conteggixcanale3", 100, 0, 7);
+    // Histograms for channel-wise counting and hit maps
+    TH1F *conteggixcanale1  = new TH1F("conteggixcanale1", "Counts per channel, first detector", 1000, 0, 64);
+    TH1F *conteggixcanale2  = new TH1F("conteggixcanale2", "Counts per channel, second detector", 1000, 0, 64);
+    TH1F *conteggixcanale3  = new TH1F("conteggixcanale3", "Counts per channel, third detector", 100, 0, 7);
     TH2F *mapdet1 = new TH2F("hitmapdet1", "Hitmap detector 1;x;y", 8,0,8,8,0,8);
     TH2F *mapdet2 = new TH2F("hitmapdet2", "Hitmap detector 2;x;y", 8,0,8,8,0,8);
 
@@ -182,7 +181,7 @@ int main()
     //        Read tree
     // -----------------------
     Long64_t nentries = tree->GetEntries();
-    bool cut[nentries]={false};
+    // bool cut[nentries]={false}; // If needed for event selection?
     int nGood, idx;
 
     for (Long64_t i = 0; i < nentries; i++)
@@ -195,7 +194,7 @@ int main()
         for (int j = 0; j < npulses; j++) // Loop inside the event
         {
             //if (pulses_bad_pulse[j])
-              //  continue; // Skip events where the fit didn't work
+            //  continue; // Skip events where the fit didn't work; for now we are considering everything for statistics
 
             nGood++;
             idx = j;
@@ -210,8 +209,8 @@ int main()
         }
 
         // ---- Double hits for 1-2 FEBs ----
-        // See hitfeb = [1, 1, anything] (otherwise we lose statistics because of smaller geometrical acceptance of 3rd detector)
-        if (HitFeb[0] >= 1 && HitFeb[1] >= 1) // Condizione che mi garantisce hit sulle prime due e whatever sull'ultimo detector
+        // Choose events where hitFeb = [1, 1, anything] (otherwise we lose statistics because of smaller geometrical acceptance of 3rd detector)
+        if (HitFeb[0] >= 1 && HitFeb[1] >= 1) // Hits on first two FEBs, whatever on the third
         {
             // Arrays indexed by FEB number (0,1,2)
             double ampFEB[3]  = {-1.0, -1.0, -1.0}; 
@@ -223,8 +222,8 @@ int main()
             double base[3]    = {-9999.0, -9999.0, -9999.0};
             double peak_time[3]  = {-9999.0, -9999.0, -9999.0};
             double risetime[3] = {-9999.0, -9999.0, -9999.0};
-            float x_pulses[3] ;
-            float y_pulses[3] ;
+            float x_pulses[3];
+            float y_pulses[3];
             int canale[3];
 
             // Fill according to Board[]
@@ -241,19 +240,19 @@ int main()
                 // Cut "by hand" to evaluate signal quality before refined analysis
                 //if(pulses_amplitude[j]>0 && pulses_integral[j]/pulses_amplitude[j] < 2000 )
                 //{
-                ampFEB[det] = pulses_amplitude[j];
-                cfd10[det]  = pulses_time_cfd10[j];
-                cfd20[det]  = pulses_time_cfd20[j];
-                cfd30[det]  = pulses_time_cfd30[j];
-                integral[det]= pulses_integral[j];
-                cfd50[det]=pulses_time_cfd50[j];
-                cfd60[det]=pulses_time_cfd60[j];
-                base[det]=Baseline[j];
-                peak_time[det]= pulses_peak_time[j];
-                risetime[det]= pulses_rise_time[j];
-                canale[det]=Channel[j];
-                x_pulses[det]=pulses_channel_x[j];
-                y_pulses[det]=pulses_channel_y[j];
+                ampFEB[det]    = pulses_amplitude[j];
+                cfd10[det]     = pulses_time_cfd10[j];
+                cfd20[det]     = pulses_time_cfd20[j];
+                cfd30[det]     = pulses_time_cfd30[j];
+                integral[det]  = pulses_integral[j];
+                cfd50[det]     = pulses_time_cfd50[j];
+                cfd60[det]     = pulses_time_cfd60[j];
+                base[det]      = Baseline[j];
+                peak_time[det] = pulses_peak_time[j];
+                risetime[det]  = pulses_rise_time[j];
+                canale[det]    = Channel[j];
+                x_pulses[det]  = pulses_channel_x[j];
+                y_pulses[det]  = pulses_channel_y[j];
 
                 hTime20->Fill(cfd20[0]);
                 hTime30->Fill(cfd30[0]);
@@ -266,44 +265,36 @@ int main()
                 hrisetime2->Fill(risetime[1]);
 
                 if(det==0)
-                {
-                mapdet1->Fill(pulses_channel_x[j], pulses_channel_y[j]);}
-                if(det==1){
-                mapdet2->Fill(pulses_channel_x[j], pulses_channel_y[j]);}
+                    mapdet1->Fill(pulses_channel_x[j], pulses_channel_y[j]);
+                if(det==1)
+                    mapdet2->Fill(pulses_channel_x[j], pulses_channel_y[j]);
             }
 
-            // Skip se un detector non ha dato segnale buono
+            // Skip if detector 1 or 2 has no valid pulse
             // if (ampFEB[0] <= 0 || ampFEB[1] <= 0)
             //   continue;
-            //&& (Channel[0]<16 || Channel[0]>32)
-            //&& cfd60[0]<3600 && Channel[0]==29 && Channel[1]==29
-            //&& cfd30[0]<3100 && cfd30[0]>2900 cut on cfd 30%  && integral[0]/ampFEB[0]>8 && integral[1]/ampFEB[1]>8    ///// && ampFEB[0]> 0.2 && cfd60[0]<3350 && cfd60[0]>3000ss
-            //if(Channel[1]<16 || Channel[1]>23) nonnfunziona: && (ampFEB[0]<0.03 || ampFEB[0]>0.03) &&(ampFEB[1]<0.03 || ampFEB[1]>0.05)
-            // if(Channel[0]==29 && Channel[1]==29){
-            // if(peak_time[1]<0)
-            //   continue;
 
-            // Fill amplitude histograms           // AS: why this x 1000 scaling? -> To get values in mV
+            // Fill amplitude histograms     // add x 1000 scaling to get values in mV if needed
             htriple1->Fill(ampFEB[0]);
             htriple2->Fill(ampFEB[1]);
             htriple3->Fill(ampFEB[2]);
 
-            // Mean for every channel; table in every row events referred to that channel (row 0 - channel 0, ..., row 63 - channel 63)
-            // Should update Channel with pulse_x_channel / pulse_y_channel? Look into it later because of wrong mapping.
-            for(int i=0; i<64; i++)
+            // Average for every channel; table in every row contains events referred to that channel (row 0 - channel 0, ..., row 63 - channel 63)
+            // Should update Channel[] with pulse_x_channel / pulse_y_channel? Look into it later because of wrong mapping!
+            for(int i = 0; i < 64; i++)
             {
-                if(Channel[0]==i)
+                if(Channel[0] == i)
                     tabella1[i].push_back(peak_time[0]);
             }
 
-            for(int i=0; i<64; i++)
+            for(int i = 0; i < 64; i++)
             {
-                if(Channel[1]==i)
+                if(Channel[1] == i)
                     tabella2[i].push_back(peak_time[1]);
             }
 
             // Hit map for first two detectors
-           // mapdet1->Fill(x_pulses[0], y_pulses[0]);
+            //mapdet1->Fill(x_pulses[0], y_pulses[0]);
             //mapdet2->Fill(x_pulses[1], y_pulses[1]);
 
             // Constant fraction discriminator time differences to evaluate time resolution later on
@@ -343,7 +334,7 @@ int main()
             hbaseline2->Fill(base[1]);
 
             // Integral vs amplitude distribution
-           // timevsamplitude->SetPoint(timevsamplitude->GetN(), ampFEB[0], cfd60[0]); // In caso togliere peso!!
+            //timevsamplitude->SetPoint(timevsamplitude->GetN(), ampFEB[0], cfd60[0], peso); // In caso togliere il peso!!
             //timevsamplitude2->SetPoint(timevsamplitude2->GetN(), ampFEB[1], cfd60[1], peso2);
             prof->Fill(ampFEB[0], cfd60[0]);
             prof2->Fill(ampFEB[1], cfd60[1]);
@@ -351,7 +342,7 @@ int main()
 
             hintegral1->SetPoint(hintegral1->GetN(),ampFEB[0],integral[0]);
             hintegral2->SetPoint(hintegral2->GetN(),ampFEB[1],integral[1]);
-            //hintegral3->SetPoint(hintegral3->GetN(),ampFEB[2],integral[2]);
+            // hintegral3->SetPoint(hintegral3->GetN(),ampFEB[2],integral[2]);
 
             conteggixcanale1->Fill(Channel[0]);
             conteggixcanale2->Fill(Channel[1]);
@@ -361,28 +352,29 @@ int main()
                 cout<< "Amplitude < 0; event number: " << i << endl;
             cfdvschannel1->SetPoint(cfdvschannel1->GetN(), Channel[0], cfd60[0]);
 
-        }//}
+        }
 
         // Progress indicator for sanity :)
-        if (i % 100000 == 0) cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
+        if (i % 100000 == 0) 
+            cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
     }
 
     for(int i=0; i<64; i++)
     {
-        mean_1[i]=media(tabella1[i]);
-        //cout << "media canali primo riv:  "<< mean_1[i] <<endl;
+        average_1[i] = average(tabella1[i]);
+        //cout << "Average of channels in first detector: " << average_1[i] << endl;
     }
 
     for(int i=0; i<64; i++)
     {
-        mean_2[i]=media(tabella2[i]);
-         //cout << "media canali secondo riv:  "<< mean_2[i] <<endl;
+        average_2[i] = average(tabella2[i]);
+         //cout << "Average of channels in second detector: " << average_2[i] << endl;
     }
                   
-    // For the new tree: to correct for mean you should write new code where you use this mean tree.
+    // For the new tree: to correct for average you should write new code where you use this average results tree.
     TTree *tout = new TTree("channelMeans", "Medie per canale");
-    tout->Branch("mean_1", mean_1, "mean_1[64]/D");
-    tout->Branch("mean_2", mean_2, "mean_2[64]/D");
+    tout->Branch("average_1", average_1, "average_1[64]/D");
+    tout->Branch("average_2", average_2, "average_2[64]/D");
     tout->Fill();
 
     /// --- TF1 Polya function ---
@@ -565,7 +557,6 @@ int main()
     avsi2->SetLineColor(kRed);
     avsi2->SetLineWidth(2);
 
-    // *** SOLO ORA DISEGNA ***
     hintegral2->Draw("AP");
     hintegral2->Fit(avsi, "R");  // "R" = fit solo nell'intervallo di x specificato
     hintegral2->Draw("AP");
@@ -688,7 +679,7 @@ int main()
     // Baseline: gaussian fit (try to understand why it doesn't work)
     TCanvas *cbaseline = new TCanvas("cbaseline", "baseline", 900, 700);
 
-    TF1 *f_gaus_b = new TF1("f_gaus", "gaus", 0.003, 0.009); // Gaussian fit for baseline of first detector
+    TF1 *f_gaus_b = new TF1("f_gaus", "gaus", 0.9, 1.1); // Gaussian fit for baseline of first detector
     hbaseline1->Fit(f_gaus_b, "R"); // "R" usa il range definito in TF1
 
     hbaseline1->SetLineColor(kAzure+1);
@@ -705,8 +696,8 @@ int main()
     //baseline for second detector
     TCanvas *cbaseline2 = new TCanvas("cbaseline2", "baseline2", 900, 700);
 
-    TF1 *f_gaus_b2 = new TF1("f_gaus", "gaus2", 0.003, 0.009); // Definisci il nome, la formula, e il range iniziale del fit
-    hbaseline1->Fit(f_gaus_b2, "R"); // "R" usa il range definito in TF1
+    TF1 *f_gaus_b2 = new TF1("f_gaus", "gaus2", 0.9, 1.1); // Definisci il nome, la formula, e il range iniziale del fit
+    hbaseline2->Fit(f_gaus_b2, "R"); // "R" usa il range definito in TF1
 
     hbaseline2->SetLineColor(kAzure+1);
     hbaseline2->SetLineWidth(3);

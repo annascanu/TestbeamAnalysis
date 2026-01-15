@@ -4,27 +4,9 @@
                                Authors: A. Scanu, R. Speziali
 -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
-Goal: obtain time resolution of picosec detectors.
-To compile: c++ analysis_waveforms.cpp `root-config --cflags --libs` -o analysis.out
-Roadmap:
-- [x] work on amplitude plotting
-- [] understand what threshold to use for t_0 determination (ongoing)
-- [] understand how to deal with charge sharing (not started)
-- [] ...
+This code is to apply corrections to time resolution.
+To compile: c++ time_resolution.cpp `root-config --cflags --libs` -o timeRes.out
 
-Things we are trying to understand or need to ask:
-- Q: Order of pulse_time and pulse_amplitude inside the array (probably understood: should use Board to discriminate?)
-  A: Tentative answer is to try and use the Board array to identify which pulse corresponds to which FEB. What I (Anna) don't understand is if
-- Q: how to take into account the RMS baseline value for the CDF threshold?
-  A: (still in progress)
-*/
-
-/*
-IMPORTANT NOTE ABOUT FILE PATHS:
-Processed files can be found at this path:
-/eos/experiment/neutplatform/enubet/testbeam2025/picosec_data/sampic_runs/rootSampicData/processed_waveforms/
-- Muon runs: run 19, 20, 21, 22
-- 15 GeV pion runs: run 23, ...
 */
 
 #include <TFile.h>
@@ -57,42 +39,6 @@ double media(const vector<double>& v) {
     return somma / v.size();
 }
 
-// AS: What is this?
-/*
-TGraph* gGraph = 0;
-Double_t myLine(Double_t *x, Double_t *par)
-{
-    double xx = x[0];
-
-    // Trovo l’indice del punto più vicino
-    int n = gGraph->GetN();
-    double gx, gy;
-
-    // ROOT passa i punti in ordine → cerco il punto con la x corrispondente
-    for (int i = 0; i < n; i++)
-    {
-        gGraph->GetPoint(i, gx, gy);
-        if (fabs(gx - xx) < 1e-9)
-        {   // punto giusto
-            // Limiti su y
-            double ymin = 0;       // <-- METTI TU
-            double ymax = 30;     // <-- METTI TU
-
-            if (gy < ymin || gy > ymax)
-            {
-                TF1::RejectPoint();   // scarta il punto
-                return 0;
-            }
-            break;
-        }
-    }
-
-    // Modello lineare
-    return par[0] + par[1] * xx;
-}*/
-
-
-
 int main()
 {
     // gROOT->SetBatch(kFALSE);
@@ -102,9 +48,9 @@ int main()
     //     Load run file with processed waveforms
     // -------------------------------------------------
 
-    // TString filename = "/eos/experiment/neutplatform/enubet/testbeam2025/picosec_data/sampic_runs/rootSampicData/processed_waveforms/sampic_run22_final.root"; // Filename while running on lxplus
+    //TString filename = "/eos/experiment/neutplatform/enubet/testbeam2025/picosec_data/sampic_runs/rootSampicData/processed_waveforms/sampic_run22_final.root"; // Filename while running on lxplus
     //TString filename = "/Users/anna/Developing/PhD/Testbeam2025/sampic_run22_final.root"; // Filename while running on Anna's machine
-     TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run19_final.root"; // Filename while running on Riccardo's machine
+    TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run19_final.root"; // Filename while running on Riccardo's machine
     cout << "Opening file: " << filename << endl;
 
     TFile *file = TFile::Open(filename, "READ");
@@ -125,7 +71,7 @@ int main()
     const int MAXPULSES = 200; // Maybe could be less.
     Int_t npulses;
 
-    Double_t pulses_amplitude[MAXPULSES], pulses_integral[MAXPULSES], pulses_time_cfd10[MAXPULSES], pulses_time_cfd20[MAXPULSES], pulses_time_cfd30[MAXPULSES], integral[MAXPULSES], pulses_time_cfd50[MAXPULSES], pulses_time_cfd60[MAXPULSES], Baseline[MAXPULSES], pulses_peak_time[MAXPULSES],  pulses_rise_time[MAXPULSES], mean_1[MAXPULSES], mean_2[MAXPULSES], conteggi_canali1[64], conteggi_canali2[64], pulses_channel_x[MAXPULSES] ;
+    Double_t pulses_amplitude[MAXPULSES], pulses_integral[MAXPULSES], pulses_time_cfd10[MAXPULSES], pulses_time_cfd20[MAXPULSES], pulses_time_cfd30[MAXPULSES], integral[MAXPULSES], pulses_time_cfd50[MAXPULSES], pulses_time_cfd60[MAXPULSES], Baseline[MAXPULSES], pulses_peak_time[MAXPULSES],  pulses_rise_time[MAXPULSES], mean_1[MAXPULSES], mean_2[MAXPULSES], conteggi_canali1[64], conteggi_canali2[64] ;
     Bool_t  pulses_bad_pulse[MAXPULSES];
     Int_t HitFeb[3], Board[MAXPULSES], Channel[MAXPULSES];
     int tot_hit_feb;
@@ -133,7 +79,6 @@ int main()
     Double_t time30_12, time30_13, time30_23, time50_12, peso, peso2;
     vector<vector<double>> tabella1(64);
      vector<vector<double>> tabella2(64);
-      Long64_t pulses_channel_y[MAXPULSES];
 
     tree->SetBranchAddress("npulses", &npulses);
     tree->SetBranchAddress("pulses_amplitude", &pulses_amplitude);
@@ -150,9 +95,6 @@ int main()
     tree->SetBranchAddress("Channel", &Channel);
     tree->SetBranchAddress("pulses_peak_time", &pulses_peak_time);
     tree->SetBranchAddress("pulses_rise_time", &pulses_rise_time);
-     tree->SetBranchAddress("pulses_channel_x", &pulses_channel_x);
-    tree->SetBranchAddress("pulses_channel_y", &pulses_channel_y);
-
 
 
 
@@ -270,8 +212,6 @@ int main()
             double base[3]    = {-9999.0, -9999.0, -9999.0};
             double peak_time[3]  = {-9999.0, -9999.0, -9999.0};
             double risetime[3] = {-9999.0, -9999.0, -9999.0};
-            float x_pulses[3] ;
-            float y_pulses[3] ;
 
             // Fill according to Board[]
             for (int j = 0; j < npulses; j++)
@@ -307,9 +247,6 @@ int main()
                 hcharge2->Fill(integral[1]);
                 hrisetime1->Fill(risetime[0]);
                 hrisetime2->Fill(risetime[1]);
-                x_pulses[det]=pulses_channel_x[j];
-                y_pulses[det]=pulses_channel_y[j];
-
 
 
 
@@ -323,8 +260,7 @@ int main()
             //&& cfd60[0]<3600 &&
             //&& cfd30[0]<3100 && cfd30[0]>2900 cut on cfd 30%  && integral[0]/ampFEB[0]>8 && integral[1]/ampFEB[1]>8    ///// && ampFEB[0]> 0.2 && cfd60[0]<3350 && cfd60[0]>3000ss
            //if(Channel[1]<16 || Channel[1]>23) nonnfunziona: && (ampFEB[0]<0.03 || ampFEB[0]>0.03) &&(ampFEB[1]<0.03 || ampFEB[1]>0.05)
-            //if(Channel[0]==12 && Channel[1]==12 && Channel[2]==5){
-            if(x_pulses[0]==3 && y_pulses[0]==3 && x_pulses[1]==2 && y_pulses[1]==3){
+            if(Channel[0]==12 && Channel[1]==12 && Channel[2]==5){
             if(peak_time[1]<0)
                 continue;
                 // Fill amplitude histograms           // AS: why this x 1000 scaling? -> To get values in mV
@@ -388,9 +324,9 @@ int main()
 
 
 
-            double cfd30_co=cfd30[0]-(3848-20.03/ampFEB[0]);
-            double cfd30_co1=cfd30[1]-(3261-14.53/ampFEB[1]);
-            double cfd30_co2=cfd30[2]-(3703-27.41/ampFEB[2]);
+            double cfd30_co=cfd30[0]-(3438-27.53/ampFEB[0]);
+            double cfd30_co1=cfd30[1]-(3819-30.49/ampFEB[1]);
+            double cfd30_co2=cfd30[2]-(3902-24.2/ampFEB[2]);
 
 
 
@@ -1067,20 +1003,6 @@ cAmpVsTime->Update();
 
     // 1. Definisci e Configura la Funzione Gaussiana (TF1)
     TF1 *f_gaus = new TF1("f_gaus", "gaus", -1000, 1000); // Definisci il nome, la formula, e il range iniziale del fit
-
-    // 2. Imposta il Parametro della Media (Indice 1)
-    // Il formato della gaus ROOT è: p0 * exp(-0.5 * ((x-p1)/p2)^2)
-    // p0 = Ampiezza (Indice 0)
-    // p1 = Media (Indice 1) <-- QUESTO E' QUELLO CHE VUOI IMPOSTARE
-    // p2 = Sigma (Indice 2)
-    //f_gaus->SetParameter(1, 300); // Esempio: imposta la media a 50.0
-    //f_gaus->SetParameter(2, 80);
-    // (Opzionale) Imposta i parametri iniziali per l'Ampiezza (0) e la Sigma (2) per un fit migliore
-    // f_gaus->SetParameter(0, 500.0); // Ampiezza iniziale
-    // f_gaus->SetParameter(2, 5.0);   // Sigma iniziale
-
-    // 3. Esegui il Fit con la funzione predefinita
-    // Nota: Passiamo l'oggetto TF1 al Fit, non solo il nome "gaus"
     htime30_12->Fit(f_gaus, "R"); // "R" usa il range definito in TF1
 
     // 4. Configurazione e Disegno (il resto del tuo codice)
@@ -1176,13 +1098,6 @@ cAmpVsTime->Update();
     double sigma_1 = TMath::Sqrt(s1sq);
     double sigma_2 = TMath::Sqrt(s2sq);
     double sigma_3 = TMath::Sqrt(s3sq);
-
-    // Error propagation:
-    // S1 = sigma1^2 = 1/2*(a + b - c), with a = s12^2, b = s13^2, c = s23^2
-    // var(a) = (2*s12*es12)^2, etc.
-    // var(S1) = (1/2)^2 * ( var(a) + var(b) + var(c) )
-    // => var(S1) = s12^2*es12^2 + s13^2*es13^2 + s23^2*es23^2
-    // then error on sigma1: e_sigma1 = sqrt(var(S1)) / (2*sigma1)
 
     double varS1 = s12*s12*es12*es12 + s13*s13*es13*es13 + s23*s23*es23*es23;
     double varS2 = s12*s12*es12*es12 + s23*s23*es23*es23 + s13*s13*es13*es13; // same form, ordering irrelevant
