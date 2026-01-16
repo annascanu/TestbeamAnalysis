@@ -177,6 +177,8 @@ int main()
     TProfile *prof2 = new TProfile("prof2", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0, 1);
     TGraph *cfdvschannel1 = new TGraph();
 
+    // 
+
     // -----------------------
     //        Read tree
     // -----------------------
@@ -333,10 +335,12 @@ int main()
             hbaseline1->Fill(base[0]);
             hbaseline2->Fill(base[1]);
 
+            double peso = 1.0;
+            double peso2 = 1.0;
             // Integral vs amplitude distribution
-            //timevsamplitude->SetPoint(timevsamplitude->GetN(), ampFEB[0], cfd60[0], peso); // In caso togliere il peso!!
-            //timevsamplitude2->SetPoint(timevsamplitude2->GetN(), ampFEB[1], cfd60[1], peso2);
-            prof->Fill(ampFEB[0], cfd60[0]);
+            timevsamplitude->SetPoint(timevsamplitude->GetN(), ampFEB[0], cfd60[0], peso); // In caso togliere il peso!!
+            timevsamplitude2->SetPoint(timevsamplitude2->GetN(), ampFEB[1], cfd60[1], peso2);
+            prof->Fill(ampFEB[0], cfd0[0]);
             prof2->Fill(ampFEB[1], cfd60[1]);
             timevsintegral->SetPoint(timevsintegral->GetN(), integral[0], cfd60[0]);
 
@@ -750,7 +754,7 @@ int main()
     // -----------------------
     //     Save everything
     // -----------------------
-    TFile *fout = new TFile("pion_mapping_run24_new_version.root", "RECREATE");
+    TFile *fout = new TFile("muon_mapping_run22_new_version.root", "RECREATE");
     hTime20->Write(); // CFD at 20% for first detector 
     hTime30->Write();
     hTime50->Write();

@@ -635,12 +635,9 @@ int main()
     // ------------ Gaussian plot of the time difference ---------------
 
     TCanvas *ctime12 = new TCanvas("ctime12", "htriple1", 900, 700);
-   //TCanvas *ctime12 = new TCanvas("ctime12", "htriple1", 900, 700);
 
-    // 1. Definisci e Configura la Funzione Gaussiana (TF1)
     TF1 *f_gaus = new TF1("f_gaus", "gaus", -1000, 1000); // Definisci il nome, la formula, e il range iniziale del fit
     htime30_12->Fit(f_gaus, "R"); // "R" usa il range definito in TF1
-
     htime30_12->SetLineColor(kAzure+1);
     htime30_12->SetLineWidth(3);
     htime30_12->SetFillColorAlpha(kAzure-4, 0.35);
@@ -683,7 +680,6 @@ int main()
     htime30_13->Fit("gaus"); // Fit su htime20_13
     ctime13->Update();
 
-    // Take gaussian from the correct histogram htime20_13
     TF1 *f3 = htime30_13->GetFunction("gaus");
     double amp_13   = f3->GetParameter(0);  // taking gaus parameters
     double mean_13  = f3->GetParameter(1);
