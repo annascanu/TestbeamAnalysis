@@ -119,6 +119,10 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
                    vector<vector<double>> &tabella1, 
                    vector<vector<double>> &tabella2) 
 {
+
+    int ilcanale;
+            cout<<"Select the channel(64: significa nessun constraint):   \n " << endl;
+            cin>> ilcanale;
     Long64_t nentries = tree->GetEntries();
     
     for (Long64_t i = 0; i < nentries; i++) 
@@ -143,7 +147,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
         }
         
         // Process double/triple hits
-        if (b.HitFeb[0] >= 1 && b.HitFeb[1] >= 1) 
+        if (b.HitFeb[0] == 1 && b.HitFeb[1] == 1)
         {
             double ampFEB[3] = {-1.0, -1.0, -1.0};
             double cfd10[3] = {-9999.0, -9999.0, -9999.0};
@@ -188,6 +192,28 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
                     h.mapdet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
             }
             
+
+           if (ilcanale < 64) {
+               int cx = ilcanale % 8;
+               int cy = 7 - (ilcanale / 8);
+               bool feb0_ok = false;
+               bool feb1_ok = false;
+
+               for (int j = 0; j < b.npulses; j++) {
+                   if (b.Board[j] == 0 && b.pulses_channel_x[j] == cx && b.pulses_channel_y[j] == cy)
+                        feb0_ok = true;
+
+                   if (b.Board[j] == 1 && b.pulses_channel_x[j] == cx && b.pulses_channel_y[j] == cy)
+                        feb1_ok = true;
+                }
+
+          if (!(feb0_ok && feb1_ok))
+                continue;
+            }
+
+
+
+
             h.htriple1->Fill(ampFEB[0]);
             h.htriple2->Fill(ampFEB[1]);
             h.htriple3->Fill(ampFEB[2]);
