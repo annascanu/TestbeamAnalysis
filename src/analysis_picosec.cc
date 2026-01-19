@@ -4,6 +4,8 @@
 #include <TLatex.h>
 #include <TMath.h>
 #include <iostream>
+#include <TROOT.h>
+
 
 using namespace std;
 
@@ -40,7 +42,7 @@ void InitializeHistograms(Histograms &h)
     h.hTime30 = new TH1F("hTime30", "CFD 30% Time;Time [ps];Counts", 1000, 0, 10000);
     h.hTime50 = new TH1F("hTime50", "CFD 50% Time;Time [ps];Counts", 1000, 0, 10000);
     h.hTime60 = new TH1F("hTime60", "CFD 60% Time;Time [ps];Counts", 1000, 0, 10000);
-    h.hTime60_2 = new TH1F("hTime60_2", "CFD 60% Time;Time [ps];Counts", 1000, 0, 10000);
+    h.hTime30_2 = new TH1F("hTime60_2", "CFD 30% Time;Time [ps];Counts", 1000, 0, 10000);
     
     // Triple hit amplitudes
     h.htriple1 = new TH1F("htriple1", "Pulse amplitude for first detector", 1000, 0, 0.5);
@@ -90,8 +92,8 @@ void InitializeHistograms(Histograms &h)
     h.cfdvschannel1 = new TGraph();
     
     // Profiles
-    h.prof = new TProfile("prof", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0, 1);
-    h.prof2 = new TProfile("prof2", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0, 1);
+    h.prof = new TProfile("prof", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0, 0.7);
+    h.prof2 = new TProfile("prof2", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0, 0.7);
 }
 
 void SetupTreeBranches(TTree *tree, TreeBranches &b) 
@@ -103,7 +105,7 @@ void SetupTreeBranches(TTree *tree, TreeBranches &b)
     tree->SetBranchAddress("pulses_time_cfd20", &b.pulses_time_cfd20);
     tree->SetBranchAddress("pulses_time_cfd30", &b.pulses_time_cfd30);
     tree->SetBranchAddress("pulses_time_cfd50", &b.pulses_time_cfd50);
-    tree->SetBranchAddress("pulses_time_cfd60", &b.pulses_time_cfd60);
+    tree->SetBranchAddress("pulses_time_cfd30", &b.pulses_time_cfd30);
     tree->SetBranchAddress("pulses_bad_pulse", &b.pulses_bad_pulse);
     tree->SetBranchAddress("HitFeb", &b.HitFeb);
     tree->SetBranchAddress("Board", &b.Board);
@@ -164,6 +166,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
             {
                 int det = b.Board[j];
                 if (det < 0 || det > 2) continue;
+                if (b.pulses_bad_pulse[j]) continue;
                 
                 ampFEB[det] = b.pulses_amplitude[j];
                 cfd10[det] = b.pulses_time_cfd10[j];
@@ -176,15 +179,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
                 risetime[det] = b.pulses_rise_time[j];
                 integral[det] = b.pulses_integral[j];
                 
-                h.hTime20->Fill(cfd20[0]);
-                h.hTime30->Fill(cfd30[0]);
-                h.hTime50->Fill(cfd50[0]);
-                h.hTime60->Fill(cfd60[0]);
-                h.hTime60_2->Fill(cfd60[1]);
-                h.hcharge1->Fill(integral[0]);
-                h.hcharge2->Fill(integral[1]);
-                h.hrisetime1->Fill(risetime[0]);
-                h.hrisetime2->Fill(risetime[1]);
+
                 
                 if (det == 0)
                     h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
@@ -210,9 +205,17 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
           if (!(feb0_ok && feb1_ok))
                 continue;
             }
+                //dopo la condition della selezione dei canali altrimenti prima è inutile
 
-
-
+                h.hTime20->Fill(cfd20[0]);
+                h.hTime30->Fill(cfd30[0]);
+                h.hTime50->Fill(cfd50[0]);
+                h.hTime60->Fill(cfd60[0]);
+                h.hTime30_2->Fill(cfd30[1]);
+                h.hcharge1->Fill(integral[0]);
+                h.hcharge2->Fill(integral[1]);
+                h.hrisetime1->Fill(risetime[0]);
+                h.hrisetime2->Fill(risetime[1]);
 
             h.htriple1->Fill(ampFEB[0]);
             h.htriple2->Fill(ampFEB[1]);
@@ -228,7 +231,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
             }
             
             // Time differences
-            double time30_12 = cfd60[0] - cfd60[1];
+            double time30_12 = cfd30[0] - cfd30[1];
             h.htime30_12->Fill(time30_12);
             
             h.hpeaktime1->Fill(peak_time[0]);
@@ -237,32 +240,35 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
             h.hbaseline2->Fill(base[1]);
             
             // Fill graphs
+
             double peso = 1.0;
-            h.timevsamplitude->SetPoint(h.timevsamplitude->GetN(), ampFEB[0], cfd60[0], peso);
-            h.timevsamplitude2->SetPoint(h.timevsamplitude2->GetN(), ampFEB[1], cfd60[1], peso);
-            h.prof->Fill(ampFEB[0], cfd60[0]);
-            h.prof2->Fill(ampFEB[1], cfd60[1]);
-            h.timevsintegral->SetPoint(h.timevsintegral->GetN(), integral[0], cfd60[0]);
+            h.timevsamplitude->SetPoint(h.timevsamplitude->GetN(), ampFEB[0], cfd30[0], peso);
+            h.timevsamplitude2->SetPoint(h.timevsamplitude2->GetN(), ampFEB[1], cfd30[1], peso);
+            h.prof->Fill(ampFEB[0], cfd30[0]);
+            h.prof2->Fill(ampFEB[1], cfd30[1]);
+            h.timevsintegral->SetPoint(h.timevsintegral->GetN(), integral[0], cfd30[0]);
             h.hintegral1->SetPoint(h.hintegral1->GetN(), ampFEB[0], integral[0]);
             h.hintegral2->SetPoint(h.hintegral2->GetN(), ampFEB[1], integral[1]);
             h.conteggixcanale1->Fill(b.Channel[0]);
             h.conteggixcanale2->Fill(b.Channel[1]);
             h.conteggixcanale3->Fill(b.Channel[2]);
-            h.cfdvschannel1->SetPoint(h.cfdvschannel1->GetN(), b.Channel[0], cfd60[0]);
+            h.cfdvschannel1->SetPoint(h.cfdvschannel1->GetN(), b.Channel[0], cfd30[0]);
         }
         
         if (i % 100000 == 0)
             cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
     }
     cout << endl;
+    //h.prof->Fill(0.5, 1000);   // solo per debug
+
 }
 
-void FitHistograms(Histograms &h) 
+void FitHistograms(Histograms &h, FitResults &fit)
 {
     // Polya function
     TF1 *fpolyaAmpl1 = new TF1("fpolyaAmpl1", 
         "([0]/[1])*((([2]+1)^([2]+1)*(x/[1])^[2])/(TMath::Gamma([2]+1)))*exp(-([2]+1)*x/[1])", 
-        0, 800);
+        0, 0.5);
     fpolyaAmpl1->SetParameter(1, 180);
     fpolyaAmpl1->SetNpx(10000);
     
@@ -276,18 +282,50 @@ void FitHistograms(Histograms &h)
     h.htime30_12->Fit(f_gaus, "RQ");
     
     // Baseline fits
-    TF1 *f_gaus_b = new TF1("f_gaus_b", "gaus", 0.9, 1.1);
+    TF1 *f_gaus_b = new TF1("f_gaus_b", "gaus", 0.994, 1.008);
     h.hbaseline1->Fit(f_gaus_b, "RQ");
     
-    TF1 *f_gaus_b2 = new TF1("f_gaus_b2", "gaus", 0.9, 1.1);
+    TF1 *f_gaus_b2 = new TF1("f_gaus_b2", "gaus", 0.96, 0.98);
     h.hbaseline2->Fit(f_gaus_b2, "RQ");
     
     // Slewing correction
     TF1 *empirico = new TF1("empirico", "[0] + [1]/x", 0, 1);
     h.prof->Fit(empirico, "RQ");
+
+    cout << "=== Fit prof ===" << endl;
+cout << "p0 = " << empirico->GetParameter(0)
+     << " ± " << empirico->GetParError(0) << endl;
+cout << "p1 = " << empirico->GetParameter(1)
+     << " ± " << empirico->GetParError(1) << endl;
+cout << "Chi2 / NDF = "
+     << empirico->GetChisquare() << " / "
+     << empirico->GetNDF() << endl;
+    fit.prof_p0     = empirico->GetParameter(0);
+    fit.prof_p0_err = empirico->GetParError(0);
+    fit.prof_p1     = empirico->GetParameter(1);
+    fit.prof_p1_err = empirico->GetParError(1);
+    fit.prof_chi2   = empirico->GetChisquare();
+    fit.prof_ndf    = empirico->GetNDF();
     
     TF1 *empirico2 = new TF1("empirico2", "[0] + [1]/x", 0, 1);
     h.prof2->Fit(empirico2, "RQ");
+
+
+
+    cout << "=== Fit prof2 ===" << endl;
+cout << "p0 = " << empirico2->GetParameter(0)
+     << " ± " << empirico2->GetParError(0) << endl;
+cout << "p1 = " << empirico2->GetParameter(1)
+     << " ± " << empirico2->GetParError(1) << endl;
+cout << "Chi2 / NDF = "
+     << empirico2->GetChisquare() << " / "
+     << empirico2->GetNDF() << endl;
+     fit.prof2_p0     = empirico2->GetParameter(0);
+    fit.prof2_p0_err = empirico2->GetParError(0);
+    fit.prof2_p1     = empirico2->GetParameter(1);
+    fit.prof2_p1_err = empirico2->GetParError(1);
+    fit.prof2_chi2   = empirico2->GetChisquare();
+    fit.prof2_ndf    = empirico2->GetNDF();
 }
 
 void CreateCanvases(Histograms &h) 
@@ -316,15 +354,72 @@ void CreateCanvases(Histograms &h)
     // Hit maps
     TCanvas *cmap1 = new TCanvas("cmap1", "Detector map", 800, 750);
     cmap1->SetRightMargin(0.15);
-    gStyle->SetPalette(kViridis);
+    //gStyle->SetPalette(kViridis);
     h.mapdet1->Draw("COLZ TEXT");
     cmap1->SaveAs("hitmap1.pdf");
     delete cmap1;
+/*
+gROOT->SetBatch(kTRUE);
+
+TCanvas *c_prof = new TCanvas("c_prof",
+                              "Time vs Amplitude - FEB0 / FEB1",
+                              800, 600);
+
+c_prof->cd();
+c_prof->SetGrid();*/
+
+// double ymin = min(h.prof->GetMinimum());
+// double ymax = max(h.prof->GetMaximum());
+//
+// h.prof->GetYaxis()->SetRangeUser(ymin * 0.95, ymax * 1.05);
+
+
+// h.prof->SetLineColor(kRed+1);
+// h.prof->SetMarkerColor(kRed+1);
+// h.prof->SetMarkerStyle(21);
+// h.prof->SetLineWidth(2);
+
+// h.prof2->SetLineColor(kBlue+1);
+// h.prof2->SetMarkerColor(kBlue+1);
+// h.prof2->SetMarkerStyle(21);
+// h.prof2->SetLineWidth(2);
+
+// h.prof->GetXaxis()->SetTitle("Amplitude [a.u.]");
+// h.prof->GetYaxis()->SetTitle("CFD30 time [ns]");
+// h.prof->GetXaxis()->SetTitleSize(0.045);
+// h.prof->GetYaxis()->SetTitleSize(0.045);
+
+// h.prof->Draw();
+//h.prof2->Draw();
+/*
+TLegend *leg = new TLegend(0.15, 0.75, 0.35, 0.88);
+leg->SetBorderSize(0);
+leg->SetFillStyle(0);
+leg->Draw();*/
+
+// c_prof->Modified();
+// c_prof->Update();
+// c_prof->Paint();      // <<< QUESTA È LA CHIAVE
+// c_prof->SaveAs("TimeVsAmplitude_FEB0_FEB1.pdf");
+
+
+cout << "prof entries = " << h.prof->GetEntries() << endl;
+cout << "prof mean    = " << h.prof->GetMean(1) << endl;
+cout << "Bin 10 entries = " << h.prof->GetBinEntries(10) << endl;
+cout << "Bin 10 content = " << h.prof->GetBinContent(10) << endl;
+cout << "Bin 10 error   = " << h.prof->GetBinError(10) << endl;
+cout << "prof Y min = " << h.prof->GetMinimum() << endl;
+cout << "prof Y max = " << h.prof->GetMaximum() << endl;
+
+
+
+
+
 }
 
 void SaveResults(const string &outputFileName, Histograms &h,
                  const vector<vector<double>> &tabella1,
-                 const vector<vector<double>> &tabella2) 
+                 const vector<vector<double>> &tabella2, FitResults &fit)
 {
     // Calculate averages
     Double_t average_1[NCHANNELS], average_2[NCHANNELS];
@@ -341,7 +436,7 @@ void SaveResults(const string &outputFileName, Histograms &h,
     h.hTime30->Write();
     h.hTime50->Write();
     h.hTime60->Write();
-    h.hTime60_2->Write();
+    h.hTime30_2->Write();
     h.htriple1->Write();
     h.htriple2->Write();
     h.htriple3->Write();
@@ -369,14 +464,35 @@ void SaveResults(const string &outputFileName, Histograms &h,
     h.conteggixcanale3->Write();
     h.mapdet1->Write();
     h.mapdet2->Write();
+
+
+
     
     // Save channel means tree
     TTree *tout = new TTree("channelMeans", "Medie per canale");
     tout->Branch("average_1", average_1, "average_1[64]/D");
     tout->Branch("average_2", average_2, "average_2[64]/D");
+
     tout->Fill();
     tout->Write();
     
-    fout->Close();
+
+
+    // Tree con risultati del fit
+    TTree *tfit = new TTree("fitResults", "Fit parameters");
+    tfit->Branch("prof_p0", &fit.prof_p0, "prof_p0/D");
+    tfit->Branch("prof_p0_err", &fit.prof_p0_err, "prof_p0_err/D");
+    tfit->Branch("prof_p1", &fit.prof_p1, "prof_p1/D");
+    tfit->Branch("prof_p1_err", &fit.prof_p1_err, "prof_p1_err/D");
+
+    tfit->Branch("prof2_p0", &fit.prof2_p0, "prof2_p0/D");
+    tfit->Branch("prof2_p0_err", &fit.prof2_p0_err, "prof2_p0_err/D");
+    tfit->Branch("prof2_p1", &fit.prof2_p1, "prof2_p1/D");
+    tfit->Branch("prof2_p1_err", &fit.prof2_p1_err, "prof2_p1_err/D");
+
+    tfit->Fill();
+    tfit->Write();
+
+     fout->Close();
     cout << "Analysis complete. Results saved to " << outputFileName << endl;
 }

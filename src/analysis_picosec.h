@@ -24,7 +24,7 @@ struct Histograms {
     TH1F *hAmpAll;
     TH1F *hAmp1Hit;
     TH1F *hQ;
-    TH1F *hTime20, *hTime30, *hTime50, *hTime60, *hTime60_2;
+    TH1F *hTime20, *hTime30, *hTime50, *hTime60, *hTime30_2;
     
     // Triple hit amplitudes
     TH1F *htriple1, *htriple2, *htriple3;
@@ -77,6 +77,22 @@ struct TreeBranches {
     Int_t Channel[MAXPULSES];
 };
 
+
+struct FitResults {
+    double prof_p0, prof_p0_err;
+    double prof_p1, prof_p1_err;
+    double prof_chi2;
+    int    prof_ndf;
+
+    double prof2_p0, prof2_p0_err;
+    double prof2_p1, prof2_p1_err;
+    double prof2_chi2;
+    int    prof2_ndf;
+};
+
+
+
+
 // Function declarations
 void InitializeHistograms(Histograms &hists);
 void SetupTreeBranches(TTree *tree, TreeBranches &branches);
@@ -84,11 +100,11 @@ double CalculateAverage(const std::vector<double>& v);
 void ProcessEvents(TTree *tree, TreeBranches &branches, Histograms &hists, 
                    std::vector<std::vector<double>> &tabella1, 
                    std::vector<std::vector<double>> &tabella2);
-void FitHistograms(Histograms &hists);
+void FitHistograms(Histograms &hists, FitResults &fit);
 void CreateCanvases(Histograms &hists);
 void SaveResults(const std::string &outputFileName, Histograms &hists, 
                  const std::vector<std::vector<double>> &tabella1,
-                 const std::vector<std::vector<double>> &tabella2);
+                 const std::vector<std::vector<double>> &tabella2, FitResults &fit);
 TFile* OpenInputFile(const std::string &filename);
 
 #endif // ANALYSIS_H
