@@ -93,6 +93,7 @@ struct FitResults {
 
 
 
+
 // Function declarations
 void InitializeHistograms(Histograms &hists);
 void SetupTreeBranches(TTree *tree, TreeBranches &branches);
@@ -105,6 +106,7 @@ void CreateCanvases(Histograms &hists);
 void SaveResults(const std::string &outputFileName, Histograms &hists, 
                  const std::vector<std::vector<double>> &tabella1,
                  const std::vector<std::vector<double>> &tabella2, FitResults &fit);
+void time_res(TTree *tree, TreeBranches &branches, TTree *tree_correction);
 TFile* OpenInputFile(const std::string &filename);
 
 #endif // ANALYSIS_H

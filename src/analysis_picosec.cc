@@ -240,7 +240,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
             h.hbaseline2->Fill(base[1]);
             
             // Fill graphs
-            cout <<" valore di integral: "<< integral[0]<<endl;
+
             double peso = 1.0;
             h.timevsamplitude->SetPoint(h.timevsamplitude->GetN(), ampFEB[0], cfd30[0], peso);
             h.timevsamplitude2->SetPoint(h.timevsamplitude2->GetN(), ampFEB[1], cfd30[1], peso);
@@ -506,3 +506,126 @@ void SaveResults(const string &outputFileName, Histograms &h,
      fout->Close();
     cout << "Analysis complete. Results saved to " << outputFileName << endl;
 }
+
+
+
+//funzione per l'analisi della risoluzione temporale: riaprire il root tree con i dati, aprire il tree con i valori del fit del tprofile correggere i dati e calcolare la risoluzione temporale, approx sqrt(2)
+
+void time_res(TTree *tree, TreeBranches &b, TTree *tree_correction)
+{
+    int ilcanale;
+    double time_diff;
+    cout<<"Select the channel(64: significa nessun constraint):   \n " << endl;
+    cin>> ilcanale;
+
+    tree_correction->GetEntries(0);
+    double prof_p0;
+    double prof_p0_err;
+    double prof_p1;
+    double prof_p1_err;
+
+    double prof2_p0;
+    double prof2_p0_err;
+    double prof2_p1;
+    double prof2_p1_err;
+
+    tree_correction->SetBranchAddress("prof_p0", &prof_p0);
+    tree_correction->SetBranchAddress("prof_p0_err", &prof_p0_err);
+    tree_correction->SetBranchAddress("prof_p1", &prof_p1);
+    tree_correction->SetBranchAddress("prof_p1_err", &prof_p1_err);
+
+    tree_correction->SetBranchAddress("prof2_p0", &prof2_p0);
+    tree_correction->SetBranchAddress("prof2_p0_err", &prof2_p0_err);
+    tree_correction->SetBranchAddress("prof2_p1", &prof2_p1);
+    tree_correction->SetBranchAddress("prof2_p1_err", &prof2_p1_err);
+
+
+
+
+    TH1F *htime = new TH1F("htime", "Time difference;Time [ps];Counts", 100, -2000, 2000);
+
+
+     Long64_t nentries = tree->GetEntries();
+
+    for (Long64_t i = 0; i < nentries; i++)
+    {
+        tree->GetEntry(i);
+        if (b.HitFeb[0] == 1 && b.HitFeb[1] == 1)
+            {
+                // int j=0;
+                // int det = b.Board[j];
+                // if (det < 0 || det > 2) continue;
+                // if (b.pulses_bad_pulse[j]) continue;
+                //
+                // double ampFEB[det] = b.pulses_amplitude[j];
+                // double cfd30[det] = b.pulses_time_cfd30[j];
+                // if (det == 0)
+                //     h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+                // if (det == 1)
+                //     h.mapdet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+
+
+                if (ilcanale < 64) {
+                int cx = ilcanale % 8;
+                int cy = 7 - (ilcanale / 8);
+                bool feb0_ok = false;
+                bool feb1_ok = false;
+
+                for (int j = 0; j < b.npulses; j++) {
+                    if (b.Board[j] == 0 && b.pulses_channel_x[j] == cx && b.pulses_channel_y[j] == cy)
+                        feb0_ok = true;
+
+                    if (b.Board[j] == 1 && b.pulses_channel_x[j] == cx && b.pulses_channel_y[j] == cy)
+                        feb1_ok = true;
+                }
+
+                if (!(feb0_ok && feb1_ok))
+                    continue;
+                }
+
+                // double cfd30_co=cfd30[0]-(prof_p0+prof_p1/ampFEB[0]);
+                // double cfd30_co1=cfd30[1]-(prof2_p0+prof2_p1/ampFEB[1]);
+                //
+                // time_diff= cfd30_co-cfd30_co1;
+                // htime->Fill(time_diff);
+
+
+
+
+
+
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
