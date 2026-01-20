@@ -5,6 +5,7 @@
 #include <TMath.h>
 #include <iostream>
 #include <TROOT.h>
+#include <TApplication.h>
 
 
 using namespace std;
@@ -518,7 +519,7 @@ void time_res(TTree *tree, TreeBranches &b, TTree *tree_correction)
     cout<<"Select the channel(64: significa nessun constraint):   \n " << endl;
     cin>> ilcanale;
 
-    tree_correction->GetEntries(0);
+    tree_correction->GetEntry(0);
     double prof_p0;
     double prof_p0_err;
     double prof_p1;
@@ -539,6 +540,10 @@ void time_res(TTree *tree, TreeBranches &b, TTree *tree_correction)
     tree_correction->SetBranchAddress("prof2_p1", &prof2_p1);
     tree_correction->SetBranchAddress("prof2_p1_err", &prof2_p1_err);
 
+    tree_correction->GetEntry(0);
+
+    cout << "prof p0: " << prof_p0 << " ± " << prof_p0_err << endl;
+    cout << "prof p1: " << prof_p1 << " ± " << prof_p1_err << endl;
 
 
 
@@ -552,18 +557,21 @@ void time_res(TTree *tree, TreeBranches &b, TTree *tree_correction)
         tree->GetEntry(i);
         if (b.HitFeb[0] == 1 && b.HitFeb[1] == 1)
             {
-                // int j=0;
-                // int det = b.Board[j];
-                // if (det < 0 || det > 2) continue;
-                // if (b.pulses_bad_pulse[j]) continue;
-                //
-                // double ampFEB[det] = b.pulses_amplitude[j];
-                // double cfd30[det] = b.pulses_time_cfd30[j];
-                // if (det == 0)
-                //     h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
-                // if (det == 1)
-                //     h.mapdet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+                double ampFEB[3] = {-1.0, -1.0, -1.0};
+                double cfd30[3] = {-9999.0, -9999.0, -9999.0};
+                for (int j = 0; j < b.npulses; j++) 
+                {
+                 int det = b.Board[j];
+                 if (det < 0 || det > 2) continue;
+                 if (b.pulses_bad_pulse[j]) continue;
+                
+                ampFEB[det] = b.pulses_amplitude[j];
+                cfd30[det] = b.pulses_time_cfd30[j];
 
+                //custom cut 
+                //if (ampFEB[det] < 0.5) continue;
+            
+                
 
                 if (ilcanale < 64) {
                 int cx = ilcanale % 8;
@@ -582,20 +590,50 @@ void time_res(TTree *tree, TreeBranches &b, TTree *tree_correction)
                 if (!(feb0_ok && feb1_ok))
                     continue;
                 }
-
-                // double cfd30_co=cfd30[0]-(prof_p0+prof_p1/ampFEB[0]);
-                // double cfd30_co1=cfd30[1]-(prof2_p0+prof2_p1/ampFEB[1]);
-                //
-                // time_diff= cfd30_co-cfd30_co1;
-                // htime->Fill(time_diff);
-
-
-
+            }
+                double cfd30_co=cfd30[0]-(prof_p0+prof_p1/ampFEB[0]);
+                double cfd30_co1=cfd30[1]-(prof2_p0+prof2_p1/ampFEB[1]);
+                double time_diff= cfd30_co-cfd30_co1;
+                htime->Fill(time_diff);
 
 
 
         }
+        if (i % 100000 == 0)
+            cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
     }
+    // Fit Gaussian to time difference histogram and creation of tapplication canvas
+
+
+    TApplication app("app", 0, nullptr);
+
+    TCanvas *c_time_res = new TCanvas("c_time_res", "Time Resolution", 800, 600);
+
+    htime->SetLineColor(kMagenta + 1);
+    htime->SetLineWidth(2);
+    htime->SetFillColorAlpha(kMagenta - 4, 0.35);
+
+    htime->Draw("HIST");
+
+    TF1 *f_gaus_time = new TF1("f_gaus_time", "gaus", -1000, 1000);
+    htime->Fit(f_gaus_time, "RQ");
+
+    c_time_res->SaveAs("Time_Resolution.pdf");
+    app.Run();
+
+    double sigma = f_gaus_time->GetParameter(2);
+    cout << "Time resolution (approx): " << sigma / TMath::Sqrt(2) << " ps" << endl;    
+    //sigma error
+    double sigma_err = f_gaus_time->GetParError(2);
+    cout << "Time resolution error (approx): " << sigma_err / TMath::Sqrt(2) << " ps" << endl;  
+
+
+
+
+
+
+
+
 }
 
 
