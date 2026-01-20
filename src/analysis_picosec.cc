@@ -71,7 +71,7 @@ void InitializeHistograms(Histograms &h)
     h.hbaseline2 = new TH1F("hbaseline2", "baseline2", 1000, 0.9, 1.1);
     h.hpeaktime1 = new TH1F("hpeaktime1", "peaktime1", 1000, -20000, 20000);
     h.hpeaktime2 = new TH1F("hpeaktime2", "peaktime2", 1000, -20000, 20000);
-    
+
     // Channel counts
     h.conteggixcanale1 = new TH1F("conteggixcanale1", "Counts per channel, first detector", 1000, 0, 64);
     h.conteggixcanale2 = new TH1F("conteggixcanale2", "Counts per channel, second detector", 1000, 0, 64);
@@ -240,7 +240,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
             h.hbaseline2->Fill(base[1]);
             
             // Fill graphs
-
+            cout <<" valore di integral: "<< integral[0]<<endl;
             double peso = 1.0;
             h.timevsamplitude->SetPoint(h.timevsamplitude->GetN(), ampFEB[0], cfd30[0], peso);
             h.timevsamplitude2->SetPoint(h.timevsamplitude2->GetN(), ampFEB[1], cfd30[1], peso);
@@ -268,14 +268,24 @@ void FitHistograms(Histograms &h, FitResults &fit)
     // Polya function
     TF1 *fpolyaAmpl1 = new TF1("fpolyaAmpl1", 
         "([0]/[1])*((([2]+1)^([2]+1)*(x/[1])^[2])/(TMath::Gamma([2]+1)))*exp(-([2]+1)*x/[1])", 
-        0, 0.5);
-    fpolyaAmpl1->SetParameter(1, 180);
+        0, 3);
+    //fpolyaAmpl1->SetParLimits(2, 0.05, 1.5);
+
+    //fpolyaAmpl1->SetParameter(1, 180);
     fpolyaAmpl1->SetNpx(10000);
+    fpolyaAmpl1->SetParameter(0,1000); // amplitude
+    fpolyaAmpl1->SetParameter(1,30); //Charge
+    fpolyaAmpl1->SetParameter(2,2); //theta  im putting theta on 2 from 30 for debugging
+    fpolyaAmpl1->SetParLimits(2,0.001,5000); //theta
     
-    h.htriple1->Fit(fpolyaAmpl1, "RQ");
+    h.hcharge1->Fit(fpolyaAmpl1, "RQ");
     
     TF1 *fpolyaAmpl2 = (TF1*)fpolyaAmpl1->Clone("fpolyaAmpl2");
-    h.htriple2->Fit(fpolyaAmpl2, "RQ");
+    h.hcharge2->Fit(fpolyaAmpl2, "RQ");
+    fpolyaAmpl2->SetParameter(0,1000); // amplitude
+    fpolyaAmpl2->SetParameter(1,30); //Charge
+    fpolyaAmpl2->SetParameter(2,2); //theta  im putting theta on 2 from 30 for debugging
+    fpolyaAmpl2->SetParLimits(2,0.001,5000); //theta
     
     // Gaussian fit for time differences
     TF1 *f_gaus = new TF1("f_gaus", "gaus", -1000, 1000);
