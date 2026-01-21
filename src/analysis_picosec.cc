@@ -43,7 +43,7 @@ void InitializeHistograms(Histograms &h)
     h.hTime30 = new TH1F("hTime30", "CFD 30% Time;Time [ps];Counts", 1000, 0, 10000);
     h.hTime50 = new TH1F("hTime50", "CFD 50% Time;Time [ps];Counts", 1000, 0, 10000);
     h.hTime60 = new TH1F("hTime60", "CFD 60% Time;Time [ps];Counts", 1000, 0, 10000);
-    h.hTime30_2 = new TH1F("hTime60_2", "CFD 30% Time;Time [ps];Counts", 1000, 0, 10000);
+    h.hTime30_2 = new TH1F("hTime30_2", "CFD 30% Time;Time [ps];Counts", 1000, 0, 10000);
     
     // Triple hit amplitudes
     h.htriple1 = new TH1F("htriple1", "Pulse amplitude for first detector", 1000, 0, 0.5);
@@ -168,6 +168,9 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
                 int det = b.Board[j];
                 if (det < 0 || det > 2) continue;
                 if (b.pulses_bad_pulse[j]) continue;
+                //strani cut
+                //if (b.pulses_amplitude[j] < 0.05) continue;
+                
                 
                 ampFEB[det] = b.pulses_amplitude[j];
                 cfd10[det] = b.pulses_time_cfd10[j];
@@ -179,6 +182,10 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
                 peak_time[det] = b.pulses_peak_time[j];
                 risetime[det] = b.pulses_rise_time[j];
                 integral[det] = b.pulses_integral[j];
+
+
+
+                
                 
 
                 
@@ -190,22 +197,25 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
             
 
            if (ilcanale < 64) {
-               int cx = ilcanale % 8;
-               int cy = 7 - (ilcanale / 8);
-               bool feb0_ok = false;
-               bool feb1_ok = false;
+    int cx = ilcanale % 8;
+    int cy = 7 - (ilcanale / 8);
 
-               for (int j = 0; j < b.npulses; j++) {
-                   if (b.Board[j] == 0 && b.pulses_channel_x[j] == cx && b.pulses_channel_y[j] == cy)
-                        feb0_ok = true;
+    int feb0_hits = 0;
+    int feb1_hits = 0;
 
-                   if (b.Board[j] == 1 && b.pulses_channel_x[j] == cx && b.pulses_channel_y[j] == cy)
-                        feb1_ok = true;
-                }
+    for (int j = 0; j < b.npulses; j++) {
+        if (b.pulses_channel_x[j] == cx && b.pulses_channel_y[j] == cy) {
 
-          if (!(feb0_ok && feb1_ok))
-                continue;
-            }
+            if (b.Board[j] == 0) feb0_hits++;
+            if (b.Board[j] == 1) feb1_hits++;
+        }
+    }
+
+    // selezione: ESATTAMENTE un hit per FEB
+    if (feb0_hits != 1 || feb1_hits != 1)
+        continue;
+}
+
                 //dopo la condition della selezione dei canali altrimenti prima è inutile
 
                 h.hTime20->Fill(cfd20[0]);
@@ -423,8 +433,7 @@ cout << "prof Y min = " << h.prof->GetMinimum() << endl;
 cout << "prof Y max = " << h.prof->GetMaximum() << endl;
 
 
-
-
+        
 
 }
 
@@ -548,60 +557,82 @@ void time_res(TTree *tree, TreeBranches &b, TTree *tree_correction)
 
 
     TH1F *htime = new TH1F("htime", "Time difference;Time [ps];Counts", 100, -2000, 2000);
-
-
+    TGraph *hcfdcorrected_0 = new TGraph();
+    TGraph *hcfdcorrected_1 = new TGraph();
+    
      Long64_t nentries = tree->GetEntries();
 
-    for (Long64_t i = 0; i < nentries; i++)
+for (Long64_t i = 0; i < nentries; i++)
     {
-        tree->GetEntry(i);
-        if (b.HitFeb[0] == 1 && b.HitFeb[1] == 1)
-            {
-                double ampFEB[3] = {-1.0, -1.0, -1.0};
-                double cfd30[3] = {-9999.0, -9999.0, -9999.0};
-                for (int j = 0; j < b.npulses; j++) 
-                {
-                 int det = b.Board[j];
-                 if (det < 0 || det > 2) continue;
-                 if (b.pulses_bad_pulse[j]) continue;
-                
-                ampFEB[det] = b.pulses_amplitude[j];
-                cfd30[det] = b.pulses_time_cfd30[j];
+    tree->GetEntry(i);
 
-                //custom cut 
-                //if (ampFEB[det] < 0.5) continue;
-            
-                
+    // almeno un hit per FEB
+    if (b.HitFeb[0] != 1 || b.HitFeb[1] != 1)
+        continue;
 
-                if (ilcanale < 64) {
-                int cx = ilcanale % 8;
-                int cy = 7 - (ilcanale / 8);
-                bool feb0_ok = false;
-                bool feb1_ok = false;
+    if (ilcanale >= 64)
+        continue;
 
-                for (int j = 0; j < b.npulses; j++) {
-                    if (b.Board[j] == 0 && b.pulses_channel_x[j] == cx && b.pulses_channel_y[j] == cy)
-                        feb0_ok = true;
+    int cx = ilcanale % 8;
+    int cy = 7 - (ilcanale / 8);
 
-                    if (b.Board[j] == 1 && b.pulses_channel_x[j] == cx && b.pulses_channel_y[j] == cy)
-                        feb1_ok = true;
-                }
+    int feb0_hits = 0;
+    int feb1_hits = 0;
 
-                if (!(feb0_ok && feb1_ok))
-                    continue;
-                }
+    int idx_feb0 = -1;
+    int idx_feb1 = -1;
+
+    // loop sui pulse
+    for (int j = 0; j < b.npulses; j++)
+    {
+        int det = b.Board[j];
+        if (det < 0 || det > 2) continue;
+        if (b.pulses_bad_pulse[j]) continue;
+        if (b.pulses_amplitude[j] < 0) continue;
+
+        // selezione del canale
+        if (b.pulses_channel_x[j] == cx &&
+            b.pulses_channel_y[j] == cy)
+        {
+            if (det == 0) {
+                feb0_hits++;
+                idx_feb0 = j;
             }
-                double cfd30_co=cfd30[0]-(prof_p0+prof_p1/ampFEB[0]);
-                double cfd30_co1=cfd30[1]-(prof2_p0+prof2_p1/ampFEB[1]);
-                double time_diff= cfd30_co-cfd30_co1;
-                htime->Fill(time_diff);
-
-
-
+            if (det == 1) {
+                feb1_hits++;
+                idx_feb1 = j;
+            }
         }
-        if (i % 100000 == 0)
+    }
+
+    // ESATTAMENTE un hit per FEB
+    if (feb0_hits != 1 || feb1_hits != 1)
+        continue;
+
+    // estrai hit giusti
+    double ampFEB0 = b.pulses_amplitude[idx_feb0];
+    double ampFEB1 = b.pulses_amplitude[idx_feb1];
+
+    double cfd0 = b.pulses_time_cfd30[idx_feb0];
+    double cfd1 = b.pulses_time_cfd30[idx_feb1];
+
+    // correzione time-walk
+    double cfd30_co  = cfd0 - (prof_p0  + prof_p1  / ampFEB0);
+    double cfd30_co1 = cfd1 - (prof2_p0 + prof2_p1 / ampFEB1);
+
+    double time_diff = cfd30_co - cfd30_co1;
+
+    htime->Fill(time_diff);
+    hcfdcorrected_0->SetPoint(hcfdcorrected_0->GetN(), ampFEB0, cfd30_co);
+    hcfdcorrected_1->SetPoint(hcfdcorrected_1->GetN(), ampFEB1, cfd30_co1);
+    if (i % 100000 == 0)
             cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
     }
+
+
+        
+        
+
     // Fit Gaussian to time difference histogram and creation of tapplication canvas
 
 
@@ -614,11 +645,29 @@ void time_res(TTree *tree, TreeBranches &b, TTree *tree_correction)
     htime->SetFillColorAlpha(kMagenta - 4, 0.35);
 
     htime->Draw("HIST");
+    
 
     TF1 *f_gaus_time = new TF1("f_gaus_time", "gaus", -1000, 1000);
     htime->Fit(f_gaus_time, "RQ");
 
     c_time_res->SaveAs("Time_Resolution.pdf");
+
+    TCanvas *c_cfd_corrected = new TCanvas("c_cfd_corrected", "CFD Corrected Times", 800, 600);
+    c_cfd_corrected->Divide(2,1);
+    c_cfd_corrected->cd(1);
+    hcfdcorrected_0->SetTitle("Corrected CFD30 Times - FEB0;ampFEB;Cfd corrected Time [ps]");
+    hcfdcorrected_0->SetMarkerStyle(21);
+    hcfdcorrected_0->SetMarkerColor(kRed + 1);
+    hcfdcorrected_0->SetLineColor(kRed + 1);        
+    hcfdcorrected_0->Draw("AP");
+    c_cfd_corrected->cd(2);
+    hcfdcorrected_1->SetTitle("Corrected CFD30 Times - FEB1;ampFEB;Cfd corrected Time [ps]");
+    hcfdcorrected_1->SetMarkerStyle(21);
+    hcfdcorrected_1->SetMarkerColor(kBlue + 1);
+    hcfdcorrected_1->SetLineColor(kBlue + 1);     
+    hcfdcorrected_1->Draw("AP");            
+
+
     app.Run();
 
     double sigma = f_gaus_time->GetParameter(2);

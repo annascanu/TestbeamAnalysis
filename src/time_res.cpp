@@ -37,7 +37,7 @@ int main() {
 
 
 
-    string outputFileName = "pion_run22_2.0version_30condition_corrected_time_res.root";
+    string outputFileName = "pion_run23_2.0version_35condition_corrected_time_res.root";
     
     // ------------------------------------------------
     //         Open input file and get tree
