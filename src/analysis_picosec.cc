@@ -93,8 +93,8 @@ void InitializeHistograms(Histograms &h)
     h.cfdvschannel1 = new TGraph();
     
     // Profiles
-    h.prof = new TProfile("prof", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0, 0.7);
-    h.prof2 = new TProfile("prof2", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0, 0.7);
+    h.prof = new TProfile("prof", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0.08, 0.7);
+    h.prof2 = new TProfile("prof2", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0.08, 0.7);
 }
 
 void SetupTreeBranches(TTree *tree, TreeBranches &b) 
@@ -168,6 +168,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
                 int det = b.Board[j];
                 if (det < 0 || det > 2) continue;
                 if (b.pulses_bad_pulse[j]) continue;
+               
                 //strani cut
                 //if (b.pulses_amplitude[j] < 0.05) continue;
                 
@@ -217,6 +218,8 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
 }
 
                 //dopo la condition della selezione dei canali altrimenti prima è inutile
+                 //cut di riccardo
+                
 
                 h.hTime20->Fill(cfd20[0]);
                 h.hTime30->Fill(cfd30[0]);
@@ -310,7 +313,10 @@ void FitHistograms(Histograms &h, FitResults &fit)
     h.hbaseline2->Fit(f_gaus_b2, "RQ");
     
     // Slewing correction
-    TF1 *empirico = new TF1("empirico", "[0] + [1]/x", 0, 1);
+    TF1 *empirico = new TF1("empirico", "[0] + [1]/(sqrt(x))", 0, 1);
+    //empirico->SetParameter(0, 3890);
+    //empirico->SetParameter(1, -20);
+    //empirico->SetParameter(2, 1);
     h.prof->Fit(empirico, "RQ");
 
     cout << "=== Fit prof ===" << endl;
@@ -318,6 +324,8 @@ cout << "p0 = " << empirico->GetParameter(0)
      << " ± " << empirico->GetParError(0) << endl;
 cout << "p1 = " << empirico->GetParameter(1)
      << " ± " << empirico->GetParError(1) << endl;
+//cout << "p2 = " << empirico->GetParameter(2)
+    // << " ± " << empirico->GetParError(2) << endl;
 cout << "Chi2 / NDF = "
      << empirico->GetChisquare() << " / "
      << empirico->GetNDF() << endl;
@@ -327,8 +335,11 @@ cout << "Chi2 / NDF = "
     fit.prof_p1_err = empirico->GetParError(1);
     fit.prof_chi2   = empirico->GetChisquare();
     fit.prof_ndf    = empirico->GetNDF();
-    
-    TF1 *empirico2 = new TF1("empirico2", "[0] + [1]/x", 0, 1);
+
+    TF1 *empirico2 = new TF1("empirico2", "[0] + [1]/(sqrt(x))", 0.015, 1);
+    //empirico2->SetParameter(0, 3000);
+    //empirico2->SetParameter(1, -20);
+    //empirico2->SetParameter(2, 1);
     h.prof2->Fit(empirico2, "RQ");
 
 
@@ -338,6 +349,8 @@ cout << "p0 = " << empirico2->GetParameter(0)
      << " ± " << empirico2->GetParError(0) << endl;
 cout << "p1 = " << empirico2->GetParameter(1)
      << " ± " << empirico2->GetParError(1) << endl;
+//cout<< "p2 = " << empirico2->GetParameter(2)
+//     << " ± " << empirico2->GetParError(2) << endl;
 cout << "Chi2 / NDF = "
      << empirico2->GetChisquare() << " / "
      << empirico2->GetNDF() << endl;
@@ -559,6 +572,9 @@ void time_res(TTree *tree, TreeBranches &b, TTree *tree_correction)
     TH1F *htime = new TH1F("htime", "Time difference;Time [ps];Counts", 100, -2000, 2000);
     TGraph *hcfdcorrected_0 = new TGraph();
     TGraph *hcfdcorrected_1 = new TGraph();
+    TGraph *hcfduncorrected_0 = new TGraph();
+    TGraph *hcfduncorrected_1 = new TGraph();
+    
     
      Long64_t nentries = tree->GetEntries();
 
@@ -581,6 +597,7 @@ for (Long64_t i = 0; i < nentries; i++)
 
     int idx_feb0 = -1;
     int idx_feb1 = -1;
+    
 
     // loop sui pulse
     for (int j = 0; j < b.npulses; j++)
@@ -607,6 +624,11 @@ for (Long64_t i = 0; i < nentries; i++)
 
     // ESATTAMENTE un hit per FEB
     if (feb0_hits != 1 || feb1_hits != 1)
+        continue;  //jump
+
+
+    //cut di riccardo
+    if (b.pulses_amplitude[idx_feb0] < 0.08 || b.pulses_amplitude[idx_feb1] < 0.08)
         continue;
 
     // estrai hit giusti
@@ -615,19 +637,23 @@ for (Long64_t i = 0; i < nentries; i++)
 
     double cfd0 = b.pulses_time_cfd30[idx_feb0];
     double cfd1 = b.pulses_time_cfd30[idx_feb1];
+    
 
     // correzione time-walk
-    double cfd30_co  = cfd0 - (prof_p0  + prof_p1  / ampFEB0);
-    double cfd30_co1 = cfd1 - (prof2_p0 + prof2_p1 / ampFEB1);
+    double cfd30_co  = cfd0 - (prof_p0  + prof_p1  / sqrt(ampFEB0));
+    double cfd30_co1 = cfd1 - (prof2_p0 + prof2_p1 / sqrt(ampFEB1));
 
     double time_diff = cfd30_co - cfd30_co1;
 
     htime->Fill(time_diff);
     hcfdcorrected_0->SetPoint(hcfdcorrected_0->GetN(), ampFEB0, cfd30_co);
     hcfdcorrected_1->SetPoint(hcfdcorrected_1->GetN(), ampFEB1, cfd30_co1);
+    hcfduncorrected_0->SetPoint(hcfduncorrected_0->GetN(), ampFEB0, cfd0);
+    hcfduncorrected_1->SetPoint(hcfduncorrected_1->GetN(), ampFEB1, cfd1);
+    
     if (i % 100000 == 0)
             cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
-    }
+}
 
 
         
@@ -665,7 +691,27 @@ for (Long64_t i = 0; i < nentries; i++)
     hcfdcorrected_1->SetMarkerStyle(21);
     hcfdcorrected_1->SetMarkerColor(kBlue + 1);
     hcfdcorrected_1->SetLineColor(kBlue + 1);     
-    hcfdcorrected_1->Draw("AP");            
+    hcfdcorrected_1->Draw("AP");        
+    
+    
+    TCanvas *c_cfd_uncorrected = new TCanvas("c_cfd_uncorrected", "CFD Uncorrected Times", 800, 600);
+    c_cfd_uncorrected->Divide(2,1);
+    c_cfd_uncorrected->cd(1);
+    hcfduncorrected_0->SetTitle("Uncorrected CFD30 Times -  FEB0;ampFEB;Cfd uncorrected Time [ps]");
+    hcfduncorrected_0->SetMarkerStyle(21);
+    hcfduncorrected_0->SetMarkerColor(kRed + 1);
+    hcfduncorrected_0->SetLineColor(kRed + 1);        
+    hcfduncorrected_0->Draw("AP");
+    c_cfd_uncorrected->cd(2);
+    hcfduncorrected_1->SetTitle("Uncorrected CFD30 Times - FEB1;ampFEB;Cfd uncorrected Time [ps]");
+    hcfduncorrected_1->SetMarkerStyle(21);
+    hcfduncorrected_1->SetMarkerColor(kBlue + 1);
+    hcfduncorrected_1->SetLineColor(kBlue + 1);     
+    hcfduncorrected_1->Draw("AP");  
+
+
+
+
 
 
     app.Run();

@@ -27,9 +27,9 @@ int main() {
     // Choose your input file path
     //TString filename = "/eos/experiment/neutplatform/enubet/testbeam2025/picosec_data/sampic_runs/rootSampicData/processed_waveforms/sampic_run22_final.root"; // when running on lxplus
     //TString filename = "/Users/anna/Developing/PhD/Testbeam2025/sampic_run22_final.root"; // when running on Anna's machine
-    TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run22_final.root"; // when running on Riccardo's machine
+    TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run24_final.root"; // when running on Riccardo's machine
     
-    string outputFileName = "pion_run22_2.0version_30condition.root";
+    string outputFileName = "pion_run24_2.0version_27condition.root";
     
     // ------------------------------------------------
     //         Open input file and get tree
