@@ -7,13 +7,14 @@
 #include <TROOT.h>
 #include <TApplication.h>
 
-
 using namespace std;
 
-double CalculateAverage(const vector<double>& v) {
+double CalculateAverage(const vector<double>& v) 
+{
     if (v.empty()) return 0;
     double sum = 0;
-    for (double x : v) {
+    for (double x : v) 
+    {
         sum += x;
     }
     return sum / v.size();
@@ -122,10 +123,10 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
                    vector<vector<double>> &tabella1, 
                    vector<vector<double>> &tabella2) 
 {
-
-    int ilcanale;
-            cout<<"Select the channel(64: significa nessun constraint):   \n " << endl;
-            cin>> ilcanale;
+    int TheChannel;
+    cout << "Select the channel (64 = no constraint on the channel number): \n " << endl;
+    cin >> TheChannel;
+    
     Long64_t nentries = tree->GetEntries();
     
     for (Long64_t i = 0; i < nentries; i++) 
@@ -169,9 +170,8 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
                 if (det < 0 || det > 2) continue;
                 if (b.pulses_bad_pulse[j]) continue;
                
-                //strani cut
+                // Just testing low amplitude cut
                 //if (b.pulses_amplitude[j] < 0.05) continue;
-                
                 
                 ampFEB[det] = b.pulses_amplitude[j];
                 cfd10[det] = b.pulses_time_cfd10[j];
@@ -183,54 +183,47 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
                 peak_time[det] = b.pulses_peak_time[j];
                 risetime[det] = b.pulses_rise_time[j];
                 integral[det] = b.pulses_integral[j];
-
-
-
-                
-                
-
                 
                 if (det == 0)
                     h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
                 if (det == 1)
                     h.mapdet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
             }
-            
 
-           if (ilcanale < 64) {
-    int cx = ilcanale % 8;
-    int cy = 7 - (ilcanale / 8);
+            if (TheChannel < 64) 
+            {
+                int cx = TheChannel % 8;
+                int cy = 7 - (TheChannel / 8);
 
-    int feb0_hits = 0;
-    int feb1_hits = 0;
+                int feb0_hits = 0;
+                int feb1_hits = 0;
 
-    for (int j = 0; j < b.npulses; j++) {
-        if (b.pulses_channel_x[j] == cx && b.pulses_channel_y[j] == cy) {
+                for (int j = 0; j < b.npulses; j++) 
+                {
+                    if (b.pulses_channel_x[j] == cx && b.pulses_channel_y[j] == cy) 
+                    {
+                        if (b.Board[j] == 0) feb0_hits++;
+                        if (b.Board[j] == 1) feb1_hits++;
+                    }
+                }
 
-            if (b.Board[j] == 0) feb0_hits++;
-            if (b.Board[j] == 1) feb1_hits++;
-        }
-    }
+                // Selection: EXACTLY one hit per FEB
+                if (feb0_hits != 1 || feb1_hits != 1)
+                    continue;
+            }
 
-    // selezione: ESATTAMENTE un hit per FEB
-    if (feb0_hits != 1 || feb1_hits != 1)
-        continue;
-}
+            // After the channel selection condition, otherwise it's useless
+            //cut di riccardo  
 
-                //dopo la condition della selezione dei canali altrimenti prima è inutile
-                 //cut di riccardo
-                
-
-                h.hTime20->Fill(cfd20[0]);
-                h.hTime30->Fill(cfd30[0]);
-                h.hTime50->Fill(cfd50[0]);
-                h.hTime60->Fill(cfd60[0]);
-                h.hTime30_2->Fill(cfd30[1]);
-                h.hcharge1->Fill(integral[0]);
-                h.hcharge2->Fill(integral[1]);
-                h.hrisetime1->Fill(risetime[0]);
-                h.hrisetime2->Fill(risetime[1]);
-
+            h.hTime20->Fill(cfd20[0]);
+            h.hTime30->Fill(cfd30[0]);
+            h.hTime50->Fill(cfd50[0]);
+            h.hTime60->Fill(cfd60[0]);
+            h.hTime30_2->Fill(cfd30[1]);
+            h.hcharge1->Fill(integral[0]);
+            h.hcharge2->Fill(integral[1]);
+            h.hrisetime1->Fill(risetime[0]);
+            h.hrisetime2->Fill(risetime[1]);
             h.htriple1->Fill(ampFEB[0]);
             h.htriple2->Fill(ampFEB[1]);
             h.htriple3->Fill(ampFEB[2]);
@@ -254,7 +247,6 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
             h.hbaseline2->Fill(base[1]);
             
             // Fill graphs
-
             double peso = 1.0;
             h.timevsamplitude->SetPoint(h.timevsamplitude->GetN(), ampFEB[0], cfd30[0], peso);
             h.timevsamplitude2->SetPoint(h.timevsamplitude2->GetN(), ampFEB[1], cfd30[1], peso);
@@ -272,9 +264,9 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
         if (i % 100000 == 0)
             cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
     }
+
     cout << endl;
     //h.prof->Fill(0.5, 1000);   // solo per debug
-
 }
 
 void FitHistograms(Histograms &h, FitResults &fit)
@@ -497,171 +489,134 @@ void SaveResults(const string &outputFileName, Histograms &h,
     h.conteggixcanale3->Write();
     h.mapdet1->Write();
     h.mapdet2->Write();
-
-
-
     
-    // Save channel means tree
+    // Save channel-averaged tree
     TTree *tout = new TTree("channelMeans", "Medie per canale");
     tout->Branch("average_1", average_1, "average_1[64]/D");
     tout->Branch("average_2", average_2, "average_2[64]/D");
-
     tout->Fill();
     tout->Write();
-    
 
-
-    // Tree con risultati del fit
+    // Tree with fit results
     TTree *tfit = new TTree("fitResults", "Fit parameters");
     tfit->Branch("prof_p0", &fit.prof_p0, "prof_p0/D");
     tfit->Branch("prof_p0_err", &fit.prof_p0_err, "prof_p0_err/D");
     tfit->Branch("prof_p1", &fit.prof_p1, "prof_p1/D");
     tfit->Branch("prof_p1_err", &fit.prof_p1_err, "prof_p1_err/D");
-
     tfit->Branch("prof2_p0", &fit.prof2_p0, "prof2_p0/D");
     tfit->Branch("prof2_p0_err", &fit.prof2_p0_err, "prof2_p0_err/D");
     tfit->Branch("prof2_p1", &fit.prof2_p1, "prof2_p1/D");
     tfit->Branch("prof2_p1_err", &fit.prof2_p1_err, "prof2_p1_err/D");
-
     tfit->Fill();
     tfit->Write();
 
-     fout->Close();
+    fout->Close();
     cout << "Analysis complete. Results saved to " << outputFileName << endl;
 }
 
+// Function for time resolution analysis: reopen the ROOT tree with data, open the tree with 
+// fit values of TProfile, correct data and calculate time resolution (approx. with sqrt(2)).
 
-
-//funzione per l'analisi della risoluzione temporale: riaprire il root tree con i dati, aprire il tree con i valori del fit del tprofile correggere i dati e calcolare la risoluzione temporale, approx sqrt(2)
-
-void time_res(TTree *tree, TreeBranches &b, TTree *tree_correction)
+void TimeRes(TTree *tree, TreeBranches &b, TTree *tree_correction)
 {
-    int ilcanale;
+    int TheChannel;
     double time_diff;
-    cout<<"Select the channel(64: significa nessun constraint):   \n " << endl;
-    cin>> ilcanale;
+    cout << "Select the channel (64 = no constraint on the channel number): \n " << endl;
+    cin >> TheChannel;
 
     tree_correction->GetEntry(0);
-    double prof_p0;
-    double prof_p0_err;
-    double prof_p1;
-    double prof_p1_err;
-
-    double prof2_p0;
-    double prof2_p0_err;
-    double prof2_p1;
-    double prof2_p1_err;
-
+    double prof_p0, prof_p0_err, prof_p1, prof_p1_err, prof2_p0, prof2_p0_err, prof2_p1, prof2_p1_err;
     tree_correction->SetBranchAddress("prof_p0", &prof_p0);
     tree_correction->SetBranchAddress("prof_p0_err", &prof_p0_err);
     tree_correction->SetBranchAddress("prof_p1", &prof_p1);
     tree_correction->SetBranchAddress("prof_p1_err", &prof_p1_err);
-
     tree_correction->SetBranchAddress("prof2_p0", &prof2_p0);
     tree_correction->SetBranchAddress("prof2_p0_err", &prof2_p0_err);
     tree_correction->SetBranchAddress("prof2_p1", &prof2_p1);
     tree_correction->SetBranchAddress("prof2_p1_err", &prof2_p1_err);
+    cout << "Profile p0: " << prof_p0 << " ± " << prof_p0_err << endl;
+    cout << "Profile p1: " << prof_p1 << " ± " << prof_p1_err << endl;
 
     tree_correction->GetEntry(0);
 
-    cout << "prof p0: " << prof_p0 << " ± " << prof_p0_err << endl;
-    cout << "prof p1: " << prof_p1 << " ± " << prof_p1_err << endl;
-
-
-
     TH1F *htime = new TH1F("htime", "Time difference;Time [ps];Counts", 100, -2000, 2000);
-    TGraph *hcfdcorrected_0 = new TGraph();
-    TGraph *hcfdcorrected_1 = new TGraph();
+    TGraph *hcfdcorrected_0   = new TGraph();
+    TGraph *hcfdcorrected_1   = new TGraph();
     TGraph *hcfduncorrected_0 = new TGraph();
     TGraph *hcfduncorrected_1 = new TGraph();
     
-    
-     Long64_t nentries = tree->GetEntries();
-
-for (Long64_t i = 0; i < nentries; i++)
+    Long64_t nentries = tree->GetEntries();
+    for (Long64_t i = 0; i < nentries; i++)
     {
-    tree->GetEntry(i);
+        tree->GetEntry(i);
 
-    // almeno un hit per FEB
-    if (b.HitFeb[0] != 1 || b.HitFeb[1] != 1)
-        continue;
+        // At least one hit per FEB
+        if (b.HitFeb[0] != 1 || b.HitFeb[1] != 1)
+            continue;
+        if (TheChannel >= 64)
+            continue;
 
-    if (ilcanale >= 64)
-        continue;
+        int cx = TheChannel % 8;
+        int cy = 7 - (TheChannel / 8);
+        int feb0_hits = 0;
+        int feb1_hits = 0;
+        int idx_feb0 = -1;
+        int idx_feb1 = -1;
 
-    int cx = ilcanale % 8;
-    int cy = 7 - (ilcanale / 8);
-
-    int feb0_hits = 0;
-    int feb1_hits = 0;
-
-    int idx_feb0 = -1;
-    int idx_feb1 = -1;
-    
-
-    // loop sui pulse
-    for (int j = 0; j < b.npulses; j++)
-    {
-        int det = b.Board[j];
-        if (det < 0 || det > 2) continue;
-        if (b.pulses_bad_pulse[j]) continue;
-        if (b.pulses_amplitude[j] < 0) continue;
-
-        // selezione del canale
-        if (b.pulses_channel_x[j] == cx &&
-            b.pulses_channel_y[j] == cy)
+        // Loop on pulses to find hits on selected channel
+        for (int j = 0; j < b.npulses; j++)
         {
-            if (det == 0) {
-                feb0_hits++;
-                idx_feb0 = j;
-            }
-            if (det == 1) {
-                feb1_hits++;
-                idx_feb1 = j;
+            int det = b.Board[j];
+            if (det < 0 || det > 2) continue;
+            if (b.pulses_bad_pulse[j]) continue;
+            if (b.pulses_amplitude[j] < 0) continue;
+
+            // Channel selection
+            if (b.pulses_channel_x[j] == cx && b.pulses_channel_y[j] == cy)
+            {
+                if (det == 0) 
+                {
+                    feb0_hits++;
+                    idx_feb0 = j;
+                }
+                if (det == 1) 
+                {
+                    feb1_hits++;
+                    idx_feb1 = j;
+                }
             }
         }
+
+        // Exactly one hit per FEB
+        if (feb0_hits != 1 || feb1_hits != 1)
+            continue;  //jump to next event
+
+        //cut di riccardo
+        if (b.pulses_amplitude[idx_feb0] < 0.08 || b.pulses_amplitude[idx_feb1] < 0.08)
+            continue;
+
+        double ampFEB0 = b.pulses_amplitude[idx_feb0];
+        double ampFEB1 = b.pulses_amplitude[idx_feb1];
+        double cfd0 = b.pulses_time_cfd30[idx_feb0];
+        double cfd1 = b.pulses_time_cfd30[idx_feb1];
+
+        // Time-walk correction
+        double cfd30_co  = cfd0 - (prof_p0  + prof_p1  / sqrt(ampFEB0));
+        double cfd30_co1 = cfd1 - (prof2_p0 + prof2_p1 / sqrt(ampFEB1));
+
+        double time_diff = cfd30_co - cfd30_co1;
+
+        htime->Fill(time_diff);
+        hcfdcorrected_0->SetPoint(hcfdcorrected_0->GetN(), ampFEB0, cfd30_co);
+        hcfdcorrected_1->SetPoint(hcfdcorrected_1->GetN(), ampFEB1, cfd30_co1);
+        hcfduncorrected_0->SetPoint(hcfduncorrected_0->GetN(), ampFEB0, cfd0);
+        hcfduncorrected_1->SetPoint(hcfduncorrected_1->GetN(), ampFEB1, cfd1);
+        
+        if (i % 100000 == 0)
+                cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
     }
 
-    // ESATTAMENTE un hit per FEB
-    if (feb0_hits != 1 || feb1_hits != 1)
-        continue;  //jump
-
-
-    //cut di riccardo
-    if (b.pulses_amplitude[idx_feb0] < 0.08 || b.pulses_amplitude[idx_feb1] < 0.08)
-        continue;
-
-    // estrai hit giusti
-    double ampFEB0 = b.pulses_amplitude[idx_feb0];
-    double ampFEB1 = b.pulses_amplitude[idx_feb1];
-
-    double cfd0 = b.pulses_time_cfd30[idx_feb0];
-    double cfd1 = b.pulses_time_cfd30[idx_feb1];
-    
-
-    // correzione time-walk
-    double cfd30_co  = cfd0 - (prof_p0  + prof_p1  / sqrt(ampFEB0));
-    double cfd30_co1 = cfd1 - (prof2_p0 + prof2_p1 / sqrt(ampFEB1));
-
-    double time_diff = cfd30_co - cfd30_co1;
-
-    htime->Fill(time_diff);
-    hcfdcorrected_0->SetPoint(hcfdcorrected_0->GetN(), ampFEB0, cfd30_co);
-    hcfdcorrected_1->SetPoint(hcfdcorrected_1->GetN(), ampFEB1, cfd30_co1);
-    hcfduncorrected_0->SetPoint(hcfduncorrected_0->GetN(), ampFEB0, cfd0);
-    hcfduncorrected_1->SetPoint(hcfduncorrected_1->GetN(), ampFEB1, cfd1);
-    
-    if (i % 100000 == 0)
-            cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
-}
-
-
-        
-        
-
-    // Fit Gaussian to time difference histogram and creation of tapplication canvas
-
-
+    // Fit Gaussian to time difference histogram and creation of TApplication 
     TApplication app("app", 0, nullptr);
 
     TCanvas *c_time_res = new TCanvas("c_time_res", "Time Resolution", 800, 600);
@@ -669,13 +624,10 @@ for (Long64_t i = 0; i < nentries; i++)
     htime->SetLineColor(kMagenta + 1);
     htime->SetLineWidth(2);
     htime->SetFillColorAlpha(kMagenta - 4, 0.35);
-
     htime->Draw("HIST");
-    
 
     TF1 *f_gaus_time = new TF1("f_gaus_time", "gaus", -1000, 1000);
     htime->Fit(f_gaus_time, "RQ");
-
     c_time_res->SaveAs("Time_Resolution.pdf");
 
     TCanvas *c_cfd_corrected = new TCanvas("c_cfd_corrected", "CFD Corrected Times", 800, 600);
@@ -693,7 +645,6 @@ for (Long64_t i = 0; i < nentries; i++)
     hcfdcorrected_1->SetLineColor(kBlue + 1);     
     hcfdcorrected_1->Draw("AP");        
     
-    
     TCanvas *c_cfd_uncorrected = new TCanvas("c_cfd_uncorrected", "CFD Uncorrected Times", 800, 600);
     c_cfd_uncorrected->Divide(2,1);
     c_cfd_uncorrected->cd(1);
@@ -709,26 +660,13 @@ for (Long64_t i = 0; i < nentries; i++)
     hcfduncorrected_1->SetLineColor(kBlue + 1);     
     hcfduncorrected_1->Draw("AP");  
 
-
-
-
-
-
     app.Run();
 
     double sigma = f_gaus_time->GetParameter(2);
     cout << "Time resolution (approx): " << sigma / TMath::Sqrt(2) << " ps" << endl;    
-    //sigma error
+    // Sigma error
     double sigma_err = f_gaus_time->GetParError(2);
     cout << "Time resolution error (approx): " << sigma_err / TMath::Sqrt(2) << " ps" << endl;  
-
-
-
-
-
-
-
-
 }
 
 

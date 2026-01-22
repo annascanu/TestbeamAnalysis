@@ -5,7 +5,7 @@
 -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
 Goal: obtain time resolution of picosec detectors.
-To compile: c++ analysis_picosec.cpp analysis_picosec.cc `root-config --cflags --libs` -o analysis.out
+To compile: c++ time_res.cpp analysis_picosec.cc `root-config --cflags --libs` -o analysis.out
 
 Processed files can be found at:
 /eos/experiment/neutplatform/enubet/testbeam2025/picosec_data/sampic_runs/rootSampicData/processed_waveforms/
@@ -32,10 +32,6 @@ int main() {
 
     //root file w/ tree with correction fit parameters
     TString filename_corr = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/src/pion_run24_2.0version_27condition.root"; // when running on Riccardo's machine
-
-
-
-
     string outputFileName = "pion_run24_2.0version_27condition_corrected_time_res.root";
     
     // ------------------------------------------------
@@ -60,7 +56,6 @@ int main() {
         return 1;
     }
     
-    
     // ------------------------------------------------
     //         Initialize analysis structures
     // ------------------------------------------------
@@ -82,7 +77,8 @@ int main() {
     //ProcessEvents(tree, branches, hists, tabella1, tabella2);
     
     cout << "\nCalculating time resolution with corrections..." << endl;
-    time_res(tree, branches, tree_corr);
+    TimeRes(tree, branches, tree_corr);
+    
     // ------------------------------------------------
     //                     Cleanup
     // ------------------------------------------------
