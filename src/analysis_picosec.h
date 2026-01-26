@@ -44,7 +44,7 @@ struct Histograms {
     TH1F *conteggixcanale1, *conteggixcanale2, *conteggixcanale3;
     
     // Hit maps
-    TH2F *mapdet1, *mapdet2;
+    TH2F *mapdet1, *mapdet2, *mapdet1_afterselection, *mapdet2_afterselection;
     
     // Graphs
     TGraph *hintegral1, *hintegral2, *hintegral3;
@@ -107,6 +107,9 @@ void SaveResults(const std::string &outputFileName, Histograms &hists,
                  const std::vector<std::vector<double>> &tabella1,
                  const std::vector<std::vector<double>> &tabella2, FitResults &fit);
 void time_res(TTree *tree, TreeBranches &branches, TTree *tree_correction);
+void ProcessEvents3rd_picosec(TTree *tree, TreeBranches &branches, Histograms &hists, 
+                   std::vector<std::vector<double>> &tabella1, 
+                   std::vector<std::vector<double>> &tabella2);
 TFile* OpenInputFile(const std::string &filename);
 
 #endif // ANALYSIS_H

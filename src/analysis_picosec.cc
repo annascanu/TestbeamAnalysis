@@ -81,7 +81,8 @@ void InitializeHistograms(Histograms &h)
     // Hit maps
     h.mapdet1 = new TH2F("hitmapdet1", "Hitmap detector 1;x;y", 8, 0, 8, 8, 0, 8);
     h.mapdet2 = new TH2F("hitmapdet2", "Hitmap detector 2;x;y", 8, 0, 8, 8, 0, 8);
-    
+    h.mapdet1_afterselection = new TH2F("hitmapdet1_afterselection", "Hitmap detector 1 after selection;x;y", 8, 0, 8, 8, 0, 8);
+    h.mapdet2_afterselection = new TH2F("hitmapdet2_afterselection", "Hitmap detector 2 after selection;x;y", 8, 0, 8, 8, 0, 8);
     // Graphs
     h.hintegral1 = new TGraph();
     h.hintegral2 = new TGraph();
@@ -387,9 +388,23 @@ void CreateCanvases(Histograms &h)
     
     // Hit maps
     TCanvas *cmap1 = new TCanvas("cmap1", "Detector map", 800, 750);
-    cmap1->SetRightMargin(0.15);
+    cmap1->Divide(1,2);
+    cmap1->cd(1);
+    //cmap1->SetRightMargin(0.15);
     //gStyle->SetPalette(kViridis);
     h.mapdet1->Draw("COLZ TEXT");
+    h.mapdet1->SetTitle("Hitmap of the first detector");
+    h.mapdet1->GetXaxis()->SetTitle("X channel");
+    h.mapdet1->GetYaxis()->SetTitle("Y channel");
+
+    cmap1->cd(2);
+
+    h.mapdet2->Draw("COLZ TEXT");
+    h.mapdet2->SetTitle("Hitmap of the second detector");
+    h.mapdet2->GetXaxis()->SetTitle("X channel");   
+    h.mapdet2->GetYaxis()->SetTitle("Y channel");
+
+
     cmap1->SaveAs("hitmap1.pdf");
     delete cmap1;
 /*
@@ -497,6 +512,8 @@ void SaveResults(const string &outputFileName, Histograms &h,
     h.conteggixcanale3->Write();
     h.mapdet1->Write();
     h.mapdet2->Write();
+    h.mapdet1_afterselection->Write();
+    h.mapdet2_afterselection->Write();
 
 
 
@@ -609,7 +626,7 @@ for (Long64_t i = 0; i < nentries; i++)
 
         // selezione del canale
         if (b.pulses_channel_x[j] == cx &&
-            b.pulses_channel_y[j] == cy)
+            b.pulses_channel_y[j] == cy )
         {
             if (det == 0) {
                 feb0_hits++;
@@ -731,6 +748,185 @@ for (Long64_t i = 0; i < nentries; i++)
 
 }
 
+
+
+void ProcessEvents3rd_picosec(TTree *tree, TreeBranches &b, Histograms &h,
+                   vector<vector<double>> &tabella1, 
+                   vector<vector<double>> &tabella2) 
+{
+
+    int ilcanale;
+    cout<<"Select the channel(from 0 to 6, mpore than 6 considered all the events):   \n " << endl;
+    cin>> ilcanale;
+    
+           
+    Long64_t nentries = tree->GetEntries();
+    
+    for (Long64_t i = 0; i < nentries; i++) 
+    {
+        tree->GetEntry(i);
+        
+        int nGood = 0;
+        int idx = -1;
+        
+        // Fill basic histograms
+        for (int j = 0; j < b.npulses; j++) 
+        {
+            nGood++;
+            idx = j;
+            h.hAmpAll->Fill(b.pulses_amplitude[j]);
+        }
+        
+        if (nGood == 1 && idx >= 0) 
+        {
+            h.hAmp1Hit->Fill(b.pulses_amplitude[idx]);
+            h.hQ->Fill(b.pulses_integral[idx]);
+        }
+        
+
+    
+        // Process terzo
+        if (b.HitFeb[2] == 1)
+        {
+            double ampFEB[3] = {-1.0, -1.0, -1.0};
+            double cfd10[3] = {-9999.0, -9999.0, -9999.0};
+            double cfd20[3] = {-9999.0, -9999.0, -9999.0};
+            double cfd30[3] = {-9999.0, -9999.0, -9999.0};
+            double cfd50[3] = {-9999.0, -9999.0, -9999.0};
+            double cfd60[3] = {-9999.0, -9999.0, -9999.0};
+            double base[3] = {-9999.0, -9999.0, -9999.0};
+            double peak_time[3] = {-9999.0, -9999.0, -9999.0};
+            double risetime[3] = {-9999.0, -9999.0, -9999.0};
+            double integral[3] = {-9999.0, -9999.0, -9999.0};
+            double ch_x[3] = {-1.0, -1.0, -1.0};
+            double ch_y[3] = {-1.0, -1.0, -1.0};
+            
+            for (int j = 0; j < b.npulses; j++) 
+            {
+                int det = b.Board[j];
+                if (det < 0 || det > 2) continue;
+                if (b.pulses_bad_pulse[j]) continue;
+               
+                //strani cut
+                //if (b.pulses_amplitude[j] < 0.05) continue;
+                
+                
+                ampFEB[det] = b.pulses_amplitude[j];
+                cfd10[det] = b.pulses_time_cfd10[j];
+                cfd20[det] = b.pulses_time_cfd20[j];
+                cfd30[det] = b.pulses_time_cfd30[j];
+                cfd50[det] = b.pulses_time_cfd50[j];
+                cfd60[det] = b.pulses_time_cfd60[j];
+                base[det] = b.Baseline[j];
+                peak_time[det] = b.pulses_peak_time[j];
+                risetime[det] = b.pulses_rise_time[j];
+                integral[det] = b.pulses_integral[j];
+                ch_x[det] = b.pulses_channel_x[j];
+                ch_y[det] = b.pulses_channel_y[j];
+
+
+
+                
+                
+
+                
+                if (det == 0)
+                    h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+                if (det == 1)
+                    h.mapdet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+            }
+          
+
+
+            
+                
+     
+
+    /*int feb0_hits = 0;
+    int feb1_hits = 0;
+
+    for (int j = 0; j < b.npulses; j++) {
+        if (b.pulses_channel_x[j] == cx && b.pulses_channel_y[j] == cy) {
+
+            if (b.Board[j] == 0) feb0_hits++;
+            if (b.Board[j] == 1) feb1_hits++;
+        }
+    }
+
+    // selezione: ESATTAMENTE un hit per FEB
+    if (feb0_hits != 1 || feb1_hits != 1)
+        continue;*/
+                
+                /*if (det == 0)
+                    h.mapdet1_afterselection->Fill(ch_x[0], ch_y[0]);
+                if (det == 1)
+                    h.mapdet2_afterselection->Fill(ch_x[1], ch_y[1]);*/
+            
+                //dopo la condition della selezione dei canali altrimenti prima è inutile
+                 //cut di riccardo
+               
+
+
+                h.hTime20->Fill(cfd20[0]);
+                h.hTime30->Fill(cfd30[0]);
+                h.hTime50->Fill(cfd50[0]);
+                h.hTime60->Fill(cfd60[0]);
+                h.hTime30_2->Fill(cfd30[1]);
+                h.hcharge1->Fill(integral[0]);
+                h.hcharge2->Fill(integral[1]);
+                h.hrisetime1->Fill(risetime[0]);
+                h.hrisetime2->Fill(risetime[1]);
+
+            h.htriple1->Fill(ampFEB[0]);
+            h.htriple2->Fill(ampFEB[1]);
+            h.htriple3->Fill(ampFEB[2]);
+            
+            // Store peak times for channel averaging
+            for (int k = 0; k < NCHANNELS; k++) 
+            {
+                if (b.Channel[0] == k)
+                    tabella1[k].push_back(peak_time[0]);
+                if (b.Channel[1] == k)
+                    tabella2[k].push_back(peak_time[1]);
+            }
+            
+            // Time differences
+            double time30_12 = cfd30[0] - cfd30[1];
+            h.htime30_12->Fill(time30_12);
+            
+            h.hpeaktime1->Fill(peak_time[0]);
+            h.hpeaktime2->Fill(peak_time[1]);
+            h.hbaseline1->Fill(base[0]);
+            h.hbaseline2->Fill(base[1]);
+            
+            // Fill graphs
+
+            double peso = 1.0;
+            h.timevsamplitude->SetPoint(h.timevsamplitude->GetN(), ampFEB[0], cfd30[0], peso);
+            h.timevsamplitude2->SetPoint(h.timevsamplitude2->GetN(), ampFEB[1], cfd30[1], peso);
+            h.prof->Fill(ampFEB[0], cfd30[0]);
+            h.prof2->Fill(ampFEB[1], cfd30[1]);
+            h.timevsintegral->SetPoint(h.timevsintegral->GetN(), integral[0], cfd30[0]);
+            h.hintegral1->SetPoint(h.hintegral1->GetN(), ampFEB[0], integral[0]);
+            h.hintegral2->SetPoint(h.hintegral2->GetN(), ampFEB[1], integral[1]);
+            h.conteggixcanale1->Fill(b.Channel[0]);
+            h.conteggixcanale2->Fill(b.Channel[1]);
+            h.conteggixcanale3->Fill(b.Channel[2]);
+            h.cfdvschannel1->SetPoint(h.cfdvschannel1->GetN(), b.Channel[0], cfd30[0]);
+              
+        }
+    
+        
+        if (i % 100000 == 0)
+            cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
+    
+    //cout << endl;
+    //h.prof->Fill(0.5, 1000);   // solo per debug
+
+
+
+}
+}
 
 
 

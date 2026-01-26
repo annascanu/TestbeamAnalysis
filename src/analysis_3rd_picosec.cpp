@@ -5,7 +5,7 @@
 -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
 Goal: obtain time resolution of picosec detectors.
-To compile: c++ analysis_picosec.cpp analysis_picosec.cc `root-config --cflags --libs` -o analysis.out
+To compile: c++ analysis_3rd_picosec.cpp analysis_picosec.cc `root-config --cflags --libs` -o analysis_3rd_picosec.out
 
 Processed files can be found at:
 /eos/experiment/neutplatform/enubet/testbeam2025/picosec_data/sampic_runs/rootSampicData/processed_waveforms/
@@ -29,7 +29,7 @@ int main() {
     //TString filename = "/Users/anna/Developing/PhD/Testbeam2025/sampic_run22_final.root"; // when running on Anna's machine
     TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run22_final.root"; // when running on Riccardo's machine
 
-    string outputFileName = "muon_run22_2.0version_27condition.root";
+    string outputFileName = "muon_run22_analysis_3rd_picosec_riccardocut.root";
 
     // ------------------------------------------------
     //         Open input file and get tree
@@ -62,9 +62,9 @@ int main() {
     // ------------------------------------------------
     
     cout << "\nProcessing events..." << endl;
-    ProcessEvents(tree, branches, hists, tabella1, tabella2);
+    ProcessEvents3rd_picosec(tree, branches, hists, tabella1, tabella2);
     
-    // ------------------------------------------------
+    // -------------ProcessEvents\-----------------------------------
     //                 Fit histograms
     // ------------------------------------------------
     
