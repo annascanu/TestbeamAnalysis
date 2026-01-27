@@ -6,6 +6,7 @@
 #include <iostream>
 #include <TROOT.h>
 #include <TApplication.h>
+#include <array>
 
 using namespace std;
 
@@ -696,16 +697,19 @@ void ProcessEvents3rd_picosec(TTree *tree, TreeBranches &b, Histograms &h,
                    vector<vector<double>> &tabella2) 
 {
 
-    int ilcanale;
-    cout<<"Select the channel(from 0 to 6, mpore than 6 considered all the events):   \n " << endl;
-    cin>> ilcanale;
-    
+   int TheChannel;
+    double time_diff;
+    cout << "Select the region (1 = central; 2=second region; 3:not yet coded...): \n " << endl;
+    cin >> TheChannel;
            
     Long64_t nentries = tree->GetEntries();
     
     for (Long64_t i = 0; i < nentries; i++) 
     {
         tree->GetEntry(i);
+        bool flag1 = false; // det1 presente
+        bool flag2 = false; // det2 presente sul canale TheChannel da cancellare
+        bool match_center = false;
         
         int nGood = 0;
         int idx = -1;
@@ -727,9 +731,9 @@ void ProcessEvents3rd_picosec(TTree *tree, TreeBranches &b, Histograms &h,
 
     
         // Process terzo
-        if (b.HitFeb[2] == 1)
+        if (b.HitFeb[2] == 1 )
         {
-            double ampFEB[3] = {-1.0, -1.0, -1.0};
+            /*double ampFEB[3] = {-1.0, -1.0, -1.0};
             double cfd10[3] = {-9999.0, -9999.0, -9999.0};
             double cfd20[3] = {-9999.0, -9999.0, -9999.0};
             double cfd30[3] = {-9999.0, -9999.0, -9999.0};
@@ -740,7 +744,7 @@ void ProcessEvents3rd_picosec(TTree *tree, TreeBranches &b, Histograms &h,
             double risetime[3] = {-9999.0, -9999.0, -9999.0};
             double integral[3] = {-9999.0, -9999.0, -9999.0};
             double ch_x[3] = {-1.0, -1.0, -1.0};
-            double ch_y[3] = {-1.0, -1.0, -1.0};
+            double ch_y[3] = {-1.0, -1.0, -1.0};*/
             
             for (int j = 0; j < b.npulses; j++) 
             {
@@ -752,7 +756,7 @@ void ProcessEvents3rd_picosec(TTree *tree, TreeBranches &b, Histograms &h,
                 //if (b.pulses_amplitude[j] < 0.05) continue;
                 
                 
-                ampFEB[det] = b.pulses_amplitude[j];
+                /*ampFEB[det] = b.pulses_amplitude[j];
                 cfd10[det] = b.pulses_time_cfd10[j];
                 cfd20[det] = b.pulses_time_cfd20[j];
                 cfd30[det] = b.pulses_time_cfd30[j];
@@ -763,25 +767,69 @@ void ProcessEvents3rd_picosec(TTree *tree, TreeBranches &b, Histograms &h,
                 risetime[det] = b.pulses_rise_time[j];
                 integral[det] = b.pulses_integral[j];
                 ch_x[det] = b.pulses_channel_x[j];
-                ch_y[det] = b.pulses_channel_y[j];
+                ch_y[det] = b.pulses_channel_y[j];*/
 
 
+
+                //first region: ch n 19,20,27,28
+                //second region: ch n 10, 11, 12, 13, 18, 21, 26, 29, 34, 35, 36, 37
+                // Riempi hitmap prima della selezione
+                    if (det == 0)
+                        h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+                    if (det == 1)
+                        h.mapdet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
 
                 
-                
-
-                
-                if (det == 0)
-                    h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
-                if (det == 1)
-                    h.mapdet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
-            }
-          
-
-
+                //selezione canali regione
+                int cx_center[16] = {3,4,3,4,2,3,4,5,2,5,2,5,2,3,4,5};
+                int cy_center[16] = {4,4,5,5,6,6,6,6,5,5,4,4,3,3,3,3};
+                int size=0;
+                if(TheChannel == 0){
+                    size= b.npulses; //tutti i canali
+                }
+                if(TheChannel ==1){
+                    size=4;
+                }
+                if(TheChannel==2){
+                    size=16;
+                }
             
                 
-     
+                for(int idx_center=0; idx_center < size; idx_center++){
+                    if(b.pulses_channel_x[j] == cx_center[idx_center] && b.pulses_channel_y[j] == cy_center[idx_center] || TheChannel==0){
+                        match_center = true;
+                        if(det == 0){
+                            h.mapdet1_afterselection->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+                            h.htriple1->Fill(b.pulses_amplitude[j]);
+                            h.hcharge1->Fill(b.pulses_integral[j]);
+                        }
+                        if(det == 1){
+                            h.mapdet2_afterselection->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+                            h.htriple2->Fill(b.pulses_amplitude[j]);
+                            h.hcharge2->Fill(b.pulses_integral[j]);
+                        }
+                        
+                        break;  
+
+                }
+            }
+         
+                    
+if( (TheChannel ==1 && match_center==false) || (TheChannel==2 && match_center==false)){
+            continue; //salta evento se non matcha la selezione
+                            }   
+if(det ==2)
+    h.htriple3->Fill(b.pulses_amplitude[j]);
+                
+                
+
+                
+                // selezione canale            
+                    
+                
+                    
+    
+                                    
 
     /*int feb0_hits = 0;
     int feb1_hits = 0;
@@ -807,8 +855,30 @@ void ProcessEvents3rd_picosec(TTree *tree, TreeBranches &b, Histograms &h,
                  //cut di riccardo
                
 
+      /*  if( (TheChannel ==1 && match_center==false) || (TheChannel==2 && match_center==false) ){
+            continue; //salta evento se non matcha la selezione
+                            }
+        if(b.Board[j]==0){
+            h.htriple1->Fill(b.pulses_amplitude[j]);
+            h.hcharge1->Fill(b.pulses_integral[j]);}
+        if(b.Board[j]==1){
+            h.htriple2->Fill(b.pulses_amplitude[j]);
+            h.hcharge2->Fill(b.pulses_integral[j]);}
+        if(b.Board[j]==2){
+            h.htriple3->Fill(b.pulses_amplitude[j]);}*/
+    
 
-                h.hTime20->Fill(cfd20[0]);
+
+
+                
+            
+        }//loop sui pulse 
+
+              
+
+
+
+               /* h.hTime20->Fill(cfd20[0]);
                 h.hTime30->Fill(cfd30[0]);
                 h.hTime50->Fill(cfd50[0]);
                 h.hTime60->Fill(cfd60[0]);
@@ -853,7 +923,7 @@ void ProcessEvents3rd_picosec(TTree *tree, TreeBranches &b, Histograms &h,
             h.conteggixcanale1->Fill(b.Channel[0]);
             h.conteggixcanale2->Fill(b.Channel[1]);
             h.conteggixcanale3->Fill(b.Channel[2]);
-            h.cfdvschannel1->SetPoint(h.cfdvschannel1->GetN(), b.Channel[0], cfd30[0]);
+            h.cfdvschannel1->SetPoint(h.cfdvschannel1->GetN(), b.Channel[0], cfd30[0]);*/
               
         }
     
