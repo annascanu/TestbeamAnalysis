@@ -313,15 +313,10 @@ void FitHistograms(Histograms &h, FitResults &fit)
     h.prof->Fit(empirico, "RQ");
 
     cout << "=== Fit prof ===" << endl;
-cout << "p0 = " << empirico->GetParameter(0)
-     << " ± " << empirico->GetParError(0) << endl;
-cout << "p1 = " << empirico->GetParameter(1)
-     << " ± " << empirico->GetParError(1) << endl;
-//cout << "p2 = " << empirico->GetParameter(2)
-    // << " ± " << empirico->GetParError(2) << endl;
-cout << "Chi2 / NDF = "
-     << empirico->GetChisquare() << " / "
-     << empirico->GetNDF() << endl;
+    cout << "p0 = " << empirico->GetParameter(0) << " ± " << empirico->GetParError(0) << endl;
+    cout << "p1 = " << empirico->GetParameter(1) << " ± " << empirico->GetParError(1) << endl;
+    //cout << "p2 = " << empirico->GetParameter(2) << " ± " << empirico->GetParError(2) << endl;
+    cout << "Chi2 / NDF = " << empirico->GetChisquare() << " / " << empirico->GetNDF() << endl;
     fit.prof_p0     = empirico->GetParameter(0);
     fit.prof_p0_err = empirico->GetParError(0);
     fit.prof_p1     = empirico->GetParameter(1);
@@ -335,19 +330,13 @@ cout << "Chi2 / NDF = "
     //empirico2->SetParameter(2, 1);
     h.prof2->Fit(empirico2, "RQ");
 
-
-
     cout << "=== Fit prof2 ===" << endl;
-cout << "p0 = " << empirico2->GetParameter(0)
-     << " ± " << empirico2->GetParError(0) << endl;
-cout << "p1 = " << empirico2->GetParameter(1)
-     << " ± " << empirico2->GetParError(1) << endl;
-//cout<< "p2 = " << empirico2->GetParameter(2)
-//     << " ± " << empirico2->GetParError(2) << endl;
-cout << "Chi2 / NDF = "
-     << empirico2->GetChisquare() << " / "
-     << empirico2->GetNDF() << endl;
-     fit.prof2_p0     = empirico2->GetParameter(0);
+    cout << "p0 = " << empirico2->GetParameter(0) << " ± " << empirico2->GetParError(0) << endl;
+    cout << "p1 = " << empirico2->GetParameter(1) << " ± " << empirico2->GetParError(1) << endl;
+    //cout<< "p2 = " << empirico2->GetParameter(2)
+    //     << " ± " << empirico2->GetParError(2) << endl;
+    cout << "Chi2 / NDF = " << empirico2->GetChisquare() << " / " << empirico2->GetNDF() << endl;
+    fit.prof2_p0     = empirico2->GetParameter(0);
     fit.prof2_p0_err = empirico2->GetParError(0);
     fit.prof2_p1     = empirico2->GetParameter(1);
     fit.prof2_p1_err = empirico2->GetParError(1);
@@ -390,70 +379,65 @@ void CreateCanvases(Histograms &h)
     h.mapdet1->GetYaxis()->SetTitle("Y channel");
 
     cmap1->cd(2);
-
     h.mapdet2->Draw("COLZ TEXT");
     h.mapdet2->SetTitle("Hitmap of the second detector");
     h.mapdet2->GetXaxis()->SetTitle("X channel");   
     h.mapdet2->GetYaxis()->SetTitle("Y channel");
-
-
     cmap1->SaveAs("hitmap1.pdf");
     delete cmap1;
-/*
-gROOT->SetBatch(kTRUE);
+    
+    /*
+    gROOT->SetBatch(kTRUE);
 
-TCanvas *c_prof = new TCanvas("c_prof",
-                              "Time vs Amplitude - FEB0 / FEB1",
-                              800, 600);
+    TCanvas *c_prof = new TCanvas("c_prof",
+                                "Time vs Amplitude - FEB0 / FEB1",
+                                800, 600);
 
-c_prof->cd();
-c_prof->SetGrid();*/
+    c_prof->cd();
+    c_prof->SetGrid();*/
 
-// double ymin = min(h.prof->GetMinimum());
-// double ymax = max(h.prof->GetMaximum());
-//
-// h.prof->GetYaxis()->SetRangeUser(ymin * 0.95, ymax * 1.05);
-
-
-// h.prof->SetLineColor(kRed+1);
-// h.prof->SetMarkerColor(kRed+1);
-// h.prof->SetMarkerStyle(21);
-// h.prof->SetLineWidth(2);
-
-// h.prof2->SetLineColor(kBlue+1);
-// h.prof2->SetMarkerColor(kBlue+1);
-// h.prof2->SetMarkerStyle(21);
-// h.prof2->SetLineWidth(2);
-
-// h.prof->GetXaxis()->SetTitle("Amplitude [a.u.]");
-// h.prof->GetYaxis()->SetTitle("CFD30 time [ns]");
-// h.prof->GetXaxis()->SetTitleSize(0.045);
-// h.prof->GetYaxis()->SetTitleSize(0.045);
-
-// h.prof->Draw();
-//h.prof2->Draw();
-/*
-TLegend *leg = new TLegend(0.15, 0.75, 0.35, 0.88);
-leg->SetBorderSize(0);
-leg->SetFillStyle(0);
-leg->Draw();*/
-
-// c_prof->Modified();
-// c_prof->Update();
-// c_prof->Paint();      // <<< QUESTA È LA CHIAVE
-// c_prof->SaveAs("TimeVsAmplitude_FEB0_FEB1.pdf");
+    // double ymin = min(h.prof->GetMinimum());
+    // double ymax = max(h.prof->GetMaximum());
+    //
+    // h.prof->GetYaxis()->SetRangeUser(ymin * 0.95, ymax * 1.05);
 
 
-cout << "prof entries = " << h.prof->GetEntries() << endl;
-cout << "prof mean    = " << h.prof->GetMean(1) << endl;
-cout << "Bin 10 entries = " << h.prof->GetBinEntries(10) << endl;
-cout << "Bin 10 content = " << h.prof->GetBinContent(10) << endl;
-cout << "Bin 10 error   = " << h.prof->GetBinError(10) << endl;
-cout << "prof Y min = " << h.prof->GetMinimum() << endl;
-cout << "prof Y max = " << h.prof->GetMaximum() << endl;
+    // h.prof->SetLineColor(kRed+1);
+    // h.prof->SetMarkerColor(kRed+1);
+    // h.prof->SetMarkerStyle(21);
+    // h.prof->SetLineWidth(2);
+
+    // h.prof2->SetLineColor(kBlue+1);
+    // h.prof2->SetMarkerColor(kBlue+1);
+    // h.prof2->SetMarkerStyle(21);
+    // h.prof2->SetLineWidth(2);
+
+    // h.prof->GetXaxis()->SetTitle("Amplitude [a.u.]");
+    // h.prof->GetYaxis()->SetTitle("CFD30 time [ns]");
+    // h.prof->GetXaxis()->SetTitleSize(0.045);
+    // h.prof->GetYaxis()->SetTitleSize(0.045);
+
+    // h.prof->Draw();
+    //h.prof2->Draw();
+    /*
+    TLegend *leg = new TLegend(0.15, 0.75, 0.35, 0.88);
+    leg->SetBorderSize(0);
+    leg->SetFillStyle(0);
+    leg->Draw();*/
+
+    // c_prof->Modified();
+    // c_prof->Update();
+    // c_prof->Paint();      // <<< QUESTA È LA CHIAVE
+    // c_prof->SaveAs("TimeVsAmplitude_FEB0_FEB1.pdf");
 
 
-        
+    cout << "prof entries = " << h.prof->GetEntries() << endl;
+    cout << "prof mean    = " << h.prof->GetMean(1) << endl;
+    cout << "Bin 10 entries = " << h.prof->GetBinEntries(10) << endl;
+    cout << "Bin 10 content = " << h.prof->GetBinContent(10) << endl;
+    cout << "Bin 10 error   = " << h.prof->GetBinError(10) << endl;
+    cout << "prof Y min = " << h.prof->GetMinimum() << endl;
+    cout << "prof Y max = " << h.prof->GetMaximum() << endl;
 
 }
 
@@ -507,9 +491,6 @@ void SaveResults(const string &outputFileName, Histograms &h,
     h.mapdet1_afterselection->Write();
     h.mapdet2_afterselection->Write();
 
-
-
-    
     // Save channel-averaged tree
     TTree *tout = new TTree("channelMeans", "Medie per canale");
     tout->Branch("average_1", average_1, "average_1[64]/D");
@@ -689,17 +670,13 @@ void TimeRes(TTree *tree, TreeBranches &b, TTree *tree_correction)
     cout << "Time resolution error (approx): " << sigma_err / TMath::Sqrt(2) << " ps" << endl;  
 }
 
-
-
 void ProcessEvents3rd_picosec(TTree *tree, TreeBranches &b, Histograms &h,
-                   vector<vector<double>> &tabella1, 
-                   vector<vector<double>> &tabella2) 
+                              vector<vector<double>> &tabella1, 
+                              vector<vector<double>> &tabella2) 
 {
-
     int ilcanale;
-    cout<<"Select the channel(from 0 to 6, mpore than 6 considered all the events):   \n " << endl;
+    cout<<"Select the channel(from 0 to 6, more than 6 = consider all the events):   \n " << endl;
     cin>> ilcanale;
-    
            
     Long64_t nentries = tree->GetEntries();
     
@@ -723,8 +700,6 @@ void ProcessEvents3rd_picosec(TTree *tree, TreeBranches &b, Histograms &h,
             h.hAmp1Hit->Fill(b.pulses_amplitude[idx]);
             h.hQ->Fill(b.pulses_integral[idx]);
         }
-        
-
     
         // Process terzo
         if (b.HitFeb[2] == 1)
@@ -747,10 +722,6 @@ void ProcessEvents3rd_picosec(TTree *tree, TreeBranches &b, Histograms &h,
                 int det = b.Board[j];
                 if (det < 0 || det > 2) continue;
                 if (b.pulses_bad_pulse[j]) continue;
-               
-                //strani cut
-                //if (b.pulses_amplitude[j] < 0.05) continue;
-                
                 
                 ampFEB[det] = b.pulses_amplitude[j];
                 cfd10[det] = b.pulses_time_cfd10[j];
@@ -764,59 +735,45 @@ void ProcessEvents3rd_picosec(TTree *tree, TreeBranches &b, Histograms &h,
                 integral[det] = b.pulses_integral[j];
                 ch_x[det] = b.pulses_channel_x[j];
                 ch_y[det] = b.pulses_channel_y[j];
-
-
-
-                
-                
-
                 
                 if (det == 0)
                     h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
                 if (det == 1)
                     h.mapdet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
             }
-          
 
+            /*int feb0_hits = 0;
+            int feb1_hits = 0;
 
-            
+            for (int j = 0; j < b.npulses; j++) {
+                if (b.pulses_channel_x[j] == cx && b.pulses_channel_y[j] == cy) {
+
+                    if (b.Board[j] == 0) feb0_hits++;
+                    if (b.Board[j] == 1) feb1_hits++;
+                }
+            }
+
+            // selezione: ESATTAMENTE un hit per FEB
+            if (feb0_hits != 1 || feb1_hits != 1)
+                continue;*/
                 
-     
-
-    /*int feb0_hits = 0;
-    int feb1_hits = 0;
-
-    for (int j = 0; j < b.npulses; j++) {
-        if (b.pulses_channel_x[j] == cx && b.pulses_channel_y[j] == cy) {
-
-            if (b.Board[j] == 0) feb0_hits++;
-            if (b.Board[j] == 1) feb1_hits++;
-        }
-    }
-
-    // selezione: ESATTAMENTE un hit per FEB
-    if (feb0_hits != 1 || feb1_hits != 1)
-        continue;*/
-                
-                /*if (det == 0)
-                    h.mapdet1_afterselection->Fill(ch_x[0], ch_y[0]);
-                if (det == 1)
-                    h.mapdet2_afterselection->Fill(ch_x[1], ch_y[1]);*/
+            /*if (det == 0)
+                h.mapdet1_afterselection->Fill(ch_x[0], ch_y[0]);
+            if (det == 1)
+                h.mapdet2_afterselection->Fill(ch_x[1], ch_y[1]);*/
             
-                //dopo la condition della selezione dei canali altrimenti prima è inutile
-                 //cut di riccardo
-               
+            //dopo la condition della selezione dei canali altrimenti prima è inutile
+            //cut di riccardo
 
-
-                h.hTime20->Fill(cfd20[0]);
-                h.hTime30->Fill(cfd30[0]);
-                h.hTime50->Fill(cfd50[0]);
-                h.hTime60->Fill(cfd60[0]);
-                h.hTime30_2->Fill(cfd30[1]);
-                h.hcharge1->Fill(integral[0]);
-                h.hcharge2->Fill(integral[1]);
-                h.hrisetime1->Fill(risetime[0]);
-                h.hrisetime2->Fill(risetime[1]);
+            h.hTime20->Fill(cfd20[0]);
+            h.hTime30->Fill(cfd30[0]);
+            h.hTime50->Fill(cfd50[0]);
+            h.hTime60->Fill(cfd60[0]);
+            h.hTime30_2->Fill(cfd30[1]);
+            h.hcharge1->Fill(integral[0]);
+            h.hcharge2->Fill(integral[1]);
+            h.hrisetime1->Fill(risetime[0]);
+            h.hrisetime2->Fill(risetime[1]);
 
             h.htriple1->Fill(ampFEB[0]);
             h.htriple2->Fill(ampFEB[1]);
@@ -853,49 +810,14 @@ void ProcessEvents3rd_picosec(TTree *tree, TreeBranches &b, Histograms &h,
             h.conteggixcanale1->Fill(b.Channel[0]);
             h.conteggixcanale2->Fill(b.Channel[1]);
             h.conteggixcanale3->Fill(b.Channel[2]);
-            h.cfdvschannel1->SetPoint(h.cfdvschannel1->GetN(), b.Channel[0], cfd30[0]);
-              
+            h.cfdvschannel1->SetPoint(h.cfdvschannel1->GetN(), b.Channel[0], cfd30[0]);     
         }
     
         
-        if (i % 100000 == 0)
-            cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
+    if (i % 100000 == 0)
+        cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
     
     //cout << endl;
     //h.prof->Fill(0.5, 1000);   // solo per debug
-
-
-
+    }
 }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
