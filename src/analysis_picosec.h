@@ -110,6 +110,9 @@ void time_res(TTree *tree, TreeBranches &branches, TTree *tree_correction);
 void ProcessEvents3rd_picosec(TTree *tree, TreeBranches &branches, Histograms &hists, 
                    std::vector<std::vector<double>> &tabella1, 
                    std::vector<std::vector<double>> &tabella2); //farlo diventare un int invece che un void per avere il nome del file di output
+void ProcessEvents_november(TTree *tree, TreeBranches &branches, Histograms &hists, 
+                   std::vector<std::vector<double>> &tabella1, 
+                   std::vector<std::vector<double>> &tabella2);
 TFile* OpenInputFile(const std::string &filename);
 
 #endif // ANALYSIS_H

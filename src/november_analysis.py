@@ -64,7 +64,7 @@ int main() {
     // ------------------------------------------------
     
     cout << "\nProcessing events..." << endl;
-    ProcessEvents(tree, branches, hists, tabella1, tabella2);
+    ProcessEvents_november(tree, branches, hists, tabella1, tabella2);
     
     // ------------------------------------------------
     //                 Fit histograms

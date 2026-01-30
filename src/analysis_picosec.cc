@@ -169,6 +169,8 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
             for (int j = 0; j < b.npulses; j++) 
             {
                 int det = b.Board[j];
+                cout << "Board: " << det << endl;
+
                 if (det < 0 || det > 2) continue;
                 if (b.pulses_bad_pulse[j]) continue;
                
@@ -946,6 +948,137 @@ if(det ==2)
 
 
 
+
+
+
+
+void ProcessEvents_november(TTree *tree, TreeBranches &b, Histograms &h,
+                   vector<vector<double>> &tabella1, 
+                   vector<vector<double>> &tabella2) 
+{
+    int TheChannel;
+    int board0_hits = 0;
+        int board1_hits = 0;    
+        int board2_hits = 0;
+        int board3_hits = 0;    
+
+    //cout << "Select the channel (64 = no constraint on the channel number): \n " << endl;
+    //cin >> TheChannel;
+    
+    Long64_t nentries = tree->GetEntries();
+    
+    for (Long64_t i = 0; i < nentries; i++) 
+    {
+        tree->GetEntry(i);
+        
+        int nGood = 0;
+        int idx = -1;
+
+        
+
+        
+        if(b.npulses>2)continue; //prendo solo eventi con 2 o meno hit totali
+            
+            
+            for (int j = 0; j < b.npulses; j++) 
+            {
+                int det = b.Board[j];
+                cout << "Board: " << det << endl;
+                if (det > 1) continue;
+                if (b.pulses_bad_pulse[j]) continue;
+               
+                // Just testing low amplitude cut
+                //if (b.pulses_amplitude[j] < 0.05) continue;
+                
+                
+                if (det == 0)
+                    h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+                if (det == 1)
+                    h.mapdet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);  // da sistemare i numeri delle board, tecnicamente non sappiamo nulla sulle riuna di novembre 
+
+               if(det==0)
+                    if(b.Channel[j]==0)
+
+                        h.htriple1->Fill(b.pulses_amplitude[j]);
+                    else
+                        h.htriple2->Fill(b.pulses_amplitude[j]);
+                else
+                    h.htriple3->Fill(b.pulses_amplitude[j]);
+                
+            if(det==0)
+                board0_hits++;
+            if(det==1)
+                board1_hits++;
+            if(det==2)
+                board2_hits++;  
+            if(det==3)
+                board3_hits++;  
+            
+            
+                
+
+            }
+
+             
+            // After the channel selection condition, otherwise it's useless
+            //cut di riccardo  
+
+           /* h.hTime20->Fill(cfd20[0]);
+            h.hTime30->Fill(cfd30[0]);
+            h.hTime50->Fill(cfd50[0]);
+            h.hTime60->Fill(cfd60[0]);
+            h.hTime30_2->Fill(cfd30[1]);
+            h.hcharge1->Fill(integral[0]);
+            h.hcharge2->Fill(integral[1]);
+            h.hrisetime1->Fill(risetime[0]);
+            h.hrisetime2->Fill(risetime[1]);*/
+            
+            // Store peak times for channel averaging
+           /* for (int k = 0; k < NCHANNELS; k++) 
+            {
+                if (b.Channel[0] == k)
+                    tabella1[k].push_back(peak_time[0]);
+                if (b.Channel[1] == k)
+                    tabella2[k].push_back(peak_time[1]);
+            }*/
+            
+            // Time differences
+           /* double time30_12 = cfd30[0] - cfd30[1];
+            h.htime30_12->Fill(time30_12);
+            
+            h.hpeaktime1->Fill(peak_time[0]);
+            h.hpeaktime2->Fill(peak_time[1]);
+            h.hbaseline1->Fill(base[0]);
+            h.hbaseline2->Fill(base[1]);
+            
+            // Fill graphs
+            double peso = 1.0;
+            h.timevsamplitude->SetPoint(h.timevsamplitude->GetN(), ampFEB[0], cfd30[0], peso);
+            h.timevsamplitude2->SetPoint(h.timevsamplitude2->GetN(), ampFEB[1], cfd30[1], peso);
+            h.prof->Fill(ampFEB[0], cfd30[0]);
+            h.prof2->Fill(ampFEB[1], cfd30[1]);
+            h.timevsintegral->SetPoint(h.timevsintegral->GetN(), integral[0], cfd30[0]);
+            h.hintegral1->SetPoint(h.hintegral1->GetN(), ampFEB[0], integral[0]);
+            h.hintegral2->SetPoint(h.hintegral2->GetN(), ampFEB[1], integral[1]);*/
+            h.conteggixcanale1->Fill(b.Channel[0]);
+            h.conteggixcanale2->Fill(b.Channel[1]);
+            h.conteggixcanale3->Fill(b.Channel[2]);
+           // h.cfdvschannel1->SetPoint(h.cfdvschannel1->GetN(), b.Channel[0], cfd30[0]);
+
+
+
+            if (i % 100000 == 0)
+            cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
+        }
+
+    cout << "board0 hits: " << board0_hits << endl;
+    cout << "board1 hits: " << board1_hits << endl;
+    cout << "board2 hits: " << board2_hits << endl;
+    cout << "board3 hits: " << board3_hits << endl; 
+        
+    }
+
+    //cout << endl;
 
 
 
