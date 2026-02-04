@@ -48,7 +48,7 @@ struct Histograms {
     
     // Graphs
     TGraph *hintegral1, *hintegral2, *hintegral3;
-    TGraph2D *timevsamplitude, *timevsamplitude2;
+    TGraph *timevsamplitude, *timevsamplitude2;
     TGraph *timevsintegral, *timevsintegral2;
     TGraph *cfdvschannel1;
     
@@ -75,6 +75,7 @@ struct TreeBranches {
     Int_t HitFeb[3];
     Int_t Board[MAXPULSES];
     Int_t Channel[MAXPULSES];
+    Double_t Cell0TimeStamp[MAXPULSES];
 };
 
 
