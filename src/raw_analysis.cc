@@ -77,29 +77,34 @@ void SetupTreeBranches(TTree *tree, TreeBranches &b)
 }
 
 void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h) 
-{
-    int TheChannel;
-    cout << "Select the channel (64 = no constraint on the channel number): \n " << endl;
-    cin >> TheChannel;
-    
+{   
     Long64_t nentries = tree->GetEntries();
     
     for (Long64_t i = 0; i < nentries; i++) 
     {
         tree->GetEntry(i);
         
-        int nGood = 0;
-        int idx = -1;
-        
-        // Basic histograms
-        for (int j = 0; j < b.npulses; j++) 
+        // Basic histograms for amplitude
+        for (int j = 0; j < b.ArraySize; j++) 
         {
-            nGood++;
-            idx = j;
-            h.hAmpAll->Fill(b.pulses_amplitude[j]);
+            if (b.Board == 0)
+            {
+                h.hAmpAll1->Fill(b.Amplitude[j]);
+                h.hBaseline1->Fill(b.Baseline[j]);
+            }
+            else if (b.Board == 1)
++           {
+                h.hAmpAll2->Fill(b.Amplitude[j]);
+                h.hBaseline2->Fill(b.Baseline[j]);
+            }
+            else if (b.Board == 2)
++           {
+                h.hAmpAll3->Fill(b.Amplitude[j]);
+                h.hBaseline3->Fill(b.Baseline[j]);
+            }
         }
         
-        // Process double/triple hits
+        // Channels 
         if (b.HitFeb[0] >= 1 && b.HitFeb[1] >= 1)
         {
             double amp_FEB[3] = {-1.0, -1.0, -1.0};
@@ -143,13 +148,18 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h)
 
 void CreateCanvasesAndSaveResults(const std::string &outputFileName, Histograms &hists)
 {
-    // Create one canvas for each detector
-
+    // ---------------------------- Create one PDF file for each detector ----------------------------
     TCanvas *cSavePDF_Detector1 = new TCanvas("cSavePDF", "Saving PDF", 1200, 800);
-    cSavePDF -> SaveAs("Amplitude_Distribution_Detector1.pdf["); // Just open the PDF file for writing (append mode)
+    cSavePDF_Detector1 -> SaveAs("Amplitude_Distribution_Detector1.pdf["); // Just open the PDF file for writing (append mode)
 
-    TCanvas *cSavePDF_Detector2 = new TCanvas("c1", "Amplitude distribution for first detector", 1200, 800);
+    TCanvas *cSavePDF_Detector2 = new TCanvas("cSavePDF", "Saving PDF", 1200, 800);
+    cSavePDF_Detector2 -> SaveAs("Amplitude_Distribution_Detector2.pdf["); 
 
+    TCanvas *cSavePDF_Detector3 = new TCanvas("cSavePDF", "Saving PDF", 1200, 800);
+    cSavePDF_Detector3 -> SaveAs("Amplitude_Distribution_Detector3.pdf["); 
+
+    // ----------------------------------------------------------------------------------------------------------------
+    
     // Canvas for amplitude distributions
     TCanvas *c1 = new TCanvas("c1", "Amplitude distribution for first detector", 1200, 800);
     hists.hAmpAll1->Draw();
@@ -176,5 +186,8 @@ void CreateCanvasesAndSaveResults(const std::string &outputFileName, Histograms 
     hists.mapDet3->Draw("COLZ");
     c2->Update();
 
+    cSavePDF_Detector1 -> SaveAs("Amplitude_Distribution_Detector1.pdf]");
+    cSavePDF_Detector2 -> SaveAs("Amplitude_Distribution_Detector2.pdf]");
+    cSavePDF_Detector3 -> SaveAs("Amplitude_Distribution_Detector3.pdf]");
 
 }
