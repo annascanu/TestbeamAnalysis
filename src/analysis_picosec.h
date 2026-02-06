@@ -78,7 +78,6 @@ struct TreeBranches {
     Double_t Cell0TimeStamp[MAXPULSES];
 };
 
-
 struct FitResults {
     double prof_p0, prof_p0_err;
     double prof_p1, prof_p1_err;
@@ -90,10 +89,6 @@ struct FitResults {
     double prof2_chi2;
     int    prof2_ndf;
 };
-
-
-
-
 
 // Function declarations
 void InitializeHistograms(Histograms &hists);

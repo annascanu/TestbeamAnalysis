@@ -1,0 +1,180 @@
+#include "raw_analysis.h"
+#include <TStyle.h>
+#include <TLegend.h>
+#include <TLatex.h>
+#include <TMath.h>
+#include <iostream>
+#include <TROOT.h>
+#include <TApplication.h>
+#include <array>
+
+using namespace std;
+
+TFile* OpenInputFile(const string &filename) 
+{
+    cout << "Opening file: " << filename << endl;
+    TFile *file = TFile::Open(filename.c_str(), "READ");
+    if (!file || file->IsZombie()) 
+    {
+        cerr << "Error: cannot open " << filename << endl;
+        return nullptr;
+    }
+    return file;
+}
+
+void InitializeHistograms(Histograms &h) 
+{
+    // Basic histograms
+    h.hAmpAll1 = new TH1F("hAmpAll1", "All pulse amplitudes for first detector;Amplitude [a.u.];Counts",  1000, 0, 5);
+    h.hAmpAll2 = new TH1F("hAmpAll2", "All pulse amplitudes for second detector;Amplitude [a.u.];Counts", 1000, 0, 5);
+    h.hAmpAll3 = new TH1F("hAmpAll3", "All pulse amplitudes for third detector;Amplitude [a.u.];Counts",  1000, 0, 5);
+    
+    // Baseline
+    h.hBaseline1 = new TH1F("hBaseline1", "Baseline for first detector;Amplitude [a.u.];Counts",  1000, 0.9, 1.1);
+    h.hBaseline2 = new TH1F("hBaseline2", "Baseline for second detector;Amplitude [a.u.];Counts", 1000, 0.9, 1.1);
+    h.hBaseline3 = new TH1F("hBaseline3", "Baseline for third detector;Amplitude [a.u.];Counts",  1000, 0.9, 1.1);
+
+    // Channel counts
+    h.hChannelHits1 = new TH1F("hChannelHits1", "Channel hits for first detector;Channel;Counts", 64, 0, 64);
+    h.hChannelHits2 = new TH1F("hChannelHits2", "Channel hits for second detector;Channel;Counts",64, 0, 64);
+    h.hChannelHits3 = new TH1F("hChannelHits3", "Channel hits for third detector;Channel;Counts", 64, 0, 64);
+
+    // Amplitudes per channel
+    /*
+    for (int i = 0; i < 64; i++) 
+    {
+        h.hAmpChannel1[i] = new TH1F(Form("hAmpChannel1_%d", i), Form("Amplitudes for channel %d of first detector;Amplitude [a.u.];Counts", i), 1000, 0, 5);
+        h.hAmpChannel2[i] = new TH1F(Form("hAmpChannel2_%d", i), Form("Amplitudes for channel %d of second detector;Amplitude [a.u.];Counts", i), 1000, 0, 5);
+        h.hAmpChannel3[i] = new TH1F(Form("hAmpChannel3_%d", i), Form("Amplitudes for channel %d of third detector;Amplitude [a.u.];Counts", i), 1000, 0, 5);
+    }
+    */
+
+    // Hit maps
+    h.mapDet1 = new TH2F("hitmapdet1", "Hit map for detector 1;x;y", 8, 0, 8, 8, 0, 8);
+    h.mapDet2 = new TH2F("hitmapdet2", "Hit map for detector 2;x;y", 8, 0, 8, 8, 0, 8);
+    h.mapDet3 = new TH2F("hitmapdet3", "Hit map for detector 3;x;y", 8, 0, 8, 8, 0, 8);
+}
+
+void SetupTreeBranches(TTree *tree, TreeBranches &b) 
+{
+    cout << "\n\n                  Setting up tree branches...\n\n\n" << endl;
+    // tree->Print();
+
+    tree -> SetBranchAddress("ArraySize", &b.ArraySize);
+    tree -> SetBranchAddress("Board", &b.Board);
+    tree -> SetBranchAddress("HitFeb", &b.HitFeb);
+    tree -> SetBranchAddress("Channel", &b.Channel);
+
+    tree -> SetBranchAddress("Cell0TimeStamp", &b.Cell0TimeStamp);
+    // tree -> SetBranchAddress("UnixTime", &b.UnixTime);
+    tree -> SetBranchAddress("TimeInstant", &b.TimeInstant);
+
+    tree -> SetBranchAddress("Amplitude", &b.Amplitude);
+    tree -> SetBranchAddress("Baseline", &b.Baseline);
+    tree -> SetBranchAddress("PeakValue", &b.PeakValue);
+    tree -> SetBranchAddress("TOTValue", &b.TOTValue);
+    tree -> SetBranchAddress("Waveform", &b.Waveform);
+}
+
+void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h) 
+{
+    int TheChannel;
+    cout << "Select the channel (64 = no constraint on the channel number): \n " << endl;
+    cin >> TheChannel;
+    
+    Long64_t nentries = tree->GetEntries();
+    
+    for (Long64_t i = 0; i < nentries; i++) 
+    {
+        tree->GetEntry(i);
+        
+        int nGood = 0;
+        int idx = -1;
+        
+        // Basic histograms
+        for (int j = 0; j < b.npulses; j++) 
+        {
+            nGood++;
+            idx = j;
+            h.hAmpAll->Fill(b.pulses_amplitude[j]);
+        }
+        
+        // Process double/triple hits
+        if (b.HitFeb[0] >= 1 && b.HitFeb[1] >= 1)
+        {
+            double amp_FEB[3] = {-1.0, -1.0, -1.0};
+            double base[3] = {-9999.0, -9999.0, -9999.0};
+
+            for (int j = 0; j < b.npulses; j++) 
+            {
+                int det = b.Board[j];
+                cout << "Board: " << det << endl;
+
+                if (det < 0 || det > 2) continue;
+               
+                // Just testing low amplitude cut
+                //if (b.pulses_amplitude[j] < 0.05) continue;
+                
+                ampFEB[det] = b.pulses_amplitude[j];
+                base[det] = b.Baseline[j];
+                peak_time[det] = b.pulses_peak_time[j];
+                
+                if (det == 0)
+                    h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+                if (det == 1)
+                    h.mapdet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+            }
+            
+            h.hbaseline1->Fill(base[0]);
+            h.hbaseline2->Fill(base[1]);
+
+            // Fill amplitude histograms for each channel
+            h.conteggixcanale1->Fill(b.Channel[0]);
+            h.conteggixcanale2->Fill(b.Channel[1]);
+            h.conteggixcanale3->Fill(b.Channel[2]);
+        }
+        
+        if (i % 100000 == 0)
+            cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
+    }
+
+    cout << endl;
+}
+
+void CreateCanvasesAndSaveResults(const std::string &outputFileName, Histograms &hists)
+{
+    // Create one canvas for each detector
+
+    TCanvas *cSavePDF_Detector1 = new TCanvas("cSavePDF", "Saving PDF", 1200, 800);
+    cSavePDF -> SaveAs("Amplitude_Distribution_Detector1.pdf["); // Just open the PDF file for writing (append mode)
+
+    TCanvas *cSavePDF_Detector2 = new TCanvas("c1", "Amplitude distribution for first detector", 1200, 800);
+
+    // Canvas for amplitude distributions
+    TCanvas *c1 = new TCanvas("c1", "Amplitude distribution for first detector", 1200, 800);
+    hists.hAmpAll1->Draw();
+    c1 -> SaveAs("Amplitude_Distribution_Detector1.pdf");
+
+    TCanvas *c2 = new TCanvas("c2", "Amplitude distribution for second detector", 1200, 800);
+    hists.hAmpAll2->Draw();
+    c2 -> SaveAs("Amplitude_Distribution_Detector2.pdf");
+    
+    TCanvas *c3 = new TCanvas("c3", "Amplitude distribution for third detector", 1200, 800);
+    hists.hAmpAll3->Draw();
+    c3 -> SaveAs("Amplitude_Distribution_Detector3.pdf");
+    
+    c1->Update();
+
+    TCanvas *c2 = new TCanvas("c2", "Hit Maps", 1200, 800);
+    c2->Divide(3,1);
+
+    c2->cd(1);
+    hists.mapDet1->Draw("COLZ");
+    c2->cd(2);
+    hists.mapDet2->Draw("COLZ");
+    c2->cd(3);
+    hists.mapDet3->Draw("COLZ");
+    c2->Update();
+
+
+}

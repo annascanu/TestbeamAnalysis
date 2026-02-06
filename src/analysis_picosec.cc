@@ -392,21 +392,13 @@ void CreateCanvases(Histograms &h)
     cmap1->SaveAs("hitmap1.pdf");
     delete cmap1;
     
-    /*
-    gROOT->SetBatch(kTRUE);
-
-    TCanvas *c_prof = new TCanvas("c_prof",
-                                "Time vs Amplitude - FEB0 / FEB1",
-                                800, 600);
-
+    /*TCanvas *c_prof = new TCanvas("c_prof", "Time vs Amplitude - FEB0 / FEB1", 800, 600);
     c_prof->cd();
     c_prof->SetGrid();*/
 
     // double ymin = min(h.prof->GetMinimum());
     // double ymax = max(h.prof->GetMaximum());
-    //
     // h.prof->GetYaxis()->SetRangeUser(ymin * 0.95, ymax * 1.05);
-
 
     // h.prof->SetLineColor(kRed+1);
     // h.prof->SetMarkerColor(kRed+1);
@@ -423,19 +415,18 @@ void CreateCanvases(Histograms &h)
     // h.prof->GetXaxis()->SetTitleSize(0.045);
     // h.prof->GetYaxis()->SetTitleSize(0.045);
 
-    // h.prof->Draw();
+    //h.prof->Draw();
     //h.prof2->Draw();
-    /*
-    TLegend *leg = new TLegend(0.15, 0.75, 0.35, 0.88);
+    
+    /*TLegend *leg = new TLegend(0.15, 0.75, 0.35, 0.88);
     leg->SetBorderSize(0);
     leg->SetFillStyle(0);
     leg->Draw();*/
 
     // c_prof->Modified();
     // c_prof->Update();
-    // c_prof->Paint();      // <<< QUESTA È LA CHIAVE
+    // c_prof->Paint(); 
     // c_prof->SaveAs("TimeVsAmplitude_FEB0_FEB1.pdf");
-
 
     cout << "prof entries = " << h.prof->GetEntries() << endl;
     cout << "prof mean    = " << h.prof->GetMean(1) << endl;
@@ -444,19 +435,16 @@ void CreateCanvases(Histograms &h)
     cout << "Bin 10 error   = " << h.prof->GetBinError(10) << endl;
     cout << "prof Y min = " << h.prof->GetMinimum() << endl;
     cout << "prof Y max = " << h.prof->GetMaximum() << endl;
-
-
     
     //gStyle->SetOptStat(0);
 
     TCanvas *c_q = new TCanvas("c_q", "Time vs Integral", 900, 700);
     c_q->SetGrid();
 
-    // <<< QUI VANNO LE 5 RIGHE >>>
     h.timevsamplitude->SetMarkerStyle(20);
     h.timevsamplitude->SetMarkerSize(0.6);
     h.timevsamplitude->SetMarkerColor(kAzure+2);
-   // h.timevsamplitude->GetYaxis()->SetRangeUser(3500, 4500);
+    //h.timevsamplitude->GetYaxis()->SetRangeUser(3500, 4500);
     h.timevsamplitude->SetTitle("CFD30 time vs Amplitude;Amplitude [a.u.];CFD30 time [ps]");
     //h.timevsamplitude->SetLineColor(0);
     //h.timevsamplitude->SetLineStyle(0);
@@ -467,19 +455,16 @@ void CreateCanvases(Histograms &h)
 
     delete c_q;
 
-
     TCanvas *c_q2 = new TCanvas("c_q22", "Time vs Integral", 900, 700);
     c_q2->SetGrid();
 
-    // <<< QUI VANNO LE 5 RIGHE >>>
     h.timevsamplitude2->SetMarkerStyle(20);
     h.timevsamplitude2->SetMarkerSize(0.6);
     h.timevsamplitude2->SetMarkerColor(kAzure+2);
     //h.timevsamplitude2->GetYaxis()->SetRangeUser(3500, 4500);
     h.timevsamplitude2->SetTitle("CFD30 time vs amplitude;amplitude [a.u.];CFD30 time [ps]"); 
-   // h.timevsamplitude2->SetLineColor(0);
+    //h.timevsamplitude2->SetLineColor(0);
     //h.timevsamplitude2->SetLineStyle(0);
-
  
     //h.timevsamplitude2->ComputeRange();
     h.timevsamplitude2->SetLineWidth(0);
@@ -487,13 +472,6 @@ void CreateCanvases(Histograms &h)
     c_q2->SaveAs("TimeVsamplitude2.pdf");
 
     delete c_q2;
-
-
-
-
-
-
-
 }
 
 void SaveResults(const string &outputFileName, Histograms &h,
@@ -670,7 +648,7 @@ void TimeRes(TTree *tree, TreeBranches &b, TTree *tree_correction)
         hcfduncorrected_1->SetPoint(hcfduncorrected_1->GetN(), ampFEB1, cfd1);
         
         if (i % 100000 == 0)
-                cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
+            cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
     }
 
     // Fit Gaussian to time difference histogram and creation of TApplication 
@@ -801,64 +779,59 @@ void ProcessEvents3rd_picosec(TTree *tree, TreeBranches &b, Histograms &h,
                     h.mapdet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
             
 
-            /*int feb0_hits = 0;
-            int feb1_hits = 0;
+                /*int feb0_hits = 0;
+                int feb1_hits = 0;
 
-            for (int j = 0; j < b.npulses; j++) {
-                if (b.pulses_channel_x[j] == cx && b.pulses_channel_y[j] == cy) {
+                for (int j = 0; j < b.npulses; j++) {
+                    if (b.pulses_channel_x[j] == cx && b.pulses_channel_y[j] == cy) {
 
-                    if (b.Board[j] == 0) feb0_hits++;
-                    if (b.Board[j] == 1) feb1_hits++;
+                        if (b.Board[j] == 0) feb0_hits++;
+                        if (b.Board[j] == 1) feb1_hits++;
+                    }
                 }
-            }
 
-            // selezione: ESATTAMENTE un hit per FEB
-            if (feb0_hits != 1 || feb1_hits != 1)
-                continue;*/
+                // selezione: ESATTAMENTE un hit per FEB
+                if (feb0_hits != 1 || feb1_hits != 1)
+                    continue;*/
             
-            int centerx[16] = {3,3,4,4,2,2,2,2,3,4,5,5,5,5,4,3};
-            int centery[16] = {4,5,4,5,2,3,4,5,5,5,5,4,3,2,2,2};
+                int centerx[16] = {3,3,4,4,2,2,2,2,3,4,5,5,5,5,4,3};
+                int centery[16] = {4,5,4,5,2,3,4,5,5,5,5,4,3,2,2,2};
 
-            if(ilcanale==1){
-                for(int k=0;k<4;k++){
-                    if (det==0)
-                        if( (ch_x[0]==centerx[k]) && (ch_y[0]==centery[k]) )
-                            h.mapdet1_afterselection->Fill(ch_x[0], ch_y[0]);
-                            
-                    if (det==1)
-                        if( (ch_x[1]==centerx[k]) && (ch_y[1]==centery[k]) )
-                            h.mapdet2_afterselection->Fill(ch_x[1], ch_y[1]);
+                if(ilcanale==1)
+                {
+                    for(int k=0;k<4;k++)
+                    {
+                        if (det==0)
+                            if ( (ch_x[0]==centerx[k]) && (ch_y[0]==centery[k]) )
+                                h.mapdet1_afterselection->Fill(ch_x[0], ch_y[0]);
+                        if (det==1)
+                            if ( (ch_x[1]==centerx[k]) && (ch_y[1]==centery[k]) )
+                                h.mapdet2_afterselection->Fill(ch_x[1], ch_y[1]);
+                    }
+
                 }
 
-            }
-
-    
-
-
-            if(ilcanale==2){
-                for(int k=0;k<16;k++){
-                    if (det==0)
-                        if( (ch_x[0]==centerx[k]) && (ch_y[0]==centery[k]) )
-                            h.mapdet1_afterselection->Fill(ch_x[0], ch_y[0]);
-                            
-                    if (det==1)
-                        if( (ch_x[1]==centerx[k]) && (ch_y[1]==centery[k]) )
-                            h.mapdet2_afterselection->Fill(ch_x[1], ch_y[1]);
+                if(ilcanale==2)
+                {
+                    for(int k=0;k<16;k++)
+                    {
+                        if (det==0)
+                            if ( (ch_x[0]==centerx[k]) && (ch_y[0]==centery[k]) )
+                                h.mapdet1_afterselection->Fill(ch_x[0], ch_y[0]);
+                                
+                        if (det==1)
+                            if ( (ch_x[1]==centerx[k]) && (ch_y[1]==centery[k]) )
+                                h.mapdet2_afterselection->Fill(ch_x[1], ch_y[1]);
+                    }
                 }
+            } 
 
-            }
-            
-
-        } 
             /*if (det == 0)
                 h.mapdet1_afterselection->Fill(ch_x[0], ch_y[0]);
             if (det == 1)
                 h.mapdet2_afterselection->Fill(ch_x[1], ch_y[1]);*/
-            
-            //dopo la condition della selezione dei canali altrimenti prima è inutile
-            //cut di riccardo
 
-           /* h.hTime20->Fill(cfd20[0]);
+            /* h.hTime20->Fill(cfd20[0]);
             h.hTime30->Fill(cfd30[0]);
             h.hTime50->Fill(cfd50[0]);
             h.hTime60->Fill(cfd60[0]);
@@ -873,7 +846,7 @@ void ProcessEvents3rd_picosec(TTree *tree, TreeBranches &b, Histograms &h,
             h.htriple3->Fill(ampFEB[2]);*/
             
             // Store peak times for channel averaging
-           /* for (int k = 0; k < NCHANNELS; k++) 
+            /* for (int k = 0; k < NCHANNELS; k++) 
             {
                 if (b.Channel[0] == k)
                     tabella1[k].push_back(peak_time[0]);
@@ -882,7 +855,7 @@ void ProcessEvents3rd_picosec(TTree *tree, TreeBranches &b, Histograms &h,
             }*/
             
             // Time differences
-           /* double time30_12 = cfd30[0] - cfd30[1];
+            /* double time30_12 = cfd30[0] - cfd30[1];
             h.htime30_12->Fill(time30_12);
             
             h.hpeaktime1->Fill(peak_time[0]);
@@ -905,27 +878,11 @@ void ProcessEvents3rd_picosec(TTree *tree, TreeBranches &b, Histograms &h,
             h.conteggixcanale3->Fill(b.Channel[2]);
             //h.cfdvschannel1->SetPoint(h.cfdvschannel1->GetN(), b.Channel[0], cfd30[0]);     
         }
-    
         
-    if (i % 100000 == 0)
-        cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
-    
-    //cout << endl;
-    //h.prof->Fill(0.5, 1000);   // solo per debug
+        if (i % 100000 == 0)
+            cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 void ProcessEvents_november(TTree *tree, TreeBranches &b, Histograms &h,
                    vector<vector<double>> &tabella1, 
@@ -933,9 +890,9 @@ void ProcessEvents_november(TTree *tree, TreeBranches &b, Histograms &h,
 {
     int TheChannel;
     int board0_hits = 0;
-        int board1_hits = 0;    
-        int board2_hits = 0;
-        int board3_hits = 0;    
+    int board1_hits = 0;    
+    int board2_hits = 0;
+    int board3_hits = 0;    
     double time_MCP, time_diff;
     //cout << "Select the channel (64 = no constraint on the channel number): \n " << endl;
     //cin >> TheChannel;
@@ -951,164 +908,133 @@ void ProcessEvents_november(TTree *tree, TreeBranches &b, Histograms &h,
 
         cout << "Event " << i << " with " << b.npulses << " pulses." << endl;
 
-
         //if(b.npulses!=2)continue; //prendo solo eventi con 2 hit
-        if(b.npulses<=1)continue; //prendo solo eventi con 2 o meno hit totali
+        if(b.npulses <= 1) continue; //prendo solo eventi con 2 o meno hit totali
         //if(b.Channel[0]==19)continue; //canale rumoroso 
         //if(b.Channel[1]==0)continue; //canale rumoroso
             
             
-            for (int j = 0; j < b.npulses; j++) 
+        for (int j = 0; j < b.npulses; j++) 
+        {
+            int det = b.Board[j];
+            //cout << "Board: " << det << endl;
+            if(det ==0)
             {
-                int det = b.Board[j];
-                //cout << "Board: " << det << endl;
-                if(det ==0){
-                    if(b.Channel[j]==0){
-                        board0_hits++;
-                        //cout <<"cell0 timestamp det0: " << b.Cell0TimeStamp[j] << endl;
+                if(b.Channel[j]==0)
+                {
+                    board0_hits++;
+                    //cout <<"cell0 timestamp det0: " << b.Cell0TimeStamp[j] << endl;
 
-                        h.htriple1->Fill(b.pulses_amplitude[j]);
-                        h.hcharge1->Fill(b.pulses_integral[j]);
-                        h.timevsamplitude2->SetPoint(h.timevsamplitude2->GetN(),b.pulses_amplitude[j], b.pulses_time_cfd30[j]);//+b.Cell0TimeStamp[j]*1000);
-                        time_MCP=b.pulses_time_cfd30[j]+b.Cell0TimeStamp[j]*1000;
+                    h.htriple1->Fill(b.pulses_amplitude[j]);
+                    h.hcharge1->Fill(b.pulses_integral[j]);
+                    h.timevsamplitude2->SetPoint(h.timevsamplitude2->GetN(),b.pulses_amplitude[j], b.pulses_time_cfd30[j]);//+b.Cell0TimeStamp[j]*1000);
+                    time_MCP=b.pulses_time_cfd30[j]+b.Cell0TimeStamp[j]*1000;
+                } 
+            }
 
-                    } }
-
-
-                if (det==0 || det==2) continue;
-                //if (b.pulses_bad_pulse[j]) continue;
+            if (det==0 || det==2) continue;
+            //if (b.pulses_bad_pulse[j]) continue;
                
-                // Just testing low amplitude cut
-                //if (b.pulses_amplitude[j] < 0.05) continue;
+            // Just testing low amplitude cut
+            //if (b.pulses_amplitude[j] < 0.05) continue;
                 
                 
-                if (det == 0)
-                    h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
-                if (det == 1)
-                    h.mapdet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);  // da sistemare i numeri delle board, tecnicamente non sappiamo nulla sulle riuna di novembre 
+            if (det == 0)
+                h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+            if (det == 1)
+                h.mapdet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);  // da sistemare i numeri delle board, tecnicamente non sappiamo nulla sulle riuna di novembre 
                 
-               if(det==1){
-                    //if(b.Channel[j]==0)
-
-                            //h.htriple1->Fill(b.pulses_amplitude[j]);
-                    //else
-                        h.htriple2->Fill(b.pulses_amplitude[j]);
-                        h.hcharge2->Fill(b.pulses_integral[j]);
-                        time_diff=(b.pulses_time_cfd30[j]+b.Cell0TimeStamp[j]*1000);
-                        
-                        cout <<"cell0 timestampdet1: " << b.Cell0TimeStamp[j] << endl;
-                        }
-
-                else{
-                    cout <<"cell0 timestampdet3: " << b.Cell0TimeStamp[j] << endl;
-                    h.htriple3->Fill(b.pulses_amplitude[j]);
-                    h.hcharge2->Fill(b.pulses_integral[j]);
-                    time_diff=(b.pulses_time_cfd30[j]+b.Cell0TimeStamp[j]*1000);
-                    h.htime_12->Fill(time_diff);}
-                
-            if(det==0)
-                //nothing
-                board0_hits++;
             if(det==1)
+            {
+                //if(b.Channel[j]==0)
+                    //h.htriple1->Fill(b.pulses_amplitude[j]);
+                //else
+                h.htriple2->Fill(b.pulses_amplitude[j]);
+                h.hcharge2->Fill(b.pulses_integral[j]);
+                time_diff=(b.pulses_time_cfd30[j]+b.Cell0TimeStamp[j]*1000);
+                        
+                cout <<"cell0 timestampdet1: " << b.Cell0TimeStamp[j] << endl;
+            }
+            else
+            {
+                cout <<"cell0 timestampdet3: " << b.Cell0TimeStamp[j] << endl;
+                h.htriple3->Fill(b.pulses_amplitude[j]);
+                h.hcharge2->Fill(b.pulses_integral[j]);
+                time_diff=(b.pulses_time_cfd30[j]+b.Cell0TimeStamp[j]*1000);
+                h.htime_12->Fill(time_diff);
+            }
+                
+            if(det == 0) // nothing
+                board0_hits++;
+            if(det == 1)
                 board1_hits++;
-            if(det==2)
+            if(det == 2)
                 board2_hits++;  
-            if(det==3)
+            if(det == 3)
                 board3_hits++;  
 
-
-
-            
-                
-
-            h.timevsamplitude->SetPoint(h.timevsamplitude->GetN(),b.pulses_amplitude[j], b.pulses_time_cfd30[j]);//+b.Cell0TimeStamp[j]*1000);
-            
+            h.timevsamplitude->SetPoint(h.timevsamplitude->GetN(),b.pulses_amplitude[j], b.pulses_time_cfd30[j]); //+b.Cell0TimeStamp[j]*1000);   
             //cout << "Amplitude: " << b.pulses_amplitude[j] << " CFD30 time: " << b.pulses_time_cfd30[j] << endl;    
             h.htime_13->Fill(b.Cell0TimeStamp[j]);  
 
             
-            }
-            time_diff=time_MCP-time_diff;
-            h.htime_12->Fill(time_diff);
-            // After the channel selection condition, otherwise it's useless
-            //cut di riccardo  
-
-           /* h.hTime20->Fill(cfd20[0]);
-            h.hTime30->Fill(cfd30[0]);
-            h.hTime50->Fill(cfd50[0]);
-            h.hTime60->Fill(cfd60[0]);
-            h.hTime30_2->Fill(cfd30[1]);
-            h.hcharge1->Fill(integral[0]);
-            h.hcharge2->Fill(integral[1]);
-            h.hrisetime1->Fill(risetime[0]);
-            h.hrisetime2->Fill(risetime[1]);*/
-            
-            // Store peak times for channel averaging
-           /* for (int k = 0; k < NCHANNELS; k++) 
-            {
-                if (b.Channel[0] == k)
-                    tabella1[k].push_back(peak_time[0]);
-                if (b.Channel[1] == k)
-                    tabella2[k].push_back(peak_time[1]);
-            }*/
-            
-            // Time differences
-           /* double time30_12 = cfd30[0] - cfd30[1];
-            h.htime30_12->Fill(time30_12);
-            
-            h.hpeaktime1->Fill(peak_time[0]);
-            h.hpeaktime2->Fill(peak_time[1]);
-            h.hbaseline1->Fill(base[0]);
-            h.hbaseline2->Fill(base[1]);
-            
-            // Fill graphs
-            double peso = 1.0;
-            h.timevsamplitude->SetPoint(h.timevsamplitude->GetN(), ampFEB[0], cfd30[0], peso);
-            h.timevsamplitude2->SetPoint(h.timevsamplitude2->GetN(), ampFEB[1], cfd30[1], peso);
-            h.prof->Fill(ampFEB[0], cfd30[0]);
-            h.prof2->Fill(ampFEB[1], cfd30[1]);
-            h.timevsintegral->SetPoint(h.timevsintegral->GetN(), integral[0], cfd30[0]);
-            h.hintegral1->SetPoint(h.hintegral1->GetN(), ampFEB[0], integral[0]);
-            h.hintegral2->SetPoint(h.hintegral2->GetN(), ampFEB[1], integral[1]);*/
-            h.conteggixcanale1->Fill(b.Channel[1]);
-            h.conteggixcanale2->Fill(b.Channel[3]);
-            //h.conteggixcanale3->Fill(b.Channel[3]);
-           // h.cfdvschannel1->SetPoint(h.cfdvschannel1->GetN(), b.Channel[0], cfd30[0]);
-
-
-
-            if (i % 100000 == 0)
-            cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
         }
+            
+        time_diff=time_MCP-time_diff;
+        h.htime_12->Fill(time_diff);
+            
+        // After the channel selection condition, otherwise it's useless
+        //cut di riccardo  
+
+        /* h.hTime20->Fill(cfd20[0]);
+        h.hTime30->Fill(cfd30[0]);
+        h.hTime50->Fill(cfd50[0]);
+        h.hTime60->Fill(cfd60[0]);
+        h.hTime30_2->Fill(cfd30[1]);
+        h.hcharge1->Fill(integral[0]);
+        h.hcharge2->Fill(integral[1]);
+        h.hrisetime1->Fill(risetime[0]);
+        h.hrisetime2->Fill(risetime[1]);*/
+            
+        // Store peak times for channel averaging
+        /* for (int k = 0; k < NCHANNELS; k++) 
+        {
+            if (b.Channel[0] == k)
+                tabella1[k].push_back(peak_time[0]);
+            if (b.Channel[1] == k)
+                tabella2[k].push_back(peak_time[1]);
+        }*/
+            
+        // Time differences
+        /* double time30_12 = cfd30[0] - cfd30[1];
+        h.htime30_12->Fill(time30_12);
+            
+        h.hpeaktime1->Fill(peak_time[0]);
+        h.hpeaktime2->Fill(peak_time[1]);
+        h.hbaseline1->Fill(base[0]);
+        h.hbaseline2->Fill(base[1]);
+            
+        // Fill graphs
+        double peso = 1.0;
+        h.timevsamplitude->SetPoint(h.timevsamplitude->GetN(), ampFEB[0], cfd30[0], peso);
+        h.timevsamplitude2->SetPoint(h.timevsamplitude2->GetN(), ampFEB[1], cfd30[1], peso);
+        h.prof->Fill(ampFEB[0], cfd30[0]);
+        h.prof2->Fill(ampFEB[1], cfd30[1]);
+        h.timevsintegral->SetPoint(h.timevsintegral->GetN(), integral[0], cfd30[0]);
+        h.hintegral1->SetPoint(h.hintegral1->GetN(), ampFEB[0], integral[0]);
+        h.hintegral2->SetPoint(h.hintegral2->GetN(), ampFEB[1], integral[1]); */
+        h.conteggixcanale1->Fill(b.Channel[1]);
+        h.conteggixcanale2->Fill(b.Channel[3]);
+        //h.conteggixcanale3->Fill(b.Channel[3]);
+        //h.cfdvschannel1->SetPoint(h.cfdvschannel1->GetN(), b.Channel[0], cfd30[0]);
+
+        if (i % 100000 == 0)
+            cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
+    }
 
     cout << "board0 hits: " << board0_hits << endl;
     cout << "board1 hits: " << board1_hits << endl;
     cout << "board2 hits: " << board2_hits << endl;
     cout << "board3 hits: " << board3_hits << endl; 
         
-    }
-
-    //cout << endl;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
