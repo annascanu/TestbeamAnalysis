@@ -53,7 +53,7 @@ void InitializeHistograms(Histograms &h)
     h.htriple3 = new TH1F("htriple3", "Pulse amplitude for third detector", 1000, 0, 1.5);
     
     // Time differences
-    h.htime_12 = new TH1F("htime_12", "Time difference;Time [ps];Counts", 100, -2000, 2000);
+    h.htime_12 = new TH1F("htime_12", "Time difference;Time [ps];Counts", 100, 18000, 22000);
     h.htime_13 = new TH1F("htime_13", "Time difference;Time [ps];Counts", 100, 1e12, 1e13);// to be filled with Cell0TimeStamp for debugging
     h.htime_23 = new TH1F("htime_23", "Time difference;Time [ps];Counts", 100, -0.2, 0.2);
     
@@ -156,7 +156,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
         }
         
         // Process double/triple hits
-        if (b.HitFeb[0] == 1 && b.HitFeb[1] == 1)
+        if (b.HitFeb[0] >= 1 && b.HitFeb[1] >= 1)
         {
             double ampFEB[3] = {-1.0, -1.0, -1.0};
             double cfd10[3] = {-9999.0, -9999.0, -9999.0};
@@ -936,7 +936,7 @@ void ProcessEvents_november(TTree *tree, TreeBranches &b, Histograms &h,
         int board1_hits = 0;    
         int board2_hits = 0;
         int board3_hits = 0;    
-
+    double time_MCP, time_diff;
     //cout << "Select the channel (64 = no constraint on the channel number): \n " << endl;
     //cin >> TheChannel;
     
@@ -949,11 +949,12 @@ void ProcessEvents_november(TTree *tree, TreeBranches &b, Histograms &h,
         int nGood = 0;
         int idx = -1;
 
-        
+        cout << "Event " << i << " with " << b.npulses << " pulses." << endl;
 
-        
+
+        //if(b.npulses!=2)continue; //prendo solo eventi con 2 hit
         if(b.npulses<=1)continue; //prendo solo eventi con 2 o meno hit totali
-        if(b.Channel[0]==19)continue; //canale rumoroso 
+        //if(b.Channel[0]==19)continue; //canale rumoroso 
         //if(b.Channel[1]==0)continue; //canale rumoroso
             
             
@@ -966,9 +967,12 @@ void ProcessEvents_november(TTree *tree, TreeBranches &b, Histograms &h,
                         board0_hits++;
                         //cout <<"cell0 timestamp det0: " << b.Cell0TimeStamp[j] << endl;
 
-                        h.htriple1->Fill(b.pulses_amplitude[j]);}}
+                        h.htriple1->Fill(b.pulses_amplitude[j]);
+                        h.hcharge1->Fill(b.pulses_integral[j]);
+                        h.timevsamplitude2->SetPoint(h.timevsamplitude2->GetN(),b.pulses_amplitude[j], b.pulses_time_cfd30[j]);//+b.Cell0TimeStamp[j]*1000);
+                        time_MCP=b.pulses_time_cfd30[j]+b.Cell0TimeStamp[j]*1000;
 
-                        
+                    } }
 
 
                 if (det==0 || det==2) continue;
@@ -982,19 +986,25 @@ void ProcessEvents_november(TTree *tree, TreeBranches &b, Histograms &h,
                     h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
                 if (det == 1)
                     h.mapdet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);  // da sistemare i numeri delle board, tecnicamente non sappiamo nulla sulle riuna di novembre 
-
+                
                if(det==1){
                     //if(b.Channel[j]==0)
 
                             //h.htriple1->Fill(b.pulses_amplitude[j]);
                     //else
                         h.htriple2->Fill(b.pulses_amplitude[j]);
-                        //cout <<"cell0 timestampdet1: " << b.Cell0TimeStamp[j] << endl;
+                        h.hcharge2->Fill(b.pulses_integral[j]);
+                        time_diff=(b.pulses_time_cfd30[j]+b.Cell0TimeStamp[j]*1000);
+                        
+                        cout <<"cell0 timestampdet1: " << b.Cell0TimeStamp[j] << endl;
                         }
 
                 else{
-                    //cout <<"cell0 timestampdet3: " << b.Cell0TimeStamp[j] << endl;
-                    h.htriple3->Fill(b.pulses_amplitude[j]);}
+                    cout <<"cell0 timestampdet3: " << b.Cell0TimeStamp[j] << endl;
+                    h.htriple3->Fill(b.pulses_amplitude[j]);
+                    h.hcharge2->Fill(b.pulses_integral[j]);
+                    time_diff=(b.pulses_time_cfd30[j]+b.Cell0TimeStamp[j]*1000);
+                    h.htime_12->Fill(time_diff);}
                 
             if(det==0)
                 //nothing
@@ -1011,13 +1021,15 @@ void ProcessEvents_november(TTree *tree, TreeBranches &b, Histograms &h,
             
                 
 
-            h.timevsamplitude->SetPoint(h.timevsamplitude->GetN(),b.pulses_amplitude[j], b.pulses_time_cfd30[j]+b.Cell0TimeStamp[j]);
+            h.timevsamplitude->SetPoint(h.timevsamplitude->GetN(),b.pulses_amplitude[j], b.pulses_time_cfd30[j]);//+b.Cell0TimeStamp[j]*1000);
+            
             //cout << "Amplitude: " << b.pulses_amplitude[j] << " CFD30 time: " << b.pulses_time_cfd30[j] << endl;    
             h.htime_13->Fill(b.Cell0TimeStamp[j]);  
 
+            
             }
-
-             
+            time_diff=time_MCP-time_diff;
+            h.htime_12->Fill(time_diff);
             // After the channel selection condition, otherwise it's useless
             //cut di riccardo  
 
@@ -1058,8 +1070,8 @@ void ProcessEvents_november(TTree *tree, TreeBranches &b, Histograms &h,
             h.timevsintegral->SetPoint(h.timevsintegral->GetN(), integral[0], cfd30[0]);
             h.hintegral1->SetPoint(h.hintegral1->GetN(), ampFEB[0], integral[0]);
             h.hintegral2->SetPoint(h.hintegral2->GetN(), ampFEB[1], integral[1]);*/
-            ////h.conteggixcanale1->Fill(b.Channel[1]);
-            //h.conteggixcanale2->Fill(b.Channel[3]);
+            h.conteggixcanale1->Fill(b.Channel[1]);
+            h.conteggixcanale2->Fill(b.Channel[3]);
             //h.conteggixcanale3->Fill(b.Channel[3]);
            // h.cfdvschannel1->SetPoint(h.cfdvschannel1->GetN(), b.Channel[0], cfd30[0]);
 
