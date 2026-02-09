@@ -7,6 +7,9 @@
 #include <TROOT.h>
 #include <TApplication.h>
 #include <array>
+#include <fstream>
+#include <sstream>
+#include <vector>
 
 using namespace std;
 
@@ -76,10 +79,10 @@ void SetupTreeBranches(TTree *tree, TreeBranches &b)
     tree -> SetBranchAddress("Waveform", &b.Waveform);
 }
 
-void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h) 
+void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h, vector<vector<int>> &coordinates) ///aggiungere vettore di vettori
 {   
     Long64_t nentries = tree->GetEntries();
-    
+    cout << "Total number of entries: " << nentries << endl;
     for (Long64_t i = 0; i < nentries; i++) 
     {
         tree->GetEntry(i);
@@ -87,58 +90,77 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h)
         // Basic histograms for amplitude
         for (int j = 0; j < b.ArraySize; j++) 
         {
-            if (b.Board == 0)
+            if (b.Board[j] == 0)
             {
                 h.hAmpAll1->Fill(b.Amplitude[j]);
                 h.hBaseline1->Fill(b.Baseline[j]);
             }
-            else if (b.Board == 1)
-+           {
+            else if (b.Board[j] == 1)
+            {
                 h.hAmpAll2->Fill(b.Amplitude[j]);
                 h.hBaseline2->Fill(b.Baseline[j]);
             }
-            else if (b.Board == 2)
-+           {
+            else if (b.Board[j] == 2)
+            {
                 h.hAmpAll3->Fill(b.Amplitude[j]);
                 h.hBaseline3->Fill(b.Baseline[j]);
             }
         }
-        
+        //cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
         // Channels 
-        if (b.HitFeb[0] >= 1 && b.HitFeb[1] >= 1 && b.HitFeb[2] >= 1) //added the parto of hitfeb[2]
+        //if (b.HitFeb[0] >= 1 && b.HitFeb[1] >= 1 && b.HitFeb[2] >= 1) //added the parto of hitfeb[2]
+        if(b.HitFeb[2]==1)//check con ultima analisis con trigger sul terzo det
         {
             double amp_FEB[3] = {-1.0, -1.0, -1.0};
             double base[3] = {-9999.0, -9999.0, -9999.0};
+            
 
-            for (int j = 0; j < b.npulses; j++) 
+            for (int j = 0; j < b.ArraySize; j++) 
             {
                 int det = b.Board[j];
-                cout << "Board: " << det << endl;
+                //cout << "Board: " << det << endl;
 
                 if (det < 0 || det > 2) continue;
                
                 // Just testing low amplitude cut
                 //if (b.pulses_amplitude[j] < 0.05) continue;
                 
-                ampFEB[det] = b.pulses_amplitude[j];
+                // amp_FEB[det] = b.pulses_amplitude[j];
                 base[det] = b.Baseline[j];
-                peak_time[det] = b.pulses_peak_time[j];
-                
+                // peak_time[det] = b.pulses_peak_time[j];
+
+                for(int k=0; k<64; k++){
+                    if(b.Channel[j]==k){
+                        if(det==0){
+                            h.mapDet1->Fill(coordinates[k][1], coordinates[k][2]);
+                        }
+                        else if(det==1){
+                            h.mapDet2->Fill(coordinates[k][1], coordinates[k][2]);
+                        }
+                        else if(det==2){
+                            h.mapDet3->Fill(coordinates[k][1], coordinates[k][2]);
+                        }
+                    }
+                }
+
+                //cout << "Channel: " << b.Channel[j] << endl;
+
+                /*
                 if (det == 0)
-                    h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+                    h.mapDet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
                 if (det == 1)
-                    h.mapdet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
-               /* if (det == 2)
+                    h.mapDet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+                if (det == 2)
                     h.mapdet3->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);   for third detector*/
             }
             
-            h.hbaseline1->Fill(base[0]);
-            h.hbaseline2->Fill(base[1]);
-            h.hbaseline3->Fill(base[2]); //for the third det
+            h.hBaseline1->Fill(base[0]);
+            h.hBaseline2->Fill(base[1]);
+            h.hBaseline3->Fill(base[2]); //for the third det
             // Fill amplitude histograms for each channel
-            h.conteggixcanale1->Fill(b.Channel[0]);
-            h.conteggixcanale2->Fill(b.Channel[1]);
-            h.conteggixcanale3->Fill(b.Channel[2]);
+            // h.conteggixcanale1->Fill(b.Channel[0]);
+            // h.conteggixcanale2->Fill(b.Channel[1]);
+            // h.conteggixcanale3->Fill(b.Channel[2]);
         }
         
         if (i % 100000 == 0)
@@ -151,7 +173,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h)
 void CreateCanvasesAndSaveResults(const std::string &outputFileName, Histograms &hists)
 {
     // ---------------------------- Create one PDF file for each detector ----------------------------
-    TCanvas *cSavePDF_Detector1 = new TCanvas("cSavePDF", "Saving PDF", 1200, 800);
+    /*TCanvas *cSavePDF_Detector1 = new TCanvas("cSavePDF", "Saving PDF", 1200, 800);
     cSavePDF_Detector1 -> SaveAs("Amplitude_Distribution_Detector1.pdf["); // Just open the PDF file for writing (append mode)
 
     TCanvas *cSavePDF_Detector2 = new TCanvas("cSavePDF", "Saving PDF", 1200, 800);
@@ -176,20 +198,60 @@ void CreateCanvasesAndSaveResults(const std::string &outputFileName, Histograms 
     c3 -> SaveAs("Amplitude_Distribution_Detector3.pdf");
     
     c1->Update();
-
-    TCanvas *c2 = new TCanvas("c2", "Hit Maps", 1200, 800);
-    c2->Divide(3,1);
-
-    c2->cd(1);
-    hists.mapDet1->Draw("COLZ");
-    c2->cd(2);
-    hists.mapDet2->Draw("COLZ");
-    c2->cd(3);
-    hists.mapDet3->Draw("COLZ");
     c2->Update();
+    c3->Update();
 
     cSavePDF_Detector1 -> SaveAs("Amplitude_Distribution_Detector1.pdf]");
     cSavePDF_Detector2 -> SaveAs("Amplitude_Distribution_Detector2.pdf]");
-    cSavePDF_Detector3 -> SaveAs("Amplitude_Distribution_Detector3.pdf]");
+    cSavePDF_Detector3 -> SaveAs("Amplitude_Distribution_Detector3.pdf]");*/
 
+    // Canvas for hit maps
+    TCanvas *cMap1 = new TCanvas("cMap1", "Hit map for first detector", 1200, 800);
+    hists.mapDet1->Draw("COLZ");
+    cMap1 -> SaveAs("Hit_Map_Detector1.pdf");   
+
+    TCanvas *cMap2 = new TCanvas("cMap2", "Hit map for second detector", 1200, 800);
+    hists.mapDet2->Draw("COLZ");
+    cMap2 -> SaveAs("Hit_Map_Detector2.pdf");
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+vector<vector<int>> ReadFile() {
+
+    ifstream channel_file("channel_mapping.txt");
+    if (!channel_file.is_open()) {
+        cerr << "Error: could not open channel_mapping.txt" << endl;
+        return {};
+    }
+
+    channel_file.ignore(1000, '\n');
+
+    int channel, board;
+    double x, y;
+
+    vector<vector<int>> coordinates;
+
+    while (channel_file >> channel >> x >> y >> board) {
+        coordinates.push_back({
+            channel,
+            static_cast<int>(x),
+            static_cast<int>(y),
+            board
+        });
+    }
+
+    cout << "\n\n\n        ciao!" << endl;
+
+    return coordinates;
 }

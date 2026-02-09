@@ -13,6 +13,8 @@
 #include <vector>
 #include <string>
 
+using namespace std;
+
 // Constants
 const int MAXPULSES = 200;
 const int NCHANNELS = 64;
@@ -60,11 +62,12 @@ struct TreeBranches
 // (LATER) Function to convert from binary to root
 // We assume event building has already been done (https://gitlab.cern.ch/enubet-neutrino/testbeam2025/-/tree/master/Code/SAMPICRead?ref_type=heads)
 
-TFile* OpenInputFile(const std::string &filename, TFile* &file, TTree* &tree);
+TFile* OpenInputFile(const string &filename);
 void InitializeHistograms(Histograms &h);
 void SetupTreeBranches(TTree *tree, TreeBranches &b);
-void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h);
-void CreateCanvasesAndSaveResults(const std::string &outputFileName, Histograms &hists);
+void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h, vector<vector<int>> &coordinates);
+void CreateCanvasesAndSaveResults(const string &outputFileName, Histograms &hists);
+vector<vector<int>> ReadFile();
 
 // vogliamo vedere ampiezze (all)
 // vedere le hit per canale, per capire se abbiamo canali rumorosi
