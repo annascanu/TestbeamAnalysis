@@ -906,7 +906,7 @@ void ProcessEvents_november(TTree *tree, TreeBranches &b, Histograms &h,
         int nGood = 0;
         int idx = -1;
 
-        cout << "Event " << i << " with " << b.npulses << " pulses." << endl;
+        //cout << "Event " << i << " with " << b.npulses << " pulses." << endl;
 
         //if(b.npulses!=2)continue; //prendo solo eventi con 2 hit
         if(b.npulses <= 1) continue; //prendo solo eventi con 2 o meno hit totali

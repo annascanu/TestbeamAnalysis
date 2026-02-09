@@ -28,9 +28,9 @@ TFile* OpenInputFile(const string &filename)
 void InitializeHistograms(Histograms &h) 
 {
     // Basic histograms
-    h.hAmpAll1 = new TH1F("hAmpAll1", "All pulse amplitudes for first detector;Amplitude [a.u.];Counts",  1000, 0, 5);
-    h.hAmpAll2 = new TH1F("hAmpAll2", "All pulse amplitudes for second detector;Amplitude [a.u.];Counts", 1000, 0, 5);
-    h.hAmpAll3 = new TH1F("hAmpAll3", "All pulse amplitudes for third detector;Amplitude [a.u.];Counts",  1000, 0, 5);
+    h.hAmpAll1 = new TH1F("hAmpAll1", "All pulse amplitudes for first detector;Amplitude [a.u.];Counts",  1000, 0, 1);
+    h.hAmpAll2 = new TH1F("hAmpAll2", "All pulse amplitudes for second detector;Amplitude [a.u.];Counts", 1000, 0, 1);
+    h.hAmpAll3 = new TH1F("hAmpAll3", "All pulse amplitudes for third detector;Amplitude [a.u.];Counts",  1000, 0, 1);
     
     // Baseline
     h.hBaseline1 = new TH1F("hBaseline1", "Baseline for first detector;Amplitude [a.u.];Counts",  1000, 0.9, 1.1);
