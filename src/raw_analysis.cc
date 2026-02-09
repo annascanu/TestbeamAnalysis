@@ -105,7 +105,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h)
         }
         
         // Channels 
-        if (b.HitFeb[0] >= 1 && b.HitFeb[1] >= 1)
+        if (b.HitFeb[0] >= 1 && b.HitFeb[1] >= 1 && b.HitFeb[2] >= 1) //added the parto of hitfeb[2]
         {
             double amp_FEB[3] = {-1.0, -1.0, -1.0};
             double base[3] = {-9999.0, -9999.0, -9999.0};
@@ -128,11 +128,13 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h)
                     h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
                 if (det == 1)
                     h.mapdet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+               /* if (det == 2)
+                    h.mapdet3->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);   for third detector*/
             }
             
             h.hbaseline1->Fill(base[0]);
             h.hbaseline2->Fill(base[1]);
-
+            h.hbaseline3->Fill(base[2]); //for the third det
             // Fill amplitude histograms for each channel
             h.conteggixcanale1->Fill(b.Channel[0]);
             h.conteggixcanale2->Fill(b.Channel[1]);
