@@ -96,16 +96,19 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h, vector<vector<in
             {
                 h.hAmpAll1->Fill(b.Amplitude[j]);
                 h.hBaseline1->Fill(b.Baseline[j]);
+                h.hChannelHits1->Fill(b.Channel[j]);
             }
             else if (b.Board[j] == 1)
             {
                 h.hAmpAll2->Fill(b.Amplitude[j]);
                 h.hBaseline2->Fill(b.Baseline[j]);
+                h.hChannelHits2->Fill(b.Channel[j]);
             }
             else if (b.Board[j] == 2)
             {
                 h.hAmpAll3->Fill(b.Amplitude[j]);
                 h.hBaseline3->Fill(b.Baseline[j]);
+                h.hChannelHits3->Fill(b.Channel[j]);
             }
             
 
@@ -125,7 +128,8 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h, vector<vector<in
         //cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
         // Channels 
         //if (b.HitFeb[0] >= 1 && b.HitFeb[1] >= 1 && b.HitFeb[2] >= 1) //added the parto of hitfeb[2]
-        if(b.HitFeb[2]==1)//check con ultima analisis con trigger sul terzo det
+        //if(b.HitFeb[2]==1)//check con ultima analisis con trigger sul terzo det
+        if(true)
         {
             double amp_FEB[3] = {-1.0, -1.0, -1.0};
             double base[3] = {-9999.0, -9999.0, -9999.0};
@@ -173,10 +177,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h, vector<vector<in
             h.hBaseline1->Fill(base[0]);
             h.hBaseline2->Fill(base[1]);
             h.hBaseline3->Fill(base[2]); //for the third det
-            // Fill amplitude histograms for each channel
-            // h.conteggixcanale1->Fill(b.Channel[0]);
-            // h.conteggixcanale2->Fill(b.Channel[1]);
-            // h.conteggixcanale3->Fill(b.Channel[2]);
+            
         }
         
         if (i % 100000 == 0)
@@ -250,7 +251,27 @@ void CreateCanvasesAndSaveResults(const std::string &outputFileName, Histograms 
 
 
 
+    //save channel hits
+    TCanvas *cSavePDF_ChannelHits = new TCanvas("cSavePDF_ChannelHits", "Saving PDF", 1200, 800);
+    cSavePDF_ChannelHits -> SaveAs(Form("%s/Channel_Hits.pdf[", outDir.Data()));
 
+    TCanvas *cChannelHits1 = new TCanvas("cChannelHits1", "Channel Hits for first detector", 1200, 800);
+    hists.hChannelHits1->Draw();
+    cChannelHits1 -> SaveAs(Form("%s/Channel_Hits.pdf", outDir.Data()));
+
+    TCanvas *cChannelHits2 = new TCanvas("cChannelHits2", "Channel Hits for second detector", 1200, 800);
+    hists.hChannelHits2->Draw();
+    cChannelHits2 -> SaveAs(Form("%s/Channel_Hits.pdf", outDir.Data()));
+
+    TCanvas *cChannelHits3 = new TCanvas("cChannelHits3", "Channel Hits for third detector", 1200, 800);
+    hists.hChannelHits3->Draw();
+    cChannelHits3 -> SaveAs(Form("%s/Channel_Hits.pdf", outDir.Data()));
+
+    cChannelHits1->Update();
+    cChannelHits2->Update();
+    cChannelHits3->Update();    
+
+    cSavePDF_ChannelHits -> SaveAs(Form("%s/Channel_Hits.pdf]", outDir.Data()));
 
 
 }
