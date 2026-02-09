@@ -105,6 +105,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h, vector<vector<in
                 h.hAmpAll3->Fill(b.Amplitude[j]);
                 h.hBaseline3->Fill(b.Baseline[j]);
             }
+            
         }
         //cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
         // Channels 
@@ -173,7 +174,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h, vector<vector<in
 void CreateCanvasesAndSaveResults(const std::string &outputFileName, Histograms &hists)
 {
     // ---------------------------- Create one PDF file for each detector ----------------------------
-    /*TCanvas *cSavePDF_Detector1 = new TCanvas("cSavePDF", "Saving PDF", 1200, 800);
+    TCanvas *cSavePDF_Detector1 = new TCanvas("cSavePDF", "Saving PDF", 1200, 800);
     cSavePDF_Detector1 -> SaveAs("Amplitude_Distribution_Detector1.pdf["); // Just open the PDF file for writing (append mode)
 
     TCanvas *cSavePDF_Detector2 = new TCanvas("cSavePDF", "Saving PDF", 1200, 800);
@@ -203,17 +204,32 @@ void CreateCanvasesAndSaveResults(const std::string &outputFileName, Histograms 
 
     cSavePDF_Detector1 -> SaveAs("Amplitude_Distribution_Detector1.pdf]");
     cSavePDF_Detector2 -> SaveAs("Amplitude_Distribution_Detector2.pdf]");
-    cSavePDF_Detector3 -> SaveAs("Amplitude_Distribution_Detector3.pdf]");*/
+    cSavePDF_Detector3 -> SaveAs("Amplitude_Distribution_Detector3.pdf]");
 
     // Canvas for hit maps
+    //creazione unico pdf con tutti i canvas delle hitmap
+
+    TCanvas *cSavePDF_HitMaps = new TCanvas("cSavePDF_HitMaps", "Saving PDF", 1200, 800);
+    cSavePDF_HitMaps -> SaveAs("Hit_Maps.pdf[");
+
     TCanvas *cMap1 = new TCanvas("cMap1", "Hit map for first detector", 1200, 800);
     hists.mapDet1->Draw("COLZ");
-    cMap1 -> SaveAs("Hit_Map_Detector1.pdf");   
+    cMap1 -> SaveAs("Hit_Maps.pdf");   
 
     TCanvas *cMap2 = new TCanvas("cMap2", "Hit map for second detector", 1200, 800);
     hists.mapDet2->Draw("COLZ");
-    cMap2 -> SaveAs("Hit_Map_Detector2.pdf");
+    cMap2 -> SaveAs("Hit_Maps.pdf");
 
+    TCanvas *cMap3 = new TCanvas("cMap3", "Hit map for third detector", 1200, 800);
+    hists.mapDet3->Draw("COLZ");
+    cMap3 -> SaveAs("Hit_Maps.pdf");
+
+    cMap1->Update();
+    cMap2->Update();    
+    cMap3->Update();    
+
+
+    cSavePDF_HitMaps -> SaveAs("Hit_Maps.pdf]");
 
 
 
