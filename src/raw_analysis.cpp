@@ -96,9 +96,10 @@ int main(int argc, char**argv) {
     vector<vector<int>> coords;
     coords = ReadFile(); 
 
-    cout << "\n\n\nEsempio di coordinate: Canale " << coords[2][0] << " x: " << coords[2][1] << " y: " << coords[2][2] << " board: " << coords[2][3] << "\n\n\n" << endl;
+    //////cout << "\n\n\nEsempio di coordinate: Canale " << coords[2][0] << " x: " << coords[2][1] << " y: " << coords[2][2] << " board: " << coords[2][3] << "\n\n\n" << endl;
     ProcessEvents(tree, branches, hists, coords);
-    CreateCanvasesAndSaveResults(outputFileName, hists);
+
+    CreateCanvasesAndSaveResults(outputFileName, hists, run);
         
     // ------------------------------------------------
     //                     Cleanup

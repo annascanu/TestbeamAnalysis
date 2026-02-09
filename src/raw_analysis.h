@@ -66,7 +66,7 @@ TFile* OpenInputFile(const string &filename);
 void InitializeHistograms(Histograms &h);
 void SetupTreeBranches(TTree *tree, TreeBranches &b);
 void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h, vector<vector<int>> &coordinates);
-void CreateCanvasesAndSaveResults(const string &outputFileName, Histograms &hists);
+void CreateCanvasesAndSaveResults(const string &outputFileName, Histograms &hists, int &run);
 vector<vector<int>> ReadFile();
 
 // vogliamo vedere ampiezze (all)

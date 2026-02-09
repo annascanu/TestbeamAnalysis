@@ -10,6 +10,8 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <TSystem.h>
+
 
 using namespace std;
 
@@ -171,65 +173,66 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h, vector<vector<in
     cout << endl;
 }
 
-void CreateCanvasesAndSaveResults(const std::string &outputFileName, Histograms &hists)
+void CreateCanvasesAndSaveResults(const std::string &outputFileName, Histograms &hists, int &run)
 {
+    TString outDir = Form("Results/run%d", run);
+    gSystem->mkdir(outDir, kTRUE);  // kTRUE = crea anche path intermedi
     // ---------------------------- Create one PDF file for each detector ----------------------------
     TCanvas *cSavePDF_Detector1 = new TCanvas("cSavePDF", "Saving PDF", 1200, 800);
-    cSavePDF_Detector1 -> SaveAs("Amplitude_Distribution_Detector1.pdf["); // Just open the PDF file for writing (append mode)
-
+    cSavePDF_Detector1 -> SaveAs(Form("%s/Amplitude_Distribution_Detector1.pdf[", outDir.Data())); // Just open the PDF file for writing (append mode)
     TCanvas *cSavePDF_Detector2 = new TCanvas("cSavePDF", "Saving PDF", 1200, 800);
-    cSavePDF_Detector2 -> SaveAs("Amplitude_Distribution_Detector2.pdf["); 
+    cSavePDF_Detector2 -> SaveAs(Form("%s/Amplitude_Distribution_Detector2.pdf[", outDir.Data())); 
 
     TCanvas *cSavePDF_Detector3 = new TCanvas("cSavePDF", "Saving PDF", 1200, 800);
-    cSavePDF_Detector3 -> SaveAs("Amplitude_Distribution_Detector3.pdf["); 
+    cSavePDF_Detector3 -> SaveAs(Form("%s/Amplitude_Distribution_Detector3.pdf[", outDir.Data())); 
 
     // ----------------------------------------------------------------------------------------------------------------
     
     // Canvas for amplitude distributions
     TCanvas *c1 = new TCanvas("c1", "Amplitude distribution for first detector", 1200, 800);
     hists.hAmpAll1->Draw();
-    c1 -> SaveAs("Amplitude_Distribution_Detector1.pdf");
+    c1 -> SaveAs(Form("%s/Amplitude_Distribution_Detector1.pdf", outDir.Data())); // Save the first page of the PDF file
 
     TCanvas *c2 = new TCanvas("c2", "Amplitude distribution for second detector", 1200, 800);
     hists.hAmpAll2->Draw();
-    c2 -> SaveAs("Amplitude_Distribution_Detector2.pdf");
+    c2 -> SaveAs(Form("%s/Amplitude_Distribution_Detector2.pdf", outDir.Data()));
     
     TCanvas *c3 = new TCanvas("c3", "Amplitude distribution for third detector", 1200, 800);
     hists.hAmpAll3->Draw();
-    c3 -> SaveAs("Amplitude_Distribution_Detector3.pdf");
+    c3 -> SaveAs(Form("%s/Amplitude_Distribution_Detector3.pdf", outDir.Data()));
     
     c1->Update();
     c2->Update();
     c3->Update();
 
-    cSavePDF_Detector1 -> SaveAs("Amplitude_Distribution_Detector1.pdf]");
-    cSavePDF_Detector2 -> SaveAs("Amplitude_Distribution_Detector2.pdf]");
-    cSavePDF_Detector3 -> SaveAs("Amplitude_Distribution_Detector3.pdf]");
+    cSavePDF_Detector1 -> SaveAs(Form("%s/Amplitude_Distribution_Detector1.pdf]", outDir.Data()));
+    cSavePDF_Detector2 -> SaveAs(Form("%s/Amplitude_Distribution_Detector2.pdf]", outDir.Data()));
+    cSavePDF_Detector3 -> SaveAs(Form("%s/Amplitude_Distribution_Detector3.pdf]", outDir.Data()));
 
     // Canvas for hit maps
     //creazione unico pdf con tutti i canvas delle hitmap
 
     TCanvas *cSavePDF_HitMaps = new TCanvas("cSavePDF_HitMaps", "Saving PDF", 1200, 800);
-    cSavePDF_HitMaps -> SaveAs("Hit_Maps.pdf[");
+    cSavePDF_HitMaps -> SaveAs(Form("%s/Hit_Maps.pdf[", outDir.Data()));
 
     TCanvas *cMap1 = new TCanvas("cMap1", "Hit map for first detector", 1200, 800);
     hists.mapDet1->Draw("COLZ");
-    cMap1 -> SaveAs("Hit_Maps.pdf");   
+    cMap1 -> SaveAs(Form("%s/Hit_Maps.pdf", outDir.Data()));   
 
     TCanvas *cMap2 = new TCanvas("cMap2", "Hit map for second detector", 1200, 800);
     hists.mapDet2->Draw("COLZ");
-    cMap2 -> SaveAs("Hit_Maps.pdf");
+    cMap2 -> SaveAs(Form("%s/Hit_Maps.pdf", outDir.Data()));
 
     TCanvas *cMap3 = new TCanvas("cMap3", "Hit map for third detector", 1200, 800);
     hists.mapDet3->Draw("COLZ");
-    cMap3 -> SaveAs("Hit_Maps.pdf");
+    cMap3 -> SaveAs(Form("%s/Hit_Maps.pdf", outDir.Data()));
 
     cMap1->Update();
     cMap2->Update();    
     cMap3->Update();    
 
 
-    cSavePDF_HitMaps -> SaveAs("Hit_Maps.pdf]");
+    cSavePDF_HitMaps -> SaveAs(Form("%s/Hit_Maps.pdf]", outDir.Data()));
 
 
 
