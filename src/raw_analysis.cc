@@ -108,7 +108,20 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h, vector<vector<in
                 h.hBaseline3->Fill(b.Baseline[j]);
             }
             
+
         }
+            h.hAmpAll1->GetXaxis()->SetRange(
+            h.hAmpAll1->FindFirstBinAbove(0),
+            h.hAmpAll1->FindLastBinAbove(0)
+            );
+                    h.hAmpAll2->GetXaxis()->SetRange(
+            h.hAmpAll2->FindFirstBinAbove(0),
+            h.hAmpAll2->FindLastBinAbove(0)
+            );
+                    h.hAmpAll3->GetXaxis()->SetRange(
+            h.hAmpAll3->FindFirstBinAbove(0),
+            h.hAmpAll3->FindLastBinAbove(0)
+            );
         //cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
         // Channels 
         //if (b.HitFeb[0] >= 1 && b.HitFeb[1] >= 1 && b.HitFeb[2] >= 1) //added the parto of hitfeb[2]
