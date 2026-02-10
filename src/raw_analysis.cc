@@ -30,9 +30,9 @@ TFile* OpenInputFile(const string &filename)
 void InitializeHistograms(Histograms &h) 
 {
     // Basic histograms
-    h.hAmpAll1 = new TH1F("hAmpAll1", "All pulse amplitudes for first detector;Amplitude [a.u.];Counts",  1000, 0, 1);
-    h.hAmpAll2 = new TH1F("hAmpAll2", "All pulse amplitudes for second detector;Amplitude [a.u.];Counts", 1000, 0, 1);
-    h.hAmpAll3 = new TH1F("hAmpAll3", "All pulse amplitudes for third detector;Amplitude [a.u.];Counts",  1000, 0, 1);
+    h.hAmpAll1 = new TH1F("hAmpAll1", "All pulse amplitudes for first detector;Amplitude [a.u.];Counts",  1000, -1, 0);
+    h.hAmpAll2 = new TH1F("hAmpAll2", "All pulse amplitudes for second detector;Amplitude [a.u.];Counts", 1000, -1, 0);
+    h.hAmpAll3 = new TH1F("hAmpAll3", "All pulse amplitudes for third detector;Amplitude [a.u.];Counts",  1000, -1, );
     
     // Baseline
     h.hBaseline1 = new TH1F("hBaseline1", "Baseline for first detector;Amplitude [a.u.];Counts",  1000, 0.9, 1.1);
@@ -48,9 +48,9 @@ void InitializeHistograms(Histograms &h)
     
     for (int i = 0; i < 64; i++) 
     {
-        h.hAmpChannel1[i] = new TH1F(Form("hAmpChannel1_%d", i), Form("Amplitudes for channel %d of first detector;Amplitude [a.u.];Counts", i), 1000, 0, 5);
-        h.hAmpChannel2[i] = new TH1F(Form("hAmpChannel2_%d", i), Form("Amplitudes for channel %d of second detector;Amplitude [a.u.];Counts", i), 1000, 0, 5);
-        h.hAmpChannel3[i] = new TH1F(Form("hAmpChannel3_%d", i), Form("Amplitudes for channel %d of third detector;Amplitude [a.u.];Counts", i), 1000, 0, 5);
+        h.hAmpChannel1[i] = new TH1F(Form("hAmpChannel1_%d", i), Form("Amplitudes for channel %d of first detector;Amplitude [a.u.];Counts", i), 1000, -1, 0);
+        h.hAmpChannel2[i] = new TH1F(Form("hAmpChannel2_%d", i), Form("Amplitudes for channel %d of second detector;Amplitude [a.u.];Counts", i), 1000, -1, 0);
+        h.hAmpChannel3[i] = new TH1F(Form("hAmpChannel3_%d", i), Form("Amplitudes for channel %d of third detector;Amplitude [a.u.];Counts", i), 1000, -1, 0  );
     }
     
 
@@ -95,6 +95,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h, vector<vector<in
             if (b.Board[j] == 0)
             {
                 h.hAmpAll1->Fill(b.Amplitude[j]);
+                //cout << "Amplitude: " << b.Amplitude[j] << endl;
                 h.hBaseline1->Fill(b.Baseline[j]);
                 h.hChannelHits1->Fill(b.Channel[j]);
                 for(int k=0; k<64; k++){
@@ -128,7 +129,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h, vector<vector<in
             
 
         }
-            h.hAmpAll1->GetXaxis()->SetRange(
+          /*  h.hAmpAll1->GetXaxis()->SetRange(
             h.hAmpAll1->FindFirstBinAbove(0),
             h.hAmpAll1->FindLastBinAbove(0)
             );
@@ -139,7 +140,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h, vector<vector<in
                     h.hAmpAll3->GetXaxis()->SetRange(
             h.hAmpAll3->FindFirstBinAbove(0),
             h.hAmpAll3->FindLastBinAbove(0)
-            );
+            );*/
         //cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
         // Channels 
         //if (b.HitFeb[0] >= 1 && b.HitFeb[1] >= 1 && b.HitFeb[2] >= 1) //added the parto of hitfeb[2]
@@ -364,11 +365,6 @@ vector<vector<int>> ReadFile() {
 
 /*void ProcessEvents_November(TTree *tree, TreeBranches &b, Histograms &h, vector<vector<int>> &coordinates) ///aggiungere vettore di vettori
 {   
-
-
-
-
-
     Long64_t nentries = tree->GetEntries();
     cout << "Total number of entries: " << nentries << endl;
     for (Long64_t i = 0; i < nentries; i++) 
@@ -380,21 +376,35 @@ vector<vector<int>> ReadFile() {
         {
             if (b.Board[j] == 0)
             {
+                if(b.Channel[j]==0){
                 h.hAmpAll1->Fill(b.Amplitude[j]);
                 h.hBaseline1->Fill(b.Baseline[j]);
                 h.hChannelHits1->Fill(b.Channel[j]);
+                h.hAmpChannel1[0]->Fill(b.Amplitude[j]);
+                }
+                }
             }
             else if (b.Board[j] == 1)
             {
                 h.hAmpAll2->Fill(b.Amplitude[j]);
                 h.hBaseline2->Fill(b.Baseline[j]);
                 h.hChannelHits2->Fill(b.Channel[j]);
+                for(int k=0; k<64; k++){
+                    if(b.Channel[j]==k){
+                        h.hAmpChannel2[k]->Fill(b.Amplitude[j]);
+                    }
+                }
             }
-            else if (b.Board[j] == 2)
+            else if (b.Board[j] == 3)
             {
                 h.hAmpAll3->Fill(b.Amplitude[j]);
                 h.hBaseline3->Fill(b.Baseline[j]);
                 h.hChannelHits3->Fill(b.Channel[j]);
+                for(int k=0; k<64; k++){
+                    if(b.Channel[j]==k){
+                        h.hAmpChannel3[k]->Fill(b.Amplitude[j]);
+                    }
+                }
             }
             
 
@@ -451,13 +461,13 @@ vector<vector<int>> ReadFile() {
 
                 //cout << "Channel: " << b.Channel[j] << endl;
 
-                /*
+                
                 if (det == 0)
                     h.mapDet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
                 if (det == 1)
                     h.mapDet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
                 if (det == 2)
-                    h.mapdet3->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);   for third detector
+                    h.mapDet3->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);   for third detectors
             }
             
             h.hBaseline1->Fill(base[0]);
@@ -468,7 +478,4 @@ vector<vector<int>> ReadFile() {
         
         if (i % 100000 == 0)
             cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
-    }
-
-    cout << endl;
-}*/
+    }*/

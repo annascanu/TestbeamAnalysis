@@ -156,7 +156,8 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
         }
         
         // Process double/triple hits
-        if (b.HitFeb[0] >= 1 && b.HitFeb[1] >= 1)
+        //if (b.HitFeb[0] >= 1 && b.HitFeb[1] >= 1)
+        if(true)
         {
             double ampFEB[3] = {-1.0, -1.0, -1.0};
             double cfd10[3] = {-9999.0, -9999.0, -9999.0};
@@ -172,10 +173,10 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
             for (int j = 0; j < b.npulses; j++) 
             {
                 int det = b.Board[j];
-                cout << "Board: " << det << endl;
+                //cout << "Board: " << det << endl;
 
                 if (det < 0 || det > 2) continue;
-                if (b.pulses_bad_pulse[j]) continue;
+                //if (b.pulses_bad_pulse[j]) continue;
                
                 // Just testing low amplitude cut
                 //if (b.pulses_amplitude[j] < 0.05) continue;

@@ -28,11 +28,11 @@ int main() {
     // Choose your input file path
     //TString filename = "/eos/experiment/neutplatform/enubet/testbeam2025/picosec_data/sampic_runs/rootSampicData/processed_waveforms/sampic_run22_final.root"; // when running on lxplus
     //TString filename = "/Users/anna/Developing/PhD/Testbeam2025/sampic_run22_final.root"; // when running on Anna's machine
-    TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run22_final.root"; // when running on Riccardo's machine
+    TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run24_final.root"; // when running on Riccardo's machine
 
     //TString filename = "/home/riccardo-speziali/Scrivania/november_2025/root_tree/sampic_run209_final.root"; // when running on Riccardo's machine
 
-    string outputFileName = "muon_run22_3.0VERSION.root";
+    string outputFileName = "muon_run24_3.0VERSION.root";
     // ------------------------------------------------
     //         Open input file and get tree
     // ------------------------------------------------
