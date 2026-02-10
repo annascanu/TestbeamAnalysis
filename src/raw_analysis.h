@@ -33,7 +33,7 @@ struct Histograms
     TH1F *hChannelHits1, *hChannelHits2, *hChannelHits3;
     
     // Amplitudes per channel
-    // TH1F *hAmpChannel1[NCHANNELS], *hAmpChannel2[NCHANNELS], *hAmpChannel3[NCHANNELS];
+    TH1F *hAmpChannel1[NCHANNELS], *hAmpChannel2[NCHANNELS], *hAmpChannel3[NCHANNELS];
 
     // Hit maps
     TH2F *mapDet1, *mapDet2, *mapDet3;

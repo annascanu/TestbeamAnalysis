@@ -45,14 +45,14 @@ void InitializeHistograms(Histograms &h)
     h.hChannelHits3 = new TH1F("hChannelHits3", "Channel hits for third detector;Channel;Counts", 64, 0, 64);
 
     // Amplitudes per channel
-    /*
+    
     for (int i = 0; i < 64; i++) 
     {
         h.hAmpChannel1[i] = new TH1F(Form("hAmpChannel1_%d", i), Form("Amplitudes for channel %d of first detector;Amplitude [a.u.];Counts", i), 1000, 0, 5);
         h.hAmpChannel2[i] = new TH1F(Form("hAmpChannel2_%d", i), Form("Amplitudes for channel %d of second detector;Amplitude [a.u.];Counts", i), 1000, 0, 5);
         h.hAmpChannel3[i] = new TH1F(Form("hAmpChannel3_%d", i), Form("Amplitudes for channel %d of third detector;Amplitude [a.u.];Counts", i), 1000, 0, 5);
     }
-    */
+    
 
     // Hit maps
     h.mapDet1 = new TH2F("hitmapdet1", "Hit map for detector 1;x;y", 8, 0, 8, 8, 0, 8);
@@ -97,18 +97,33 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h, vector<vector<in
                 h.hAmpAll1->Fill(b.Amplitude[j]);
                 h.hBaseline1->Fill(b.Baseline[j]);
                 h.hChannelHits1->Fill(b.Channel[j]);
+                for(int k=0; k<64; k++){
+                    if(b.Channel[j]==k){
+                        h.hAmpChannel1[k]->Fill(b.Amplitude[j]);
+                    }
+                }
             }
             else if (b.Board[j] == 1)
             {
                 h.hAmpAll2->Fill(b.Amplitude[j]);
                 h.hBaseline2->Fill(b.Baseline[j]);
                 h.hChannelHits2->Fill(b.Channel[j]);
+                for(int k=0; k<64; k++){
+                    if(b.Channel[j]==k){
+                        h.hAmpChannel2[k]->Fill(b.Amplitude[j]);
+                    }
+                }
             }
             else if (b.Board[j] == 2)
             {
                 h.hAmpAll3->Fill(b.Amplitude[j]);
                 h.hBaseline3->Fill(b.Baseline[j]);
                 h.hChannelHits3->Fill(b.Channel[j]);
+                for(int k=0; k<64; k++){
+                    if(b.Channel[j]==k){
+                        h.hAmpChannel3[k]->Fill(b.Amplitude[j]);
+                    }
+                }
             }
             
 
@@ -274,6 +289,34 @@ void CreateCanvasesAndSaveResults(const std::string &outputFileName, Histograms 
     cSavePDF_ChannelHits -> SaveAs(Form("%s/Channel_Hits.pdf]", outDir.Data()));
 
 
+    TCanvas *cSavePDF_AmplitudesPerChannel = new TCanvas("cSavePDF_AmplitudesPerChannel", "Saving PDF", 1200, 800);
+    cSavePDF_AmplitudesPerChannel -> SaveAs(Form("%s/Amplitude_Distribution_Per_Channel_detector1.pdf[", outDir.Data()));
+
+    TCanvas *cSavePDF_AmplitudesPerChannel2 = new TCanvas("cSavePDF_AmplitudesPerChannel2", "Saving PDF", 1200, 800);
+    cSavePDF_AmplitudesPerChannel2 -> SaveAs(Form("%s/Amplitude_Distribution_Per_Channel_detector2.pdf[", outDir.Data()));
+
+    TCanvas *cSavePDF_AmplitudesPerChannel3 = new TCanvas("cSavePDF_AmplitudesPerChannel3", "Saving PDF", 1200, 800);
+    cSavePDF_AmplitudesPerChannel3 -> SaveAs(Form("%s/Amplitude_Distribution_Per_Channel_detector3.pdf[", outDir.Data()));
+
+    for(int k=0; k<64; k++){
+        TCanvas *cAmpChannel1 = new TCanvas(Form("cAmpChannel1_%d", k), Form("Amplitudes for channel %d of first detector", k), 1200, 800);
+        hists.hAmpChannel1[k]->Draw();
+        cAmpChannel1 -> SaveAs(Form("%s/Amplitude_Distribution_Per_Channel_detector1.pdf", outDir.Data(), k));
+
+        TCanvas *cAmpChannel2 = new TCanvas(Form("cAmpChannel2_%d", k), Form("Amplitudes for channel %d of second detector", k), 1200, 800);
+        hists.hAmpChannel2[k]->Draw();
+        cAmpChannel2 -> SaveAs(Form("%s/Amplitude_Distribution_Per_Channel_detector2.pdf", outDir.Data(), k));
+
+        TCanvas *cAmpChannel3 = new TCanvas(Form("cAmpChannel3_%d", k), Form("Amplitudes for channel %d of third detector", k), 1200, 800);
+        hists.hAmpChannel3[k]->Draw();
+        cAmpChannel3 -> SaveAs(Form("%s/Amplitude_Distribution_Per_Channel_detector3.pdf", outDir.Data(), k));
+    }
+
+
+    cSavePDF_AmplitudesPerChannel -> SaveAs(Form("%s/Amplitude_Distribution_Per_Channel_detector1.pdf]", outDir.Data()));
+    cSavePDF_AmplitudesPerChannel2 -> SaveAs(Form("%s/Amplitude_Distribution_Per_Channel_detector2.pdf]", outDir.Data()));
+    cSavePDF_AmplitudesPerChannel3 -> SaveAs(Form("%s/Amplitude_Distribution_Per_Channel_detector3.pdf]", outDir.Data()));
+
 }
 
 
@@ -308,3 +351,124 @@ vector<vector<int>> ReadFile() {
 
     return coordinates;
 }
+
+
+
+/*per processe events november:
+1)ricordarsi che su feb0 channel 0 ci sta l'mcp mentre i segnali stanno su feb1 e feb3
+2)abbiamo solo un detector 
+3) run 209 solo feb 1
+4) riscrivere il txt file delle coordinate
+5) */
+
+
+/*void ProcessEvents_November(TTree *tree, TreeBranches &b, Histograms &h, vector<vector<int>> &coordinates) ///aggiungere vettore di vettori
+{   
+
+
+
+
+
+    Long64_t nentries = tree->GetEntries();
+    cout << "Total number of entries: " << nentries << endl;
+    for (Long64_t i = 0; i < nentries; i++) 
+    {
+        tree->GetEntry(i);
+        
+        // Basic histograms for amplitude
+        for (int j = 0; j < b.ArraySize; j++) 
+        {
+            if (b.Board[j] == 0)
+            {
+                h.hAmpAll1->Fill(b.Amplitude[j]);
+                h.hBaseline1->Fill(b.Baseline[j]);
+                h.hChannelHits1->Fill(b.Channel[j]);
+            }
+            else if (b.Board[j] == 1)
+            {
+                h.hAmpAll2->Fill(b.Amplitude[j]);
+                h.hBaseline2->Fill(b.Baseline[j]);
+                h.hChannelHits2->Fill(b.Channel[j]);
+            }
+            else if (b.Board[j] == 2)
+            {
+                h.hAmpAll3->Fill(b.Amplitude[j]);
+                h.hBaseline3->Fill(b.Baseline[j]);
+                h.hChannelHits3->Fill(b.Channel[j]);
+            }
+            
+
+        }
+            h.hAmpAll1->GetXaxis()->SetRange(
+            h.hAmpAll1->FindFirstBinAbove(0),
+            h.hAmpAll1->FindLastBinAbove(0)
+            );
+                    h.hAmpAll2->GetXaxis()->SetRange(
+            h.hAmpAll2->FindFirstBinAbove(0),
+            h.hAmpAll2->FindLastBinAbove(0)
+            );
+                    h.hAmpAll3->GetXaxis()->SetRange(
+            h.hAmpAll3->FindFirstBinAbove(0),
+            h.hAmpAll3->FindLastBinAbove(0)
+            );
+        //cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
+        // Channels 
+        //if (b.HitFeb[0] >= 1 && b.HitFeb[1] >= 1 && b.HitFeb[2] >= 1) //added the parto of hitfeb[2]
+        //if(b.HitFeb[2]==1)//check con ultima analisis con trigger sul terzo det
+        if(true)
+        {
+            double amp_FEB[3] = {-1.0, -1.0, -1.0};
+            double base[3] = {-9999.0, -9999.0, -9999.0};
+            
+
+            for (int j = 0; j < b.ArraySize; j++) 
+            {
+                int det = b.Board[j];
+                //cout << "Board: " << det << endl;
+
+                if (det < 0 || det > 2) continue;
+               
+                // Just testing low amplitude cut
+                //if (b.pulses_amplitude[j] < 0.05) continue;
+                
+                // amp_FEB[det] = b.pulses_amplitude[j];
+                base[det] = b.Baseline[j];
+                // peak_time[det] = b.pulses_peak_time[j];
+
+                for(int k=0; k<64; k++){
+                    if(b.Channel[j]==k){
+                        if(det==0){
+                            h.mapDet1->Fill(coordinates[k][1], coordinates[k][2]);
+                        }
+                        else if(det==1){
+                            h.mapDet2->Fill(coordinates[k][1], coordinates[k][2]);
+                        }
+                        else if(det==2){
+                            h.mapDet3->Fill(coordinates[k][1], coordinates[k][2]);
+                        }
+                    }
+                }
+
+                //cout << "Channel: " << b.Channel[j] << endl;
+
+                /*
+                if (det == 0)
+                    h.mapDet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+                if (det == 1)
+                    h.mapDet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+                if (det == 2)
+                    h.mapdet3->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);   for third detector
+            }
+            
+            h.hBaseline1->Fill(base[0]);
+            h.hBaseline2->Fill(base[1]);
+            h.hBaseline3->Fill(base[2]); //for the third det
+            
+        }
+        
+        if (i % 100000 == 0)
+            cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
+    }
+
+    cout << endl;
+}*/
