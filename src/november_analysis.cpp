@@ -5,7 +5,8 @@
 -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
 Goal: obtain time resolution of picosec detectors.
-To compile: c++ november_analysis.cpp analysis_picosec.cc `root-config --cflags --libs` -o november.out
+To compile: 
+c++ november_analysis.cpp analysis_picosec.cc `root-config --cflags --libs` -o november.out
 
 Processed files can be found at:
 /eos/experiment/neutplatform/enubet/testbeam2025/picosec_data/sampic_runs/rootSampicData/processed_waveforms/

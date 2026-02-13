@@ -66,12 +66,12 @@ void InitializeHistograms(Histograms &h)
     h.htime30_23 = new TH1F("htime30_23", "Time difference;Time [ps];Counts", 100, -0.2, 0.2);
     
     // Charge, risetime, peaktime, baseline
-    h.hcharge1 = new TH1F("hcharge1", "charge1", 1000, 0, 10);
-    h.hcharge2 = new TH1F("hcharge2", "charge2", 1000, 0, 10);
-    h.hrisetime1 = new TH1F("hrisetime1", "risetime1", 1000, -2000, 2000);
-    h.hrisetime2 = new TH1F("hrisetime2", "risetime2", 1000, -2000, 2000);
-    h.hbaseline1 = new TH1F("hbaseline", "baseline", 1000, 0.9, 1.1);
-    h.hbaseline2 = new TH1F("hbaseline2", "baseline2", 1000, 0.9, 1.1);
+    h.hcharge1 = new TH1F("hcharge1", "charge of the hits on the first detector; pC; hits", 1000, 0, 10);
+    h.hcharge2 = new TH1F("hcharge2", "charge of the hits on the second detector; pC; hits", 1000, 0, 10);
+    h.hrisetime1 = new TH1F("hrisetime1", "risetime of the first detector; ns; hits", 1000, -2000, 2000);
+    h.hrisetime2 = new TH1F("hrisetime2", "risetime of the second detector; ns; hits", 1000, -2000, 2000);
+    h.hbaseline1 = new TH1F("hbaseline", "baseline of the first detector; V; hits", 1000, 0.9, 1.1);
+    h.hbaseline2 = new TH1F("hbaseline2", "baseline of the second detector; V; hits", 1000, 0.9, 1.1);
     h.hpeaktime1 = new TH1F("hpeaktime1", "peaktime1", 1000, -20000, 20000);
     h.hpeaktime2 = new TH1F("hpeaktime2", "peaktime2", 1000, -20000, 20000);
 
@@ -134,6 +134,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
     
     Long64_t nentries = tree->GetEntries();
     
+    
     for (Long64_t i = 0; i < nentries; i++) 
     {
         tree->GetEntry(i);
@@ -159,7 +160,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
         //if (b.HitFeb[0] >= 1 && b.HitFeb[1] >= 1)
         if(true)
         {
-            double ampFEB[3] = {-1.0, -1.0, -1.0};
+            double ampFEB[6] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0};
             double cfd10[3] = {-9999.0, -9999.0, -9999.0};
             double cfd20[3] = {-9999.0, -9999.0, -9999.0};
             double cfd30[3] = {-9999.0, -9999.0, -9999.0};
@@ -168,7 +169,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
             double base[3] = {-9999.0, -9999.0, -9999.0};
             double peak_time[3] = {-9999.0, -9999.0, -9999.0};
             double risetime[3] = {-9999.0, -9999.0, -9999.0};
-            double integral[3] = {-9999.0, -9999.0, -9999.0};
+            double integral[6] = {-9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0};
             
             for (int j = 0; j < b.npulses; j++) 
             {
@@ -192,11 +193,16 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
                 risetime[det] = b.pulses_rise_time[j];
                 integral[det] = b.pulses_integral[j];
                 
-                if (det == 0)
+                if (det == 0){
                     h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
-                if (det == 1)
+                    h.htriple1->Fill(b.pulses_amplitude[j]);
+                    h.hcharge1->Fill(b.pulses_integral[j]);
+                }
+                if (det == 1){  
                     h.mapdet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
-            }
+                    h.htriple2->Fill(b.pulses_amplitude[j]); 
+                    h.hcharge2->Fill(b.pulses_integral[j]);   
+                 }
 
             if (TheChannel < 64) 
             {
@@ -228,13 +234,13 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
             h.hTime50->Fill(cfd50[0]);
             h.hTime60->Fill(cfd60[0]);
             h.hTime30_2->Fill(cfd30[1]);
-            h.hcharge1->Fill(integral[0]);
-            h.hcharge2->Fill(integral[1]);
+            /*h.hcharge1->Fill(integral[0]);
+            h.hcharge2->Fill(integral[1]);*/
             h.hrisetime1->Fill(risetime[0]);
             h.hrisetime2->Fill(risetime[1]);
-            h.htriple1->Fill(ampFEB[0]);
+            /*h.htriple1->Fill(ampFEB[0]);
             h.htriple2->Fill(ampFEB[1]);
-            h.htriple3->Fill(ampFEB[2]);
+            h.htriple3->Fill(ampFEB[2]);*/
             
             // Store peak times for channel averaging
             for (int k = 0; k < NCHANNELS; k++) 
@@ -273,13 +279,14 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
             cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
     }
 
-    cout << endl;
+    //cout << endl;
     //h.prof->Fill(0.5, 1000);   // solo per debug
+}
 }
 
 void FitHistograms(Histograms &h, FitResults &fit)
 {
-    // Polya function
+/*   // Polya function
     TF1 *fpolyaAmpl1 = new TF1("fpolyaAmpl1", 
         "([0]/[1])*((([2]+1)^([2]+1)*(x/[1])^[2])/(TMath::Gamma([2]+1)))*exp(-([2]+1)*x/[1])", 
         0, 3);
@@ -300,6 +307,7 @@ void FitHistograms(Histograms &h, FitResults &fit)
     fpolyaAmpl2->SetParameter(1,30); //Charge
     fpolyaAmpl2->SetParameter(2,2); //theta  im putting theta on 2 from 30 for debugging
     fpolyaAmpl2->SetParLimits(2,0.001,5000); //theta
+    */
     
     // Gaussian fit for time differences
     TF1 *f_gaus = new TF1("f_gaus", "gaus", -1000, 1000);
@@ -953,6 +961,9 @@ void ProcessEvents_november(TTree *tree, TreeBranches &b, Histograms &h,
                 h.htriple2->Fill(b.pulses_amplitude[j]);
                 h.hcharge2->Fill(b.pulses_integral[j]);
                 time_diff=(b.pulses_time_cfd30[j]+b.Cell0TimeStamp[j]*1000);
+                h.htime_12->Fill(time_diff);
+                h.timevsamplitude->SetPoint(h.timevsamplitude->GetN(),b.pulses_amplitude[j], time_diff); //+b.Cell0TimeStamp[j]*1000);   
+
                         
                 cout <<"cell0 timestampdet1: " << b.Cell0TimeStamp[j] << endl;
             }
@@ -974,7 +985,6 @@ void ProcessEvents_november(TTree *tree, TreeBranches &b, Histograms &h,
             if(det == 3)
                 board3_hits++;  
 
-            h.timevsamplitude->SetPoint(h.timevsamplitude->GetN(),b.pulses_amplitude[j], b.pulses_time_cfd30[j]); //+b.Cell0TimeStamp[j]*1000);   
             //cout << "Amplitude: " << b.pulses_amplitude[j] << " CFD30 time: " << b.pulses_time_cfd30[j] << endl;    
             h.htime_13->Fill(b.Cell0TimeStamp[j]);  
 

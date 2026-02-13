@@ -318,6 +318,10 @@ void CreateCanvasesAndSaveResults(const std::string &outputFileName, Histograms 
     cSavePDF_AmplitudesPerChannel2 -> SaveAs(Form("%s/Amplitude_Distribution_Per_Channel_detector2.pdf]", outDir.Data()));
     cSavePDF_AmplitudesPerChannel3 -> SaveAs(Form("%s/Amplitude_Distribution_Per_Channel_detector3.pdf]", outDir.Data()));
 
+
+
+    //cell0time stamp vs amplitude per channel DA AGGIUNGERE
+
 }
 
 
@@ -453,7 +457,7 @@ vector<vector<int>> ReadFile() {
                         else if(det==1){
                             h.mapDet2->Fill(coordinates[k][1], coordinates[k][2]);
                         }
-                        else if(det==2){
+                        else if(det==3){
                             h.mapDet3->Fill(coordinates[k][1], coordinates[k][2]);
                         }
                     }
@@ -466,7 +470,7 @@ vector<vector<int>> ReadFile() {
                     h.mapDet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
                 if (det == 1)
                     h.mapDet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
-                if (det == 2)
+                if (det == 3)
                     h.mapDet3->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);   for third detectors
             }
             
@@ -479,3 +483,9 @@ vector<vector<int>> ReadFile() {
         if (i % 100000 == 0)
             cout << "Processed " << i << " / " << nentries << " events...\r" << flush;
     }*/
+
+
+
+
+
+    
