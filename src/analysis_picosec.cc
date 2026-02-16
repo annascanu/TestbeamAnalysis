@@ -64,6 +64,9 @@ void InitializeHistograms(Histograms &h)
     h.htime30_12 = new TH1F("htime30_12", "Time difference;Time [ps];Counts", 100, -2000, 2000);
     h.htime30_13 = new TH1F("htime30_13", "Time difference;Time [ps];Counts", 100, -0.2, 0.2);
     h.htime30_23 = new TH1F("htime30_23", "Time difference;Time [ps];Counts", 100, -0.2, 0.2);
+
+
+    h.hcell0timestampMCP = new TH1F("hcell0timestamp", "Cell0TimeStamp distribution;Cell0TimeStamp [ns];Counts", 100, 0, 1e13);
     
     // Charge, risetime, peaktime, baseline
     h.hcharge1 = new TH1F("hcharge1", "charge of the hits on the first detector; pC; hits", 1000, 0, 10);
@@ -533,6 +536,7 @@ void SaveResults(const string &outputFileName, Histograms &h,
     h.mapdet2->Write();
     h.mapdet1_afterselection->Write();
     h.mapdet2_afterselection->Write();
+    h.hcell0timestampMCP->Write();
 
     // Save channel-averaged tree
     TTree *tout = new TTree("channelMeans", "Medie per canale");
@@ -938,6 +942,7 @@ void ProcessEvents_november(TTree *tree, TreeBranches &b, Histograms &h,
                     h.hcharge1->Fill(b.pulses_integral[j]);
                     h.timevsamplitude2->SetPoint(h.timevsamplitude2->GetN(),b.pulses_amplitude[j], b.pulses_time_cfd30[j]);//+b.Cell0TimeStamp[j]*1000);
                     time_MCP=b.pulses_time_cfd30[j]+b.Cell0TimeStamp[j]*1000;
+                    h.hcell0timestampMCP->Fill(b.Cell0TimeStamp[j]);
                 } 
             }
 
@@ -965,15 +970,17 @@ void ProcessEvents_november(TTree *tree, TreeBranches &b, Histograms &h,
                 h.timevsamplitude->SetPoint(h.timevsamplitude->GetN(),b.pulses_amplitude[j], time_diff); //+b.Cell0TimeStamp[j]*1000);   
 
                         
-                cout <<"cell0 timestampdet1: " << b.Cell0TimeStamp[j] << endl;
+                //cout <<"cell0 timestampdet1: " << b.Cell0TimeStamp[j] << endl;
             }
             else
             {
-                cout <<"cell0 timestampdet3: " << b.Cell0TimeStamp[j] << endl;
+                //cout <<"cell0 timestampdet3: " << b.Cell0TimeStamp[j] << endl;
                 h.htriple3->Fill(b.pulses_amplitude[j]);
                 h.hcharge2->Fill(b.pulses_integral[j]);
                 time_diff=(b.pulses_time_cfd30[j]+b.Cell0TimeStamp[j]*1000);
                 h.htime_12->Fill(time_diff);
+
+                
             }
                 
             if(det == 0) // nothing
@@ -986,6 +993,9 @@ void ProcessEvents_november(TTree *tree, TreeBranches &b, Histograms &h,
                 board3_hits++;  
 
             //cout << "Amplitude: " << b.pulses_amplitude[j] << " CFD30 time: " << b.pulses_time_cfd30[j] << endl;    
+            //solo timestamp del picose
+            if(b.Cell0TimeStamp[j]<0)
+            cout <<"cell0 timestamp: " << b.Cell0TimeStamp[j] << endl;
             h.htime_13->Fill(b.Cell0TimeStamp[j]);  
 
             

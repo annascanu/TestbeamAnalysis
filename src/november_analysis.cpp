@@ -30,9 +30,9 @@ int main() {
     //TString filename = "/Users/anna/Developing/PhD/Testbeam2025/sampic_run22_final.root"; // when running on Anna's machine
     //TString filename = "/home/riccardo-speziali/Scrivania/October_2025/root_tree/sampic_run22_final.root"; // when running on Riccardo's machine
 
-    TString filename = "/home/riccardo-speziali/Scrivania/november_2025/root_tree/sampic_run209_final.root"; // when running on Riccardo's machine
+    TString filename = "/home/riccardo-speziali/Scrivania/november_2025/root_tree/sampic_run222_final.root"; // when running on Riccardo's machine
 
-    string outputFileName = "muon_run209_2.0version.root";
+    string outputFileName = "muon_run222_2.0version.root";
 
     // ------------------------------------------------
     //         Open input file and get tree

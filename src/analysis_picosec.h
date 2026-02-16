@@ -39,6 +39,7 @@ struct Histograms {
     TH1F *hrisetime1, *hrisetime2;
     TH1F *hbaseline1, *hbaseline2;
     TH1F *hpeaktime1, *hpeaktime2;
+    TH1F *hcell0timestampMCP;
     
     // Channel counts
     TH1F *conteggixcanale1, *conteggixcanale2, *conteggixcanale3;
