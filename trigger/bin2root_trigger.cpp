@@ -83,7 +83,7 @@ int main() {
     std::cout << "Read " << entries.size() << " entries\n";
 
     // --- Crea un ROOT file ---
-    TFile *f = new TFile("sampic_trigger.root", "RECREATE");
+    TFile *f = new TFile("sampic_trigger_run222.root", "RECREATE");
     TTree *tree = new TTree("triggerTree", "SAMPIC Trigger Data");
 
     // Variabili per il TTree
