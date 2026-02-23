@@ -6,6 +6,7 @@
 #include "TTree.h"
 #include <cmath> 
 
+
 using namespace std;
 
 
@@ -30,7 +31,7 @@ struct matchedEvent {
     int channel;
     
     float TOTValue;
-    uint64_t TriggerIDSRS;
+    Int_t TriggerIDSRS;
     
     float Waveform[64];
 };
@@ -51,10 +52,39 @@ struct WaveformRecord {
 };
 
 
+struct building{
+    double Cell0timestamp_MCP;
+    double Cell0timeSTamp_PICOSEC[10];
+    int chanel_PICOSEC[10];
+    float TOTValue;
+    float Waveform_MCP;
+    float Waveform_PICOSEC[10][64];
+    int hit_x_event;
+
+
+};
+
+
 
 
 int main() 
 {
+    cout<<"FINE!"<<endl;
+     // Dichiarazioni vettori per output
+vector<double> cell0;
+vector<int> channel_picosec;
+vector<float> tot_picosec;
+vector<float> waveform_picosec;
+int hitxevent;  // nuovo branch
+
+
+// Riserva memoria per ridurre reallocazioni
+channel_picosec.reserve(5);
+tot_picosec.reserve(5);
+waveform_picosec.reserve(5);
+cell0.reserve(5);
+
+
     // Apri i file ROOT
     TString filename_feb1 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run222/sampic_run1_feb1_Corr.root";
     TString filename_feb3 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run222/sampic_run1_feb3_Corr.root";
@@ -92,6 +122,8 @@ int main()
 
     WaveformRecord rec1, rec3;
     matchedEvent mcp_event;
+    building res;
+        cout<<"FINE!"<<endl;
 
 
     tree_feb1->SetBranchAddress("Cell0TimeStamp", &rec1.Cell0TimeStamp  );
@@ -132,19 +164,17 @@ int main()
     // tree_feb1->Branch("UnixTime", &rec.UnixTime,"UnixTime/D");
     output_tree->Branch("Channel_MCP", &mcp_event.channel,"Channel_MCP/I");
     output_tree->Branch("TOTValue_MCP", &mcp_event.TOTValue,"TOTValue_MCP/F");
-    output_tree->Branch("TriggerIDSRS", &mcp_event.TriggerIDSRS,"TriggerIDSRS_MCP/I");
-    output_tree->Branch("Waveform_MCP", mcp_event.Waveform, "Waveform[64]/F");
-    output_tree->Branch("Cell0TimeStamp_corr_FEB1", &rec1.Cell0TimeStamp_corr,"Cell0TimeStamp_corr_FEB1/D");
-    output_tree->Branch("Channel_FEB1", &rec1.channel,"Channel_FEB1/I");
-    output_tree->Branch("TOTValue_FEB1", &rec1.TOTValue,"TOTValue_FEB1/F");
-    
-    output_tree->Branch("Waveform_FEB1", rec1.Waveform, "Waveform[64]/F");
-    output_tree->Branch("Cell0TimeStamp_corr_FEB3", &rec3.Cell0TimeStamp_corr,"Cell0TimeStamp_corr_FEB3/D");
-    output_tree->Branch("Channel_FEB3", &rec3.channel,"Channel_FEB3/I");
-    output_tree->Branch("TOTValue_FEB3", &rec3.TOTValue,"TOTValue_FEB3/F");
-    
-    output_tree->Branch("Waveform_FEB3", rec3.Waveform, "Waveform[64]/F");
+    output_tree->Branch("TriggerIDSRS_MCP", &mcp_event.TriggerIDSRS,"TriggerIDSRS_MCP/I");
+    output_tree->Branch("Waveform_MCP", mcp_event.Waveform, "Waveform_MCP[64]/F");
+    output_tree->Branch("Cell0TimeStamp_PICOSEC", &cell0);
+    output_tree->Branch("Channel_PICOSEC", &channel_picosec);
+    output_tree->Branch("TOTValue_PICOSEC", &tot_picosec);
+    output_tree->Branch("Waveform_PICOSEC", &waveform_picosec);
+    output_tree->Branch("hitxevent", &hitxevent);
 
+        cout<<"FINE!"<<endl;
+
+    //
 
     Long64_t nentries_feb1 = tree_feb1->GetEntries();
     Long64_t nentries_feb3 = tree_feb3->GetEntries();
@@ -152,22 +182,75 @@ int main()
 
     // Qui puoi aggiungere il codice per leggere i dati dai file e analizzarli
     
-    Long64_t j1 = 0, j3 = 0;
+ 
 
-    for (Long64_t i = 0; i < nentries_matching; i++) {
+    cout<<"FINE!"<<endl;
+
+double time_window = 50.0; // finestra temporale in ns
+Long64_t j1 = 0, j3 = 0;   // indici globali per FEB1 e FEB3
+
+for (Long64_t i = 0; i < nentries_matching; i++) {
 
     matching_tree->GetEntry(i);
 
-    
+    // Pulizia vettori ad ogni evento MCP
+    cell0.clear();
+    channel_picosec.clear();
+    tot_picosec.clear();
+    waveform_picosec.clear();
 
+    double t_mcp = mcp_event.Cell0TimeStamp_corr;
+    hitxevent = 0;
 
+    // =========================
+    // FEB1
+    // =========================
+    while (j1 < nentries_feb1) {
+        tree_feb1->GetEntry(j1);
+        double dt = rec1.Cell0TimeStamp_corr - t_mcp;
 
+        if (dt < -time_window) { j1++; continue; } // troppo vecchio, avanti
+        if (dt > time_window) break;               // oltre finestra, stop loop
 
-    
+        // Hit valido
+        cell0.push_back(rec1.Cell0TimeStamp_corr);
+        channel_picosec.push_back(rec1.channel);
+        tot_picosec.push_back(rec1.TOTValue);
+        for (int k = 0; k < 64; k++)
+            waveform_picosec.push_back(rec1.Waveform[k]);
 
+        hitxevent++;
+        j1++;
+    }
 
+    // =========================
+    // FEB3
+    // =========================
+    while (j3 < nentries_feb3) {
+        tree_feb3->GetEntry(j3);
+        double dt = rec3.Cell0TimeStamp_corr - t_mcp;
 
+        if (dt < -time_window) { j3++; continue; } // troppo vecchio
+        if (dt > time_window) break;               // oltre finestra
+
+        // Hit valido
+        cell0.push_back(rec3.Cell0TimeStamp_corr);
+        channel_picosec.push_back(rec3.channel + 63);
+        tot_picosec.push_back(rec3.TOTValue);
+        for (int k = 0; k < 64; k++)
+            waveform_picosec.push_back(rec3.Waveform[k]);
+
+        hitxevent++;
+        j3++;
+    }
+
+    output_tree->Fill();
+
+    if (i % 1000 == 0) {
+        cout << "Events left: " << nentries_matching - i 
+             << " | Hits this event: " << hitxevent << "\r" << flush;
+    }
+}
 
 
 }
-    
