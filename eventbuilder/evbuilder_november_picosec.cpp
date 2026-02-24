@@ -5,6 +5,27 @@
 #include "TFile.h"
 #include "TTree.h"
 #include <cmath> 
+#include <TStyle.h>
+#include <TLegend.h>
+#include <TLatex.h>
+#include <TMath.h>
+#include <iostream>
+#include <TROOT.h>
+#include <TApplication.h>
+#include <array>
+
+#include <TFile.h>
+#include <TTree.h>
+#include <TH1F.h>
+#include <TH2F.h>
+#include <TCanvas.h>
+#include <TGraph.h>
+#include <TGraph2D.h>
+#include <TProfile.h>
+#include <TF1.h>
+#include <vector>
+#include <string>
+#include "TTreeIndex.h"
 
 
 using namespace std;
@@ -77,6 +98,8 @@ vector<float> tot_picosec;
 vector<float> waveform_picosec;
 int hitxevent;  // nuovo branch
 
+TGraph *cell0timehisto = new TGraph();
+TGraph *dtmcp = new TGraph();
 
 // Riserva memoria per ridurre reallocazioni
 channel_picosec.reserve(5);
@@ -86,8 +109,8 @@ cell0.reserve(5);
 
 
     // Apri i file ROOT
-    TString filename_feb1 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run222/sampic_run1_feb1_Corr.root";
-    TString filename_feb3 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run222/sampic_run1_feb3_Corr.root";
+    TString filename_feb1 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/ordered_feb1.root";
+    TString filename_feb3 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/ordered_feb3.root";
     TString matching_filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/MCPtoSRS_run222.root";
 
     TString output_filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/eventbuilding.root";
@@ -111,8 +134,8 @@ cell0.reserve(5);
         return 1;
     }   
 
-    TTree *tree_feb1 = (TTree*)file_feb1->Get("picoTreewithCorr");
-    TTree *tree_feb3 = (TTree*)file_feb3->Get("picoTreewithCorr");
+    TTree *tree_feb1 = (TTree*)file_feb1->Get("eventbuilding");
+    TTree *tree_feb3 = (TTree*)file_feb3->Get("eventbuilding");
     if (!tree_feb1 || !tree_feb3) {
         cerr << "Error: picoTreewithCorr not found in one or more files." << endl;
         return 1;
@@ -126,27 +149,27 @@ cell0.reserve(5);
         cout<<"FINE!"<<endl;
 
 
-    tree_feb1->SetBranchAddress("Cell0TimeStamp", &rec1.Cell0TimeStamp  );
-    tree_feb1->SetBranchAddress("Cell0TimeStamp_corr", &rec1.Cell0TimeStamp_corr);
+    //tree_feb1->SetBranchAddress("Cell0TimeStamp", &rec1.Cell0TimeStamp  );
+    tree_feb1->SetBranchAddress("Cell0TimeStamp_corr_FEB1", &rec1.Cell0TimeStamp_corr);
     // tree_feb1->Branch("UnixTime", &rec.UnixTime,"UnixTime/D");
-    tree_feb1->SetBranchAddress("Channel", &rec1.channel);
-    tree_feb1->SetBranchAddress("TOTValue", &rec1.TOTValue);
-    tree_feb1->SetBranchAddress("TimeInstant", &rec1.TimeInstant);
-    tree_feb1->SetBranchAddress("Baseline", &rec1.Baseline);
-    tree_feb1->SetBranchAddress("PeakValue", &rec1.PeakValue);
-    tree_feb1->SetBranchAddress("Amplitude", &rec1.Amplitude);
-    tree_feb1->SetBranchAddress("Waveform", rec1.Waveform);
+    tree_feb1->SetBranchAddress("Channel_FEB1", &rec1.channel);
+    tree_feb1->SetBranchAddress("TOTValue_FEB1", &rec1.TOTValue);
+    tree_feb1->SetBranchAddress("TimeInstant_FEB1", &rec1.TimeInstant);
+    tree_feb1->SetBranchAddress("Baseline_FEB1", &rec1.Baseline);
+    tree_feb1->SetBranchAddress("PeakValue_FEB1", &rec1.PeakValue);
+    tree_feb1->SetBranchAddress("Amplitude_FEB1", &rec1.Amplitude);
+    tree_feb1->SetBranchAddress("Waveform_FEB1", rec1.Waveform);
 
-    tree_feb3->SetBranchAddress("Cell0TimeStamp", &rec3.Cell0TimeStamp);
-    tree_feb3->SetBranchAddress("Cell0TimeStamp_corr", &rec3.Cell0TimeStamp_corr);
+    //tree_feb3->SetBranchAddress("Cell0TimeStamp_FEB3", &rec3.Cell0TimeStamp);
+    tree_feb3->SetBranchAddress("Cell0TimeStamp_corr_FEB3", &rec3.Cell0TimeStamp_corr);
     // tree_feb1->Branch("UnixTime", &rec.UnixTime,"UnixTime/D");
-    tree_feb3->SetBranchAddress("Channel", &rec3.channel);
-    tree_feb3->SetBranchAddress("TOTValue", &rec3.TOTValue);
-    tree_feb3->SetBranchAddress("TimeInstant", &rec3.TimeInstant);
-    tree_feb3->SetBranchAddress("Baseline", &rec3.Baseline);
-    tree_feb3->SetBranchAddress("PeakValue", &rec3.PeakValue);
-    tree_feb3->SetBranchAddress("Amplitude", &rec3.Amplitude);
-    tree_feb3->SetBranchAddress("Waveform", rec3.Waveform);
+    tree_feb3->SetBranchAddress("Channel_FEB3", &rec3.channel);
+    tree_feb3->SetBranchAddress("TOTValue_FEB3", &rec3.TOTValue);
+    tree_feb3->SetBranchAddress("TimeInstant_FEB3", &rec3.TimeInstant);
+    tree_feb3->SetBranchAddress("Baseline_FEB3", &rec3.Baseline);
+    tree_feb3->SetBranchAddress("PeakValue_FEB3", &rec3.PeakValue);
+    tree_feb3->SetBranchAddress("Amplitude_FEB3", &rec3.Amplitude);
+    tree_feb3->SetBranchAddress("Waveform_FEB3", rec3.Waveform);
 
     matching_tree->SetBranchAddress("Cell0TimeStamp_corr", &mcp_event.Cell0TimeStamp_corr);
     matching_tree->SetBranchAddress("Channel", &mcp_event.channel);
@@ -185,6 +208,9 @@ cell0.reserve(5);
  
 
     cout<<"FINE!"<<endl;
+    double tmcp_prevous = 0;
+    double timefeb1=0, timefeb3=0;
+  
 
 double time_window = 50.0; // finestra temporale in ns
 Long64_t j1 = 0, j3 = 0;   // indici globali per FEB1 e FEB3
