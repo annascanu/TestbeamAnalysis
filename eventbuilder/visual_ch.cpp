@@ -31,6 +31,12 @@
 #include "TH1I.h"
 #include "TCanvas.h"
 
+#include "TApplication.h"
+#include "TH1I.h"
+#include "TCanvas.h"
+#include "TSystem.h"
+
+
 
 
 using namespace std;
@@ -98,7 +104,7 @@ int main()
     double t_mcp=0;
     int channel_mcp=0;
     float tot_mcp=0;
-    float waveform_temp[64];
+    vector<float> waveform_temp;
     Int_t SRS;
 
     cout<<"FINE!"<<endl;
@@ -199,7 +205,7 @@ cell0.reserve(5);
    output_tree->Branch("Channel_MCP", &channel_mcp,"Channel_MCP/I");
    output_tree->Branch("TOTValue_MCP", &tot_mcp,"TOTValue_MCP/F");
    output_tree->Branch("TriggerIDSRS_MCP", &SRS,"TriggerIDSRS_MCP/I");
-   //output_tree->Branch("Waveform_MCP", waveform_temp, "Waveform_MCP[64]/F");
+   output_tree->Branch("Waveform_MCP", &waveform_temp);
     output_tree->Branch("Cell0TimeStamp_PICOSEC", &cell0);
     output_tree->Branch("Channel_PICOSEC", &channel_picosec);
     output_tree->Branch("TOTValue_PICOSEC", &tot_picosec);
@@ -226,6 +232,18 @@ cell0.reserve(5);
 double time_window = 50.0; // finestra temporale in ns
 Long64_t j1 = 0, j3 = 0;   // indici globali per FEB1 e FEB3
 
+int fakeargc = 0;
+char** fakeargv = nullptr;
+TApplication app("app", &fakeargc, fakeargv);
+
+TH1I *hOcc = new TH1I("hOcc",
+                      "Channel Occupancy (Live);Channel;Counts",
+                      128, 0, 128);
+
+TCanvas *cOcc = new TCanvas("cOcc","Live Occupancy",900,600);
+hOcc->Draw();
+cOcc->Update();
+
 for (Long64_t i = 0; i < nentries_matching; i++) {
 
     matching_tree->GetEntry(i);
@@ -247,8 +265,9 @@ for (Long64_t i = 0; i < nentries_matching; i++) {
     //filling MCP Data
     channel_mcp = mcp_event.channel;
     //tot_mcp = mcp_event.TOTValue;
+    waveform_temp.clear();
     for (int k = 0; k < 64; k++)
-        waveform_temp[k] = mcp_event.Waveform[k];
+        waveform_temp.push_back(mcp_event.Waveform[k]);
     SRS = mcp_event.TriggerIDSRS;
 
     // =========================
@@ -300,6 +319,20 @@ for (Long64_t i = 0; i < nentries_matching; i++) {
 
     output_tree->Fill();
 
+
+    // Riempimento live
+if(hitxevent < 5 && i<80000){
+for (auto ch : channel_picosec) {
+    hOcc->Fill(ch);
+}
+}
+// Aggiorna ogni 500 eventi (evita rallentamenti)
+if (i % 500 == 0) {
+    cOcc->Modified();
+    cOcc->Update();
+    gSystem->ProcessEvents();
+}
+
     if (i % 1000 == 0) {
         cout << "Events left: " << nentries_matching - i 
              << " | Hits this event: " << hitxevent << "\r" << flush;
@@ -307,7 +340,7 @@ for (Long64_t i = 0; i < nentries_matching; i++) {
 
 
 
-    if(t_mcp> 8.75e12 && hitxevent>0) 
+    /*if(t_mcp> 8.75e12 && hitxevent>0) 
    // if(t_mcp<0.1e12 && hitxevent<4)
     { // esempio di condizione per debug
         cout << "Debug: MCP timestamp " << t_mcp << " at entry " << i << endl;
@@ -319,44 +352,12 @@ for (Long64_t i = 0; i < nentries_matching; i++) {
                  << ", TOTValue=" << tot_picosec[idx] 
                  << endl;
         }
-    }
+    }*/
 }
 
-
-// Riportati all'inizio del tree
-output_tree->SetBranchAddress("channel_picosec", &channel_picosec);
-
-Long64_t nentries_out = output_tree->GetEntries();
-
-// Applicazione grafica
-int fakeargc = 0;
-char** fakeargv = nullptr;
-TApplication app("app", &fakeargc, fakeargv);
-
-// Istogramma (0–127 canali totali FEB1+FEB3)
-TH1I *hOcc = new TH1I("hOcc",
-                      "Channel Occupancy after EventBuilding;Channel;Counts",
-                      128, 0, 128);
-
-// Loop su eventi MCP (eventbuilding)
-for (Long64_t i = 0; i < nentries_out; i++) {
-
-    output_tree->GetEntry(i);
-
-    // channel_picosec è un vector<int>
-    for (size_t j = 0; j < channel_picosec.size(); j++) {
-        hOcc->Fill(channel_picosec[j]);
-    }
-}
-
-// Disegno
-TCanvas *cOcc = new TCanvas("cOcc","Occupancy After EventBuilding",900,600);
-hOcc->Draw();
-cOcc->Update();
-
-cout << "Premi Ctrl+C per chiudere." << endl;
-
+cout << "Event building finito." << endl;
 app.Run();
+
 
 
 }
