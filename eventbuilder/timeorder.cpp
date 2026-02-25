@@ -68,10 +68,15 @@ struct EntryRef {
 
 
 
-int main() 
+int main(int argc, char* argv[]) 
 {
-    TString filename_feb1 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run222/sampic_run1_feb1_Corr.root";
-    TString filename_feb3 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run222/sampic_run1_feb3_Corr.root";
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <run_number>\n";
+        return 1;
+}
+    int run_number = std::stoi(argv[1]);
+    TString filename_feb1 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run" + std::to_string(run_number) + "/sampic_run1_feb1_Corr.root";
+    TString filename_feb3 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run" + std::to_string(run_number) + "/sampic_run1_feb3_Corr.root";
 
     TFile* file_feb1 = OpenInputFile(filename_feb1.Data());
     TFile* file_feb3 = OpenInputFile(filename_feb3.Data());
@@ -112,7 +117,8 @@ int main()
 
 
     //output file: ordered by Cell0TimeStamp_corr
-    TFile *output_file = new TFile("/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/ordered_feb1.root", "RECREATE");
+    TString output_filename_feb1 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run" + std::to_string(run_number) + "/ordered_feb1.root";
+    TFile *output_file = new TFile(output_filename_feb1.Data(), "RECREATE");
     TTree *output_tree = new TTree("eventbuilding", "eventbuilding");
     output_tree->Branch("Cell0TimeStamp_corr_FEB1", &rec1.Cell0TimeStamp_corr,"Cell0TimeStamp_corr_FEB1/D");
     output_tree->Branch("Channel_FEB1", &rec1.channel,"Channel_FEB1/I");
@@ -123,7 +129,8 @@ int main()
     output_tree->Branch("Amplitude_FEB1", &rec1.Amplitude,"Amplitude_FEB1/F");
     output_tree->Branch("Waveform_FEB1", rec1.Waveform, "Waveform_FEB1[64]/F");
 
-    TFile *output_file3 = new TFile("/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/ordered_feb3.root", "RECREATE");
+    TString output_filename_feb3 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run" + std::to_string(run_number) + "/ordered_feb3.root";
+    TFile *output_file3 = new TFile(output_filename_feb3.Data(), "RECREATE");
     TTree *output_tree3 = new TTree("eventbuilding", "eventbuilding");  
 
     output_tree3->Branch("Cell0TimeStamp_corr_FEB3", &rec3.Cell0TimeStamp_corr,"Cell0TimeStamp_corr_FEB3/D");

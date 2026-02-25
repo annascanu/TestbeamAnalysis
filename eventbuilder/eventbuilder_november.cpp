@@ -45,15 +45,19 @@ struct TriggerEntry {
 
 
 
-int main() 
+int main(int argc, char* argv[]) 
 {
+
+    int run_number = std::stoi(argv[1]);
+    //int subrun_number = std::stoi(argv[2]);
+
     int conta=0;
     // Apri i file ROOT
-    TString filename_feb0 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run222/sampic_run1_feb0_Corr.root";
-    TString filename_feb1 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run222/sampic_run1_feb1_Corr.root";
-    TString filename_feb3 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run222/sampic_run1_feb3_Corr.root";
-    TString filename_trigger = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/trigger/sampic_trigger_run222.root";
-    TString output_filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/MCPtoSRS_run222.root";
+    TString filename_feb0 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run" + std::to_string(run_number) + "/sampic_run1_feb0_Corr.root";
+    TString filename_feb1 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run" + std::to_string(run_number) + "/sampic_run1_feb1_Corr.root";
+    TString filename_feb3 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run" + std::to_string(run_number) + "/sampic_run1_feb3_Corr.root";
+    TString filename_trigger = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/trigger/sampic_trigger_run" + std::to_string(run_number) + ".root";
+    TString output_filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/MCPtoSRS_run" + std::to_string(run_number) + ".root";
     TFile *file_feb0 = OpenInputFile(filename_feb0.Data());
     //TFile *file_feb1 = OpenInputFile(filename_feb1.Data());
     //TFile *file_feb3 = OpenInputFile(filename_feb3.Data());

@@ -321,7 +321,7 @@ for (Long64_t i = 0; i < nentries_matching; i++) {
 
 
     // Riempimento live
-if(hitxevent < 5 && i<80000){
+if(hitxevent < 5 ){
 for (auto ch : channel_picosec) {
     hOcc->Fill(ch);
 }

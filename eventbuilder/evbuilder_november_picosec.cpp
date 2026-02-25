@@ -93,8 +93,13 @@ struct building{
 
 
 
-int main() 
+int main(int argc, char* argv[]) 
 {
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <run_number>\n";
+        return 1;
+    }
+    int run_number = std::stoi(argv[1]);
     double t_mcp=0;
     int channel_mcp=0;
     float tot_mcp=0;
@@ -120,11 +125,11 @@ cell0.reserve(5);
 
 
     // Apri i file ROOT
-    TString filename_feb1 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/ordered_feb1.root";
-    TString filename_feb3 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/ordered_feb3.root";
-    TString matching_filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/MCPtoSRS_run222.root";
+    TString filename_feb1 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run" + std::to_string(run_number) + "/ordered_feb1.root";
+    TString filename_feb3 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run" + std::to_string(run_number) + "/ordered_feb3.root";
+    TString matching_filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/MCPtoSRS_run" + std::to_string(run_number) + ".root";
 
-    TString output_filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/eventbuilding.root";
+    TString output_filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run" + std::to_string(run_number) + "/eventbuilding.root";
    
     //check
     TFile *matching_file = OpenInputFile(matching_filename.Data());
