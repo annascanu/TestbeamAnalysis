@@ -40,3 +40,5 @@ This repository is evolving continuously as new insights emerge from the testbea
 - 3rd part: merge of trigger and data using eventbuilder_november.cpp here there is the coupling of the MCP data with the SRS
 - (4th part) before the final part: time ordering of the picose event with timeorder.cpp
 - last part: evbuilder_november_picosec.cpp reconstruction completed!!!
+- NEXT JOB: GEM data for the tracks to add using the anaRun.root file
+  
