@@ -76,14 +76,23 @@ std::vector<TriggerEntry> readSAMPICTriggerBinary(const std::string& filename) {
     return entries;
 }
 
-int main() {
-    std::string filename = "/home/riccardo-speziali/Scrivania/bin_file/Run222_true/Run222/sampic_run1/sampic_run1_trigger_data.bin";
+int main(int argc, char* argv[]) {
+    if (argc < 3) {
+        std::cerr << "Usage: " << argv[0] << " <run_number> <subrun_number>\n";
+        return 1;
+    }
+
+    int run_number = std::stoi(argv[1]);
+   
+
+    std::string filename = "/home/riccardo-speziali/Scrivania/bin_file/Run" + std::to_string(run_number) + "_true/Run" + std::to_string(run_number) + "/sampic_run1/sampic_run1_trigger_data.bin";
     auto entries = readSAMPICTriggerBinary(filename);
 
     std::cout << "Read " << entries.size() << " entries\n";
 
     // --- Crea un ROOT file ---
-    TFile *f = new TFile("sampic_trigger_run222.root", "RECREATE");
+    std::string output_filename = "sampic_trigger_run" + std::to_string(run_number) + ".root";
+    TFile *f = new TFile(output_filename.c_str(), "RECREATE");
     TTree *tree = new TTree("triggerTree", "SAMPIC Trigger Data");
 
     // Variabili per il TTree

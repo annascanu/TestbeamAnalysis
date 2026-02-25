@@ -80,12 +80,13 @@ struct WaveformRecord {
 
 struct building{
     double Cell0timestamp_MCP;
-    double Cell0timeSTamp_PICOSEC[10];
-    int chanel_PICOSEC[10];
+    double Cell0timeSTamp_PICOSEC[50];
+    int chanel_PICOSEC[50];
     float TOTValue;
-    float Waveform_MCP;
-    float Waveform_PICOSEC[10][64];
+    float Waveform_MCP[64];
+    float Waveform_PICOSEC[50][64];
     int hit_x_event;
+    int SRS;
 
 
 };
@@ -161,7 +162,7 @@ cell0.reserve(5);
 
     WaveformRecord rec1, rec3;
     matchedEvent mcp_event;
-    building res;
+    building built;
         cout<<"FINE!"<<endl;
 
 
@@ -199,17 +200,18 @@ cell0.reserve(5);
     TFile *output_file = new TFile(output_filename.Data(), "RECREATE");
     TTree *output_tree = new TTree("eventbuilding", "eventbuilding");
     //output_tree->Branch("Cell0TimeStamp", &rec0.Cell0TimeStamp,"Cell0TimeStamp/D");
-    output_tree->Branch("Cell0TimeStamp_corr_MCP", &t_mcp,"Cell0TimeStamp_corr/D");
+    output_tree->Branch("Cell0TimeStamp_corr_MCP", &built.Cell0timestamp_MCP,"Cell0TimeStamp_corr/D");
     // tree_feb1->Branch("UnixTime", &rec.UnixTime,"UnixTime/D");
-   output_tree->Branch("Channel_MCP", &channel_mcp,"Channel_MCP/I");
-   output_tree->Branch("TOTValue_MCP", &tot_mcp,"TOTValue_MCP/F");
-   output_tree->Branch("TriggerIDSRS_MCP", &SRS,"TriggerIDSRS_MCP/I");
+   //output_tree->Branch("Channel_MCP", &built.c,"Channel_MCP/I");
+   output_tree->Branch("TOTValue_MCP", &built.TOTValue,"TOTValue_MCP/F");
+   output_tree->Branch("TriggerIDSRS_MCP", &built.SRS,"TriggerIDSRS_MCP/I");
    //output_tree->Branch("Waveform_MCP", waveform_temp, "Waveform_MCP[64]/F");
-    output_tree->Branch("Cell0TimeStamp_PICOSEC", &cell0);
-    output_tree->Branch("Channel_PICOSEC", &channel_picosec);
-    output_tree->Branch("TOTValue_PICOSEC", &tot_picosec);
-    output_tree->Branch("Waveform_PICOSEC", &waveform_picosec);
-    output_tree->Branch("hitxevent", &hitxevent);
+    output_tree->Branch("Cell0TimeStamp_PICOSEC", &built.Cell0timeSTamp_PICOSEC,"Cell0TimeStamp_PICOSEC[50]/D");
+    output_tree->Branch("Channel_PICOSEC", &built.chanel_PICOSEC,"Channel_PICOSEC[50]/I");
+     output_tree->Branch("TOTValue_PICOSEC", &built.TOTValue,"TOTValue_PICOSEC/F");
+    //output_tree->Branch("TOTValue_PICOSEC", &tot_picosec);
+    output_tree->Branch("Waveform_PICOSEC", &built.Waveform_PICOSEC,"Waveform_PICOSEC[50][64]/F");
+    output_tree->Branch("hitxevent", &built.hit_x_event,"hitxevent/I");
 
         cout<<"FINE!"<<endl;
 
@@ -242,6 +244,11 @@ for (Long64_t i = 0; i < nentries_matching; i++) {
     waveform_picosec.clear();
 
     t_mcp = mcp_event.Cell0TimeStamp_corr;
+    built.Cell0timestamp_MCP = t_mcp;
+    built.TOTValue = mcp_event.TOTValue;
+    built.SRS = mcp_event.TriggerIDSRS;
+    for (int k = 0; k < 64; k++)         waveform_temp[k] = mcp_event.Waveform[k];
+    for (int k = 0; k < 64; k++)         built.Waveform_MCP[k] = mcp_event.Waveform[k];
     if(t_mcp < tmcp_prevous) {
         cout << "Warning: MCP timestamps not in order at entry " << i << endl;
     }
@@ -271,6 +278,10 @@ for (Long64_t i = 0; i < nentries_matching; i++) {
         if (dt > time_window) break;               // oltre finestra, stop loop
 
         // Hit valido
+        built.Cell0timeSTamp_PICOSEC[hitxevent] = rec1.Cell0TimeStamp_corr;
+        built.chanel_PICOSEC[hitxevent] = rec1.channel;
+        built.TOTValue = rec1.TOTValue;
+        for (int k = 0; k < 64; k++)            built.Waveform_PICOSEC[hitxevent][k] = rec1.Waveform[k];
         cell0.push_back(rec1.Cell0TimeStamp_corr);
         channel_picosec.push_back(rec1.channel);
         tot_picosec.push_back(rec1.TOTValue);
@@ -280,6 +291,7 @@ for (Long64_t i = 0; i < nentries_matching; i++) {
         hitxevent++;
         j1++;
     }
+    
 
     // =========================
     // FEB3
@@ -293,6 +305,10 @@ for (Long64_t i = 0; i < nentries_matching; i++) {
         if (dt > time_window) break;               // oltre finestra
 
         // Hit valido
+        built.Cell0timeSTamp_PICOSEC[hitxevent] = rec3.Cell0TimeStamp_corr;
+        built.chanel_PICOSEC[hitxevent] = rec3.channel + 63; // canali FEB3 da 64 a 127
+        built.TOTValue = rec3.TOTValue;
+        for (int k = 0; k < 64; k++)            built.Waveform_PICOSEC[hitxevent][k] = rec3.Waveform[k];
         cell0.push_back(rec3.Cell0TimeStamp_corr);
         channel_picosec.push_back(rec3.channel + 63);
         tot_picosec.push_back(rec3.TOTValue);
@@ -302,6 +318,7 @@ for (Long64_t i = 0; i < nentries_matching; i++) {
         hitxevent++;
         j3++;
     }
+    built.hit_x_event = hitxevent;
 
     output_tree->Fill();
 

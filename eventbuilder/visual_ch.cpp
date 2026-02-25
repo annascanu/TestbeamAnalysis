@@ -269,6 +269,9 @@ for (Long64_t i = 0; i < nentries_matching; i++) {
     for (int k = 0; k < 64; k++)
         waveform_temp.push_back(mcp_event.Waveform[k]);
     SRS = mcp_event.TriggerIDSRS;
+    if(i%100000==0){
+        cout<<"Entry: " << i<< "srs: " << SRS << endl;
+    }
 
     // =========================
     // FEB1

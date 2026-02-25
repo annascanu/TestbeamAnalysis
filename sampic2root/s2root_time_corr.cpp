@@ -21,8 +21,8 @@ struct WaveformRecord {
 
 std::vector<WaveformRecord> read_waveform_file(const std::string& filename);
 
-void s2root_time_corr() {
-    std::string filename = "/home/riccardo-speziali/Scrivania/bin_file/Run222_true/Run222/sampic_run1/feb0/sampic_run1_feb0.bin";
+void s2root_time_corr(int run_number) {
+    std::string filename = "/home/riccardo-speziali/Scrivania/bin_file/Run" + std::to_string(run_number) + "_true/Run" + std::to_string(run_number) + "/sampic_run/feb0/sampic_run_feb0.bin";
 
     auto records = read_waveform_file(filename);
 
@@ -34,7 +34,7 @@ void s2root_time_corr() {
     ////////////////////////////////
 
 
-    TString outfile_name = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run222/sampic_run1_feb0_Corr.root";
+    TString outfile_name = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run" + std::to_string(run_number) + "/sampic_run1_feb0_Corr.root";
     TFile outfile(outfile_name,"RECREATE");
     TTree * sampic_tree = new TTree("picoTreewithCorr", "SAMPIC output in ROOT format");
 

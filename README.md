@@ -30,10 +30,11 @@ This repository is designed for active collaboration. Feel free to:
 
 This repository is evolving continuously as new insights emerge from the testbeam data. Each user is encouraged to document changes and observations directly in the code or via commit messages to maintain clarity and traceability!
 
-##Event building (november test beam)
+---
+## Event building (november test beam)
 
-1st part: read the trigger file with bin2root_trigger.cpp this file read the binary file and converts it in a ROOT file.
-2nd part: read the binary file coming from the SAMPIC with s2root_time_corr.cpp here we have the conversion from bin to root file
-3rd part: merge of trigger and data using eventbuilder_november.cpp here there is the coupling of the MCP data with the SRS
-(4th part) before the final part: time ordering of the picose event with timeorder.cpp
-last part: evbuilder_november_picosec.cpp reconstruction completed!!!
+- 1st part: read the trigger file with bin2root_trigger.cpp this file read the binary file and converts it in a ROOT file.
+- 2nd part: read the binary file coming from the SAMPIC with s2root_time_corr.cpp here we have the conversion from bin to root file
+- 3rd part: merge of trigger and data using eventbuilder_november.cpp here there is the coupling of the MCP data with the SRS
+- (4th part) before the final part: time ordering of the picose event with timeorder.cpp
+- last part: evbuilder_november_picosec.cpp reconstruction completed!!!
