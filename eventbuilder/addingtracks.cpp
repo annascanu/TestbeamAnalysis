@@ -115,12 +115,12 @@ int main(int argc, char* argv[])
     // Leggi i dati dal TTree
 
     building eventwotrack;
-    tree->SetBranchAddress("Cell0timestamp_corr_MCP", &eventwotrack.Cell0timestamp_MCP);
+    tree->SetBranchAddress("Cell0TimeStamp_corr_MCP", &eventwotrack.Cell0timestamp_MCP);
     tree->SetBranchAddress("TriggerIDSRS_MCP", &eventwotrack.SRS);
     tree->SetBranchAddress("TOTValue_MCP", &eventwotrack.TOTValue);
     tree->SetBranchAddress("Waveform_MCP", &eventwotrack.Waveform_MCP);
     tree->SetBranchAddress("hitxevent", &eventwotrack.hit_x_event);
-    tree->SetBranchAddress("Cell0timeSTamp_PICOSEC", eventwotrack.Cell0timeSTamp_PICOSEC);
+    tree->SetBranchAddress("Cell0TimeStamp_PICOSEC", eventwotrack.Cell0timeSTamp_PICOSEC);
     tree->SetBranchAddress("Channel_PICOSEC", eventwotrack.chanel_PICOSEC);
     tree->SetBranchAddress("Waveform_PICOSEC", eventwotrack.Waveform_PICOSEC); 
 
@@ -129,13 +129,13 @@ int main(int argc, char* argv[])
     trackdata_tree->SetBranchAddress("srstriggerctr", &trackevent.SRS_trigger_ctr);
     trackdata_tree->SetBranchAddress("srstimestamp", &trackevent.SRS_Timestamp);
     trackdata_tree->SetBranchAddress("srstimestampnsec", &trackevent.SRS_Timestamp_ns);
-    trackdata_tree->SetBranchAddress("ntracks  ", &trackevent.n_tracks);
+    trackdata_tree->SetBranchAddress("ntracks", &trackevent.n_tracks);
     trackdata_tree->SetBranchAddress("tracknumber", &trackevent.track_num);
     trackdata_tree->SetBranchAddress("trackchi2", &trackevent.track_chi_2);
     trackdata_tree->SetBranchAddress("ndetsintrack", &trackevent.ndetsintrack);
-    trackdata_tree->SetBranchAddress("hits", &trackevent.hits);
-    trackdata_tree->SetBranchAddress("distnextcluster", &trackevent.distnextcluster);
-    trackdata_tree->SetBranchAddress("totchanexcluster", &trackevent.totchanexcluster);
+    //trackdata_tree->SetBranchAddress("hits", &trackevent.hits);
+    //trackdata_tree->SetBranchAddress("distnextcluster", &trackevent.distnextcluster);
+    //trackdata_tree->SetBranchAddress("totchanexcluster", &trackevent.totchanexcluster);
 
     TFile *output = new TFile(output_filename.Data(), "RECREATE");
     TTree *output_tree = new TTree("eventbuilding_withtracks", "eventbuilding_withtracks");
@@ -159,7 +159,8 @@ int main(int argc, char* argv[])
     output_tree->Branch("Waveform_PICOSEC", eventwotrack.Waveform_PICOSEC,"Waveform_PICOSEC[50][64]/F");      
 
 
-
+    int j=0; // Indice per scorrere il TTree dei track
+    int srs_mcp_prev=-1; // Variabile per tenere traccia dell'ultimo SRS MCP processato
     for (int i = 0; i < tree->GetEntries(); i++) {
         tree->GetEntry(i);
         // Ora puoi accedere ai dati di ogni evento tramite eventwotrack.Cell0timestamp
@@ -167,20 +168,47 @@ int main(int argc, char* argv[])
         // Trova l'evento di tracking corrispondente
         SRS_mcp = eventwotrack.SRS;
         bool track_found = false;
-        for (int j = 0; j < trackdata_tree->GetEntries(); j++) {
+        if(SRS_mcp<srs_mcp_prev){
+            j=0;
+            cout << "Resetting track index to 0 because SRS_mcp is smaller than previous value." << endl;
+        }
+        srs_mcp_prev = SRS_mcp;
+        //cout << "srs mcp: " << SRS_mcp << endl;
+        
+        while (j < trackdata_tree->GetEntries()) {
             trackdata_tree->GetEntry(j);
             SRS_track = trackevent.SRS_trigger_ctr;
+            //cout << "srs track: " << SRS_track << endl;
+            if(SRS_track < SRS_mcp) {
+                j++;
+                continue; // Continua a cercare
+            }
+            if(SRS_track > SRS_mcp) {
+                break; // Non c'è corrispondenza, esci dal ciclo
+            }   
             if (SRS_track == SRS_mcp) {
                 track_found = true;
                 output_tree->Fill();
+                j++; // Incrementa j per non ripetere lo stesso track
                 break;
             }
+            if(i%10000==0){
+               // cout << "Processing event " << i << "/" << tree->GetEntries() << "\r" << flush;
+            }
+            
         }
         if (!track_found) {
-            cout << "Warning: no track found for SRS " << SRS_mcp << endl;
+            //cout << "Warning: no track found for SRS " << SRS_mcp << endl;
         }
         
     }
+//closw file
+    output->Write();
+    output->Close();
+    file->Close();
+    trackdata_file->Close();
+
+    return 0;   
 }
 
     
