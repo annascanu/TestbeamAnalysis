@@ -26,6 +26,8 @@
 #include <vector>
 #include <string>
 #include "TTreeIndex.h"
+#include <filesystem>
+
 
 
 using namespace std;
@@ -74,7 +76,9 @@ int main(int argc, char* argv[])
         std::cerr << "Usage: " << argv[0] << " <run_number>\n";
         return 1;
 }
+
     int run_number = std::stoi(argv[1]);
+    std::filesystem::create_directories("/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run" + std::to_string(run_number));
     TString filename_feb1 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run" + std::to_string(run_number) + "/sampic_run1_feb1_Corr.root";
     TString filename_feb3 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run" + std::to_string(run_number) + "/sampic_run1_feb3_Corr.root";
 

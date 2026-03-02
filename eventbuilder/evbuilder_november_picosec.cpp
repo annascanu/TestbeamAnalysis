@@ -346,7 +346,7 @@ for (Long64_t i = 0; i < nentries_matching; i++) {
 
 
 // Riportati all'inizio del tree
-output_tree->SetBranchAddress("channel_picosec", &channel_picosec);
+output_tree->SetBranchAddress("Channel_PICOSEC", &channel_picosec);
 
 Long64_t nentries_out = output_tree->GetEntries();
 

@@ -126,11 +126,11 @@ cell0.reserve(5);
 
 
     // Apri i file ROOT
-    TString filename_feb1 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/ordered_feb1.root";
-    TString filename_feb3 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/ordered_feb3.root";
-    TString matching_filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/MCPtoSRS_run222.root";
+    TString filename_feb1 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run227/ordered_feb1.root";
+    TString filename_feb3 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run227/ordered_feb3.root";
+    TString matching_filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/MCPtoSRS_run227.root";
 
-    TString output_filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/eventbuilding.root";
+    TString output_filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run227/eventbuilding.root";
    
     //check
     TFile *matching_file = OpenInputFile(matching_filename.Data());
@@ -311,7 +311,7 @@ for (Long64_t i = 0; i < nentries_matching; i++) {
 
         // Hit valido
         cell0.push_back(rec3.Cell0TimeStamp_corr);
-        channel_picosec.push_back(rec3.channel + 63);
+        channel_picosec.push_back(rec3.channel + 64);
         tot_picosec.push_back(rec3.TOTValue);
         for (int k = 0; k < 64; k++)
             waveform_picosec.push_back(rec3.Waveform[k]);

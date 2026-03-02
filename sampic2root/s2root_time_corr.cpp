@@ -2,6 +2,33 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <cstdint>
+#include "TFile.h"
+#include "TTree.h"
+#include <cmath>
+#include <TStyle.h>
+#include <TLegend.h>
+#include <TLatex.h>
+#include <TMath.h>
+#include <TROOT.h>
+#include <TApplication.h>
+#include <array>    
+//#include <TString.h>
+#include <TCanvas.h>
+#include <TH1F.h>
+#include <TH2F.h>
+#include <TGraph.h>
+#include <TGraph2D.h>
+#include <TProfile.h>
+#include <TF1.h>
+#include <vector>
+#include <string>
+#include "TTreeIndex.h"
+#include "TApplication.h"
+#include "TH1I.h"
+#include "TCanvas.h"    
+#include <sstream>
+#include <filesystem>
 
 
 
@@ -19,12 +46,12 @@ struct WaveformRecord {
     float Waveform[64];
 };
 
-std::vector<WaveformRecord> read_waveform_file(const std::string& filename);
+std::vector<WaveformRecord> read_waveform_file(const std::string& filename, int& run_number);
 
-void s2root_time_corr(int run_number) {
-    std::string filename = "/home/riccardo-speziali/Scrivania/bin_file/Run" + std::to_string(run_number) + "_true/Run" + std::to_string(run_number) + "/sampic_run/feb0/sampic_run_feb0.bin";
+void s2root_time_corr(int run_number, int feb_number) {
+    std::string filename = "/home/riccardo-speziali/Scrivania/bin_file/Run" + std::to_string(run_number) + "_true/Run" + std::to_string(run_number) + "/sampic_run1/feb" + std::to_string(feb_number) + "/sampic_run1_feb" + std::to_string(feb_number) + ".bin";
 
-    auto records = read_waveform_file(filename);
+    auto records = read_waveform_file(filename, run_number);
 
     std::cout << "Read " << records.size() << " waveform record(s)\n";
 
@@ -33,8 +60,8 @@ void s2root_time_corr(int run_number) {
     // -- Output to root TTree -- //
     ////////////////////////////////
 
-
-    TString outfile_name = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run" + std::to_string(run_number) + "/sampic_run1_feb0_Corr.root";
+    std::filesystem::create_directories("/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run" + std::to_string(run_number));
+    TString outfile_name = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run" + std::to_string(run_number) + "/sampic_run1_feb"+std::to_string(feb_number)+"_Corr.root";
     TFile outfile(outfile_name,"RECREATE");
     TTree * sampic_tree = new TTree("picoTreewithCorr", "SAMPIC output in ROOT format");
 
@@ -114,7 +141,7 @@ double getPeriodFactor(const std::string& settingsPath)
 
 
 
-std::vector<WaveformRecord> read_waveform_file(const std::string& filename) {
+std::vector<WaveformRecord> read_waveform_file(const std::string& filename, int& run_number) {
 
     std::vector<WaveformRecord> records;
     std::ifstream file(filename, std::ios::binary);
@@ -125,7 +152,7 @@ std::vector<WaveformRecord> read_waveform_file(const std::string& filename) {
     }
     const double TIMESTAMP_MAX = 1099511627776.0; // 2^40
    // const double periodFactor = (64*1000)/(samplingFrequency/1000000); // <-- metti il tuo valore corretto se necessario
-    double periodFactor = getPeriodFactor("/home/riccardo-speziali/Scrivania/bin_file/Run222_true/Run222/sampic_run1/Run_Settings.txt");
+    double periodFactor = getPeriodFactor("/home/riccardo-speziali/Scrivania/bin_file/Run"+std::to_string(run_number)+"_true/Run"+std::to_string(run_number)+"/sampic_run1/Run_Settings.txt");
     uint64_t timestamp_ov = 0;
     double timestamp_prev = 0;
 
@@ -176,9 +203,10 @@ std::vector<WaveformRecord> read_waveform_file(const std::string& filename) {
         //timestamp_ov * TIMESTAMP_MAX * periodFactor + timestampRaw;
 
         // ==============================
-
-        //if(record.channel ==19) continue; //canale rumoroso
-        if(record.channel !=0) continue; //per feb0 
+        if(feb_number>0)
+            if(record.channel ==19) continue; //canale rumoroso
+        else
+            if(record.channel !=0) continue; //per feb0 
 
         
         records.push_back(std::move(record));

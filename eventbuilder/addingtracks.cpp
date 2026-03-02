@@ -161,6 +161,7 @@ int main(int argc, char* argv[])
 
     int j=0; // Indice per scorrere il TTree dei track
     int srs_mcp_prev=-1; // Variabile per tenere traccia dell'ultimo SRS MCP processato
+    int srs_pico_prev=-1; // Variabile per tenere traccia dell'ultimo SRS PICOSEC processato
     for (int i = 0; i < tree->GetEntries(); i++) {
         tree->GetEntry(i);
         // Ora puoi accedere ai dati di ogni evento tramite eventwotrack.Cell0timestamp
@@ -170,7 +171,8 @@ int main(int argc, char* argv[])
         bool track_found = false;
         if(SRS_mcp<srs_mcp_prev){
             j=0;
-            cout << "Resetting track index to 0 because SRS_mcp is smaller than previous value." << endl;
+            //cout << "Resetting track index to 0 because SRS_mcp is smaller than previous value." << endl;
+            cout<<"previois srs_mcp: "<<srs_mcp_prev<<" current srs_mcp: "<<SRS_mcp<<endl;
         }
         srs_mcp_prev = SRS_mcp;
         //cout << "srs mcp: " << SRS_mcp << endl;
@@ -178,6 +180,10 @@ int main(int argc, char* argv[])
         while (j < trackdata_tree->GetEntries()) {
             trackdata_tree->GetEntry(j);
             SRS_track = trackevent.SRS_trigger_ctr;
+            if(SRS_track<srs_pico_prev){
+                cout << "Warning: SRS_track is smaller than previous value. This should not happen if the track tree is sorted by SRS_trigger_ctr." << endl;
+            }
+
             //cout << "srs track: " << SRS_track << endl;
             if(SRS_track < SRS_mcp) {
                 j++;
