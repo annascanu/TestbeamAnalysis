@@ -346,5 +346,8 @@ cout << "Premi Ctrl+C per chiudere." << endl;
 
 app.Run();
 
-
+//chiudo i file
+matching_file->Close();
+file_feb1->Close();
+output_file->Close();
 }
