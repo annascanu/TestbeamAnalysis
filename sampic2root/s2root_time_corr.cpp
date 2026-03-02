@@ -46,12 +46,12 @@ struct WaveformRecord {
     float Waveform[64];
 };
 
-std::vector<WaveformRecord> read_waveform_file(const std::string& filename, int& run_number);
+std::vector<WaveformRecord> read_waveform_file(const std::string& filename, int& run_number, int& feb_number);
 
 void s2root_time_corr(int run_number, int feb_number) {
     std::string filename = "/home/riccardo-speziali/Scrivania/bin_file/Run" + std::to_string(run_number) + "_true/Run" + std::to_string(run_number) + "/sampic_run1/feb" + std::to_string(feb_number) + "/sampic_run1_feb" + std::to_string(feb_number) + ".bin";
 
-    auto records = read_waveform_file(filename, run_number);
+    auto records = read_waveform_file(filename, run_number, feb_number);
 
     std::cout << "Read " << records.size() << " waveform record(s)\n";
 
@@ -141,7 +141,7 @@ double getPeriodFactor(const std::string& settingsPath)
 
 
 
-std::vector<WaveformRecord> read_waveform_file(const std::string& filename, int& run_number) {
+std::vector<WaveformRecord> read_waveform_file(const std::string& filename, int& run_number, int& feb_number) {
 
     std::vector<WaveformRecord> records;
     std::ifstream file(filename, std::ios::binary);
@@ -203,10 +203,11 @@ std::vector<WaveformRecord> read_waveform_file(const std::string& filename, int&
         //timestamp_ov * TIMESTAMP_MAX * periodFactor + timestampRaw;
 
         // ==============================
-        if(feb_number>0)
-            if(record.channel ==19) continue; //canale rumoroso
-        else
-            if(record.channel !=0) continue; //per feb0 
+        if(feb_number>0){
+            //if(record.channel ==19) continue; }//canale rumoroso
+        }
+        else{
+            if(record.channel !=0) continue;} //per feb0 
 
         
         records.push_back(std::move(record));
