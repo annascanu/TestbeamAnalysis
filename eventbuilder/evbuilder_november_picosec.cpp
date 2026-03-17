@@ -205,7 +205,7 @@ cell0.reserve(5);
    //output_tree->Branch("Channel_MCP", &built.c,"Channel_MCP/I");
    output_tree->Branch("TOTValue_MCP", &built.TOTValue,"TOTValue_MCP/F");
    output_tree->Branch("TriggerIDSRS_MCP", &built.SRS,"TriggerIDSRS_MCP/I");
-   //output_tree->Branch("Waveform_MCP", waveform_temp, "Waveform_MCP[64]/F");
+    output_tree->Branch("Waveform_MCP", waveform_temp, "Waveform_MCP[64]/F");
     output_tree->Branch("Cell0TimeStamp_PICOSEC", &built.Cell0timeSTamp_PICOSEC,"Cell0TimeStamp_PICOSEC[50]/D");
     output_tree->Branch("Channel_PICOSEC", &built.chanel_PICOSEC,"Channel_PICOSEC[50]/I");
      output_tree->Branch("TOTValue_PICOSEC", &built.TOTValue,"TOTValue_PICOSEC/F");
@@ -306,11 +306,11 @@ for (Long64_t i = 0; i < nentries_matching; i++) {
 
         // Hit valido
         built.Cell0timeSTamp_PICOSEC[hitxevent] = rec3.Cell0TimeStamp_corr;
-        built.chanel_PICOSEC[hitxevent] = rec3.channel + 63; // canali FEB3 da 64 a 127
+        built.chanel_PICOSEC[hitxevent] = rec3.channel + 64; // canali FEB3 da 64 a 127
         built.TOTValue = rec3.TOTValue;
         for (int k = 0; k < 64; k++)            built.Waveform_PICOSEC[hitxevent][k] = rec3.Waveform[k];
         cell0.push_back(rec3.Cell0TimeStamp_corr);
-        channel_picosec.push_back(rec3.channel + 63);
+        channel_picosec.push_back(rec3.channel + 64);
         tot_picosec.push_back(rec3.TOTValue);
         for (int k = 0; k < 64; k++)
             waveform_picosec.push_back(rec3.Waveform[k]);

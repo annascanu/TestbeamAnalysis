@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
     //int subrun_number = std::stoi(argv[2]);
 
     TString filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run" + std::to_string(run_number) + "/eventbuilding.root";
-    TString trackdata_filename = "/home/riccardo-speziali/Scrivania/bin_file/Run"+std::to_string(run_number)+"_true/Run"+std::to_string(run_number)+"/anaRun0"+std::to_string(run_number)+".root";
+    TString trackdata_filename = "/home/riccardo-speziali/Scrivania/bin_file/Run"+std::to_string(run_number)+"_true/Run"+std::to_string(run_number)+"/anaRun"+std::to_string(run_number)+".root";
     TString output_filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run" + std::to_string(run_number) + "/eventbuilding_withtracks_run"+std::to_string(run_number)+".root";
 
     TFile *file = OpenInputFile(filename.Data());

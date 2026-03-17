@@ -126,11 +126,11 @@ cell0.reserve(5);
 
 
     // Apri i file ROOT
-    TString filename_feb1 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run213/ordered_feb1.root";
-    TString filename_feb3 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run213/ordered_feb3.root";
-    TString matching_filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/MCPtoSRS_run213.root";
+    TString filename_feb1 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run222/ordered_feb1.root";
+    TString filename_feb3 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run222/ordered_feb3.root";
+    TString matching_filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/MCPtoSRS_run222.root";
 
-    TString output_filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run213/eventbuilding.root";
+    TString output_filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run222/eventbuilding_visual.root";
    
     //check
     TFile *matching_file = OpenInputFile(matching_filename.Data());
