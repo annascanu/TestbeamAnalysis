@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
     trackdata_tree->SetBranchAddress("tracknumber", &trackevent.track_num);
     trackdata_tree->SetBranchAddress("trackchi2", &trackevent.track_chi_2);
     trackdata_tree->SetBranchAddress("ndetsintrack", &trackevent.ndetsintrack);
-    //trackdata_tree->SetBranchAddress("hits", &trackevent.hits);
+    trackdata_tree->SetBranchAddress("hits", trackevent.hits);
     //trackdata_tree->SetBranchAddress("distnextcluster", &trackevent.distnextcluster);
     //trackdata_tree->SetBranchAddress("totchanexcluster", &trackevent.totchanexcluster);
 
