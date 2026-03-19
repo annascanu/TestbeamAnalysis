@@ -133,9 +133,9 @@ int main(int argc, char* argv[])
     trackdata_tree->SetBranchAddress("tracknumber", &trackevent.track_num);
     trackdata_tree->SetBranchAddress("trackchi2", &trackevent.track_chi_2);
     trackdata_tree->SetBranchAddress("ndetsintrack", &trackevent.ndetsintrack);
-    trackdata_tree->SetBranchAddress("hits", trackevent.hits);
-    //trackdata_tree->SetBranchAddress("distnextcluster", &trackevent.distnextcluster);
-    //trackdata_tree->SetBranchAddress("totchanexcluster", &trackevent.totchanexcluster);
+    trackdata_tree->SetBranchAddress("hits", trackevent.hits);///sistemare hits e i seguenti
+    trackdata_tree->SetBranchAddress("distnextcluster", &trackevent.distnextcluster);
+    trackdata_tree->SetBranchAddress("totchanexcluster", &trackevent.totchanexcluster);
 
     TFile *output = new TFile(output_filename.Data(), "RECREATE");
     TTree *output_tree = new TTree("eventbuilding_withtracks", "eventbuilding_withtracks");
