@@ -13,30 +13,24 @@
 
 using namespace std;
 
-
-
-
-
 int main()
 {
+    TString filename = "/home/riccardo-speziali/Scrivania/git/trigger_for_november/code/output_new.root";
 
-TString filename = "/home/riccardo-speziali/Scrivania/git/trigger_for_november/code/output_new.root";
-
-cout << "Opening file: " << filename << endl;
+    cout << "Opening file: " << filename << endl;
 
     TFile *file = TFile::Open(filename, "READ");
-    if (!file || file->IsZombie()) {
+    if (!file || file->IsZombie()) 
+    {
         cerr << "Error: cannot open " << filename << endl;
         return 1;
     }
     TTree *tree = (TTree*)file->Get("picoTree");
-    if (!tree) {
+    if (!tree) 
+    {
         cerr << "Error: picoTree not found in " << filename << endl;
         return 1;
     }
-
-
-
 
     // Variabili per leggere i branch
     Char_t TriggerIDFPGA;     // /B
@@ -51,19 +45,19 @@ cout << "Opening file: " << filename << endl;
     // Numero di entry
     Long64_t nentries = tree->GetEntries();
 
-    // Loop sugli eventi
-   //       
-    for (Long64_t i = 0; i < nentries; i++) {
-        
+    // Loop sugli eventi   
+    for (Long64_t i = 0; i < nentries; i++) 
+    {
         tree->GetEntry(i);
-        if(i<10000 && i>9000){
-
-        std::cout << "Entry " << i << std::endl;
-        std::cout << "TriggerIDFPGA: " << (int)TriggerIDFPGA << std::endl;
-        std::cout << "TriggerIDSRSRaw: " << TriggerIDSRSRaw << std::endl;
-        std::cout << "timestampRaw: " << timestampRaw << std::endl;
-        std::cout << "------------------------" << std::endl;
-    }}
+        if(i<10000 && i>9000)
+        {
+            std::cout << "Entry " << i << std::endl;
+            std::cout << "TriggerIDFPGA: " << (int)TriggerIDFPGA << std::endl;
+            std::cout << "TriggerIDSRSRaw: " << TriggerIDSRSRaw << std::endl;
+            std::cout << "timestampRaw: " << timestampRaw << std::endl;
+            std::cout << "------------------------" << std::endl;
+        }
+    }
 
     file->Close();
     return 0;

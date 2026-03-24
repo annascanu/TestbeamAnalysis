@@ -3,16 +3,19 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+#include <cmath>
+#include <array> 
+#include <sstream>
+#include <filesystem>
+
 #include "TFile.h"
 #include "TTree.h"
-#include <cmath>
 #include <TStyle.h>
 #include <TLegend.h>
 #include <TLatex.h>
 #include <TMath.h>
 #include <TROOT.h>
-#include <TApplication.h>
-#include <array>    
+#include <TApplication.h>  
 //#include <TString.h>
 #include <TCanvas.h>
 #include <TH1F.h>
@@ -21,16 +24,11 @@
 #include <TGraph2D.h>
 #include <TProfile.h>
 #include <TF1.h>
-#include <vector>
-#include <string>
 #include "TTreeIndex.h"
-#include "TApplication.h"
-#include "TH1I.h"
-#include "TCanvas.h"    
-#include <sstream>
-#include <filesystem>
+#include "TH1I.h" 
 
-struct TriggerEntry {
+struct TriggerEntry 
+{
     uint64_t TriggerIDSRS;
     double timestamp; // timestamp in ns
 };
@@ -68,19 +66,13 @@ double getPeriodFactor(const std::string& settingsPath)
     return periodFactor;
 }
 
-
-
-
-
-
-
-
-
-std::vector<TriggerEntry> readSAMPICTriggerBinary(const std::string& filename, int& run_number) {
+std::vector<TriggerEntry> readSAMPICTriggerBinary(const std::string& filename, int& run_number) 
+{
     std::vector<TriggerEntry> entries;
 
     std::ifstream file(filename, std::ios::binary);
-    if (!file) {
+    if (!file) 
+    {
         std::cerr << "Failed to open file: " << filename << "\n";
         return entries;
     }
@@ -97,7 +89,8 @@ std::vector<TriggerEntry> readSAMPICTriggerBinary(const std::string& filename, i
     uint16_t event_id_prev = 0;
     uint16_t event_id_ov = 0;
 
-    while (file) {
+    while (file) 
+    {
         // --- Leggi TriggerIDFPGA ---
         file.read(reinterpret_cast<char*>(&TriggerIDFPGA), sizeof(uint8_t));
         if (!file) break;
@@ -112,7 +105,6 @@ std::vector<TriggerEntry> readSAMPICTriggerBinary(const std::string& filename, i
         if (!file) break;
 
         double periodFactor = getPeriodFactor("/home/riccardo-speziali/Scrivania/bin_file/Run"+std::to_string(run_number)+"_true/Run"+std::to_string(run_number)+"/sampic_run1/Run_Settings.txt");
-
 
         timestampRaw =
               (uint64_t)buffer[0]
@@ -145,18 +137,18 @@ std::vector<TriggerEntry> readSAMPICTriggerBinary(const std::string& filename, i
     return entries;
 }
 
-int main(int argc, char* argv[]) {
-    if (argc < 1) {
+int main(int argc, char* argv[]) 
+{
+    if (argc < 1) 
+    {
         std::cerr << "Usage: " << argv[0] << " <run_number> <subrun_number>\n";
         return 1;
     }
 
     int run_number = std::stoi(argv[1]);
-   
 
     std::string filename = "/home/riccardo-speziali/Scrivania/bin_file/Run" + std::to_string(run_number) + "_true/Run" + std::to_string(run_number) + "/sampic_run1/sampic_run1_trigger_data.bin";
     auto entries = readSAMPICTriggerBinary(filename, run_number);
-
     std::cout << "Read " << entries.size() << " entries\n";
 
     // --- Crea un ROOT file ---

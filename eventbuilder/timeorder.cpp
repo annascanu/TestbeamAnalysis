@@ -2,18 +2,17 @@
 #include <fstream>
 #include <vector>
 #include <cstdint>
-#include "TFile.h"
-#include "TTree.h"
+#include <array>
 #include <cmath> 
+#include <string>
+#include <filesystem>
+
 #include <TStyle.h>
 #include <TLegend.h>
 #include <TLatex.h>
 #include <TMath.h>
-#include <iostream>
 #include <TROOT.h>
 #include <TApplication.h>
-#include <array>
-
 #include <TFile.h>
 #include <TTree.h>
 #include <TH1F.h>
@@ -23,16 +22,9 @@
 #include <TGraph2D.h>
 #include <TProfile.h>
 #include <TF1.h>
-#include <vector>
-#include <string>
 #include "TTreeIndex.h"
-#include <filesystem>
-
-
 
 using namespace std;
-
-
 
 //aprire i file .root con feb0(:contiene l'MCP) feb1 e feb3 che corrispondono ai dati del PICOSEC
 
@@ -48,8 +40,8 @@ TFile* OpenInputFile(const string &filename)
     return file;
 }
 
-
-struct WaveformRecord {
+struct WaveformRecord 
+{
     double Cell0TimeStamp;
     double Cell0TimeStamp_corr; // <-- aggiunta per il timestamp corretto
     int channel;

@@ -8,8 +8,6 @@
 
 using namespace std;
 
-
-
 //aprire i file .root con feb0(:contiene l'MCP) feb1 e feb3 che corrispondono ai dati del PICOSEC
 
 TFile* OpenInputFile(const string &filename) 
@@ -24,7 +22,8 @@ TFile* OpenInputFile(const string &filename)
     return file;
 }
 
-struct WaveformRecord {
+struct WaveformRecord 
+{
     double Cell0TimeStamp;
     double Cell0TimeStamp_corr; // <-- aggiunta per il timestamp corretto
     int channel;
@@ -38,16 +37,14 @@ struct WaveformRecord {
     float Waveform[64];
 };
 
-struct TriggerEntry {
+struct TriggerEntry 
+{
     uint64_t TriggerIDSRS;
     double timestamp; // timestamp in ns
 };
 
-
-
 int main(int argc, char* argv[]) 
 {
-
     int run_number = std::stoi(argv[1]);
     //int subrun_number = std::stoi(argv[2]);
 
@@ -63,24 +60,10 @@ int main(int argc, char* argv[])
     //TFile *file_feb3 = OpenInputFile(filename_feb3.Data());
     TFile *trigger_file = OpenInputFile(filename_trigger.Data());
 
-    /*if (!file_feb0 || !file_feb1 || !file_feb3 || !trigger_file) 
-    {
-        cerr << "Error: one or more files could not be opened." << endl;
-        return 1;
-    }*/
-
-    // Qui puoi aggiungere il codice per leggere i dati dai file e analizzarli
-
-
     TTree *tree_feb0 = (TTree*)file_feb0->Get("picoTreewithCorr");
     //TTree *tree_feb1 = (TTree*)file_feb1->Get("picoTreewithCorr");
     //TTree *tree_feb3 = (TTree*)file_feb3->Get("picoTreewithCorr");
     TTree *trigger_tree = (TTree*)trigger_file->Get("triggerTree");
-
-    /*if (!tree_feb0 || !tree_feb1 || !tree_feb3 || !trigger_tree) {
-        cerr << "Error: picoTree or triggerTree not found in one or more files." << endl;
-        return 1;
-    }*/
 
     WaveformRecord rec0, rec1, rec3;
     TriggerEntry trig;
@@ -96,7 +79,8 @@ int main(int argc, char* argv[])
     tree_feb0->SetBranchAddress("Amplitude", &rec0.Amplitude);
     tree_feb0->SetBranchAddress("Waveform", rec0.Waveform);
 
- /*   tree_feb1->Branch("Cell0TimeStamp", &rec1.Cell0TimeStamp,"Cell0TimeStamp/D");
+    /*   
+    tree_feb1->Branch("Cell0TimeStamp", &rec1.Cell0TimeStamp,"Cell0TimeStamp/D");
     tree_feb1->Branch("Cell0TimeStamp_corr", &rec1.Cell0TimeStamp_corr,"Cell0TimeStamp_corr/D");
     // tree_feb1->Branch("UnixTime", &rec.UnixTime,"UnixTime/D");
     tree_feb1->Branch("Channel", &rec1.channel,"Channel/I");
@@ -122,8 +106,6 @@ int main(int argc, char* argv[])
     trigger_tree->SetBranchAddress("TriggerIDSRS", &trig.TriggerIDSRS);
     trigger_tree->SetBranchAddress("timestamp_ns", &trig.timestamp);
 
-
-
     TFile *output_file = new TFile(output_filename.Data(), "RECREATE");
     TTree *output_tree = new TTree("eventTree", "Combined_Event_Data");
     //output_tree->Branch("Cell0TimeStamp", &rec0.Cell0TimeStamp,"Cell0TimeStamp/D");
@@ -135,11 +117,6 @@ int main(int argc, char* argv[])
     output_tree->Branch("TriggerIDSRS", &trig.TriggerIDSRS,"TriggerIDSRS/I");
     output_tree->Branch("Waveform", rec0.Waveform, "Waveform[64]/F");
 
-
-
-
-
-
     Long64_t nentries_feb0 = tree_feb0->GetEntries();
     //Long64_t nentries_feb1 = tree_feb1->GetEntries();
     //Long64_t nentries_feb3 = tree_feb3->GetEntries();
@@ -147,61 +124,40 @@ int main(int argc, char* argv[])
 
    const double EPS = 1e10;   // tua finestra di matching
 
-Long64_t j = 0;
+    Long64_t j = 0;
 
-for (Long64_t i = 0; i < nentries_trigger; i++) {
+    for (Long64_t i = 0; i < nentries_trigger; i++) 
+    {
+        trigger_tree->GetEntry(i);
 
-    trigger_tree->GetEntry(i);
+        // Avanza feb0 finché è indietro
+        while (j < nentries_feb0) 
+        {
+            tree_feb0->GetEntry(j);
+            double diff = rec0.Cell0TimeStamp_corr - trig.timestamp;
 
-    // Avanza feb0 finché è indietro
-    while (j < nentries_feb0) {
+            if (fabs(diff) < EPS) 
+            {
+                conta++;
+                j++; 
 
-        tree_feb0->GetEntry(j);
+                //aprire file output e inserire i dati di rec0, rec1 e rec3 in un unico albero con le stesse entry del trigger egrazie all'if legare srsID con gli eventi di feb0.
+                output_tree->Fill();
+                break;
+            }
 
-        double diff = rec0.Cell0TimeStamp_corr - trig.timestamp;
-
-        if (fabs(diff) < EPS) {
-            conta++;
-            j++; 
-
-            //aprire file output e inserire i dati di rec0, rec1 e rec3 in un unico albero con le stesse entry del trigger egrazie all'if legare srsID con gli eventi di feb0.
-            
-            output_tree->Fill();
-
-
-            
-        
-            
-
-            break;
+            if (rec0.Cell0TimeStamp_corr < trig.timestamp - EPS) 
+            {
+                j++;           // feb0 troppo indietro → avanza feb0
+            }
+            else 
+            {    
+                break;         // feb0 è già avanti → passa al prossimo trigger
+            }
         }
 
-        if (rec0.Cell0TimeStamp_corr < trig.timestamp - EPS) {
-            
-            j++;           // feb0 troppo indietro → avanza feb0
-        }
-        else {
-            
-            break;         // feb0 è già avanti → passa al prossimo trigger
-        }
+        cout << "events left: " << nentries_trigger - i << "\r" << flush;
     }
-
-    cout << "events left: "
-         << nentries_trigger - i
-         << "\r" << flush;
-}
-            /*for(int k = 0; k < nentries_feb1; k++)
-                for(int l = 0; l < nentries_feb3; l++)
-                {
-                    
-                }*/
-    
-
-    
-
-
-
-
 
     cout<<"Numero di match trovati: " << conta << endl;
     // Chiudi i file alla fine

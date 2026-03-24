@@ -2,18 +2,16 @@
 #include <fstream>
 #include <vector>
 #include <cstdint>
-#include "TFile.h"
-#include "TTree.h"
+#include <string>
 #include <cmath> 
+#include <array>
+
 #include <TStyle.h>
 #include <TLegend.h>
 #include <TLatex.h>
 #include <TMath.h>
-#include <iostream>
 #include <TROOT.h>
 #include <TApplication.h>
-#include <array>
-
 #include <TFile.h>
 #include <TTree.h>
 #include <TH1F.h>
@@ -23,19 +21,10 @@
 #include <TGraph2D.h>
 #include <TProfile.h>
 #include <TF1.h>
-#include <vector>
-#include <string>
 #include "TTreeIndex.h"
-
-#include "TApplication.h"
 #include "TH1I.h"
-#include "TCanvas.h"
-
-
 
 using namespace std;
-
-
 
 //aprire i file .root con feb0(:contiene l'MCP) feb1 e feb3 che corrispondono ai dati del PICOSEC
 
@@ -51,8 +40,8 @@ TFile* OpenInputFile(const string &filename)
     return file;
 }
 
-struct matchedEvent {
-   
+struct matchedEvent 
+{   
     double Cell0TimeStamp_corr; // <-- aggiunta per il timestamp corretto
     int channel;
     
@@ -63,7 +52,8 @@ struct matchedEvent {
 };
 
 
-struct WaveformRecord {
+struct WaveformRecord 
+{
     double Cell0TimeStamp;
     double Cell0TimeStamp_corr; // <-- aggiunta per il timestamp corretto
     int channel;
@@ -77,8 +67,8 @@ struct WaveformRecord {
     float Waveform[64];
 };
 
-
-struct building{
+struct building
+{
     double Cell0timestamp_MCP;
     double Cell0timeSTamp_PICOSEC[50];
     int chanel_PICOSEC[50];
@@ -87,12 +77,7 @@ struct building{
     float Waveform_PICOSEC[50][64];
     int hit_x_event;
     int SRS;
-
-
 };
-
-
-
 
 int main(int argc, char* argv[]) 
 {
@@ -109,44 +94,43 @@ int main(int argc, char* argv[])
 
     cout<<"FINE!"<<endl;
      // Dichiarazioni vettori per output
-vector<double> cell0;
-vector<int> channel_picosec;
-vector<float> tot_picosec;
-vector<float> waveform_picosec;
-int hitxevent;  // nuovo branch
+    vector<double> cell0;
+    vector<int> channel_picosec;
+    vector<float> tot_picosec;
+    vector<float> waveform_picosec;
+    int hitxevent;  // nuovo branch
 
-TGraph *cell0timehisto = new TGraph();
-TGraph *dtmcp = new TGraph();
+    TGraph *cell0timehisto = new TGraph();
+    TGraph *dtmcp = new TGraph();
 
-// Riserva memoria per ridurre reallocazioni
-channel_picosec.reserve(5);
-tot_picosec.reserve(5);
-waveform_picosec.reserve(5);
-cell0.reserve(5);
-
+    // Riserva memoria per ridurre reallocazioni
+    channel_picosec.reserve(5);
+    tot_picosec.reserve(5);
+    waveform_picosec.reserve(5);
+    cell0.reserve(5);
 
     // Apri i file ROOT
     TString filename_feb1 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run" + std::to_string(run_number) + "/ordered_feb1.root";
-    
     TString matching_filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/MCPtoSRS_run" + std::to_string(run_number) + ".root";
-
     TString output_filename = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run" + std::to_string(run_number) + "/eventbuilding.root";
-   
-    //check
+
     TFile *matching_file = OpenInputFile(matching_filename.Data());
-    if (!matching_file) {
+    if (!matching_file) 
+    {
         cerr << "Error: cannot open " << matching_filename << endl;
         return 1;
     }
+    
     TTree *matching_tree = (TTree*)matching_file->Get("eventTree");
-    if (!matching_tree) {
+    if (!matching_tree)
+    {
         cerr << "Error: eventTree not found in " << matching_filename << endl;
         return 1;
     }
 
     TFile *file_feb1 = OpenInputFile(filename_feb1.Data());
-    
-    if (!file_feb1)     {
+    if (!file_feb1)
+    {
         cerr << "Error: cannot open one or more input files." << endl;
         return 1;
     }   
@@ -163,7 +147,6 @@ cell0.reserve(5);
     WaveformRecord rec1, rec3;
     matchedEvent mcp_event;
     building built;
-        cout<<"FINE!"<<endl;
 
 
     //tree_feb1->SetBranchAddress("Cell0TimeStamp", &rec1.Cell0TimeStamp  );
@@ -177,15 +160,11 @@ cell0.reserve(5);
     tree_feb1->SetBranchAddress("Amplitude_FEB1", &rec1.Amplitude);
     tree_feb1->SetBranchAddress("Waveform_FEB1", rec1.Waveform);
 
-    
-
     matching_tree->SetBranchAddress("Cell0TimeStamp_corr", &mcp_event.Cell0TimeStamp_corr);
     matching_tree->SetBranchAddress("Channel", &mcp_event.channel);
     matching_tree->SetBranchAddress("TOTValue", &mcp_event.TOTValue);
     matching_tree->SetBranchAddress("TriggerIDSRS", &mcp_event.TriggerIDSRS);
     matching_tree->SetBranchAddress("Waveform", mcp_event.Waveform);    
-
-
 
     //output file
     TFile *output_file = new TFile(output_filename.Data(), "RECREATE");
@@ -193,161 +172,142 @@ cell0.reserve(5);
     //output_tree->Branch("Cell0TimeStamp", &rec0.Cell0TimeStamp,"Cell0TimeStamp/D");
     output_tree->Branch("Cell0TimeStamp_corr_MCP", &built.Cell0timestamp_MCP,"Cell0TimeStamp_corr/D");
     // tree_feb1->Branch("UnixTime", &rec.UnixTime,"UnixTime/D");
-   //output_tree->Branch("Channel_MCP", &built.c,"Channel_MCP/I");
-   output_tree->Branch("TOTValue_MCP", &built.TOTValue,"TOTValue_MCP/F");
-   output_tree->Branch("TriggerIDSRS_MCP", &built.SRS,"TriggerIDSRS_MCP/I");
-   //output_tree->Branch("Waveform_MCP", waveform_temp, "Waveform_MCP[64]/F");
+    //output_tree->Branch("Channel_MCP", &built.c,"Channel_MCP/I");
+    output_tree->Branch("TOTValue_MCP", &built.TOTValue,"TOTValue_MCP/F");
+    output_tree->Branch("TriggerIDSRS_MCP", &built.SRS,"TriggerIDSRS_MCP/I");
+    //output_tree->Branch("Waveform_MCP", waveform_temp, "Waveform_MCP[64]/F");
     output_tree->Branch("Cell0TimeStamp_PICOSEC", &built.Cell0timeSTamp_PICOSEC,"Cell0TimeStamp_PICOSEC[50]/D");
     output_tree->Branch("Channel_PICOSEC", &built.chanel_PICOSEC,"Channel_PICOSEC[50]/I");
-     output_tree->Branch("TOTValue_PICOSEC", &built.TOTValue,"TOTValue_PICOSEC/F");
+    output_tree->Branch("TOTValue_PICOSEC", &built.TOTValue,"TOTValue_PICOSEC/F");
     //output_tree->Branch("TOTValue_PICOSEC", &tot_picosec);
     output_tree->Branch("Waveform_PICOSEC", &built.Waveform_PICOSEC,"Waveform_PICOSEC[50][64]/F");
     output_tree->Branch("hitxevent", &built.hit_x_event,"hitxevent/I");
 
-        cout<<"FINE!"<<endl;
-
-    //
-
     Long64_t nentries_feb1 = tree_feb1->GetEntries();
-    
     Long64_t nentries_matching = matching_tree->GetEntries();
 
-    // Qui puoi aggiungere il codice per leggere i dati dai file e analizzarli
-    
- 
-
-    cout<<"FINE!"<<endl;
     double tmcp_prevous = 0;
     double timefeb1=0, timefeb3=0;
-  
 
-double time_window = 50.0; // finestra temporale in ns
-Long64_t j1 = 0, j3 = 0;   // indici globali per FEB1 e FEB3
+    double time_window = 50.0; // finestra temporale in ns
+    Long64_t j1 = 0, j3 = 0;   // indici globali per FEB1 e FEB3
 
-for (Long64_t i = 0; i < nentries_matching; i++) {
+    for (Long64_t i = 0; i < nentries_matching; i++) 
+    {
+        matching_tree->GetEntry(i);
 
-    matching_tree->GetEntry(i);
+        // Pulizia vettori ad ogni evento MCP
+        cell0.clear();
+        channel_picosec.clear();
+        tot_picosec.clear();
+        waveform_picosec.clear();
 
-    // Pulizia vettori ad ogni evento MCP
-    cell0.clear();
-    channel_picosec.clear();
-    tot_picosec.clear();
-    waveform_picosec.clear();
+        t_mcp = mcp_event.Cell0TimeStamp_corr;
+        built.Cell0timestamp_MCP = t_mcp;
+        built.TOTValue = mcp_event.TOTValue;
+        built.SRS = mcp_event.TriggerIDSRS;
 
-    t_mcp = mcp_event.Cell0TimeStamp_corr;
-    built.Cell0timestamp_MCP = t_mcp;
-    built.TOTValue = mcp_event.TOTValue;
-    built.SRS = mcp_event.TriggerIDSRS;
-    for (int k = 0; k < 64; k++)         waveform_temp[k] = mcp_event.Waveform[k];
-    for (int k = 0; k < 64; k++)         built.Waveform_MCP[k] = mcp_event.Waveform[k];
-    if(t_mcp < tmcp_prevous) {
-        cout << "Warning: MCP timestamps not in order at entry " << i << endl;
-    }
-    //if(i%10000==0){cout<<"Entry: " << i<< "tmcp_prev: " << tmcp_prevous << endl;}
-    tmcp_prevous = t_mcp;
-    hitxevent = 0;
+        for (int k = 0; k < 64; k++)         
+            waveform_temp[k] = mcp_event.Waveform[k];
+        for (int k = 0; k < 64; k++)         
+            built.Waveform_MCP[k] = mcp_event.Waveform[k];
 
-    //filling MCP Data
-    channel_mcp = mcp_event.channel;
-    //tot_mcp = mcp_event.TOTValue;
-    for (int k = 0; k < 64; k++)
-        waveform_temp[k] = mcp_event.Waveform[k];
-    SRS = mcp_event.TriggerIDSRS;
-
-    // =========================
-    // FEB1
-    // =========================
-    while (j1 < nentries_feb1) {
-        tree_feb1->GetEntry(j1);
-        double dt = rec1.Cell0TimeStamp_corr - t_mcp;
-        if(rec1.Cell0TimeStamp_corr < timefeb1) {
-            cout << "Warning: FEB1 timestamps not in order at entry " << j1 << endl;
+        if(t_mcp < tmcp_prevous) 
+        {
+            cout << "Warning: MCP timestamps not in order at entry " << i << endl;
         }
-        timefeb1 = rec1.Cell0TimeStamp_corr;
+        
+        tmcp_prevous = t_mcp;
+        hitxevent = 0;
 
-        if (dt < -time_window) { j1++; continue; } // troppo vecchio, avanti
-        if (dt > time_window) break;               // oltre finestra, stop loop
-
-        // Hit valido
-        built.Cell0timeSTamp_PICOSEC[hitxevent] = rec1.Cell0TimeStamp_corr;
-        built.chanel_PICOSEC[hitxevent] = rec1.channel;
-        built.TOTValue = rec1.TOTValue;
-        for (int k = 0; k < 64; k++)            built.Waveform_PICOSEC[hitxevent][k] = rec1.Waveform[k];
-        cell0.push_back(rec1.Cell0TimeStamp_corr);
-        channel_picosec.push_back(rec1.channel);
-        tot_picosec.push_back(rec1.TOTValue);
+        //filling MCP Data
+        channel_mcp = mcp_event.channel;
+        //tot_mcp = mcp_event.TOTValue;
         for (int k = 0; k < 64; k++)
-            waveform_picosec.push_back(rec1.Waveform[k]);
+            waveform_temp[k] = mcp_event.Waveform[k];
+        SRS = mcp_event.TriggerIDSRS;
 
-        hitxevent++;
-        j1++;
-    }
-    
-    built.hit_x_event = hitxevent;
+        // =========================
+        //           FEB1
+        // =========================
+        while (j1 < nentries_feb1) 
+        {
+            tree_feb1->GetEntry(j1);
+            double dt = rec1.Cell0TimeStamp_corr - t_mcp;
+            if(rec1.Cell0TimeStamp_corr < timefeb1) 
+            {
+                cout << "Warning: FEB1 timestamps not in order at entry " << j1 << endl;
+            }
+            timefeb1 = rec1.Cell0TimeStamp_corr;
 
-    output_tree->Fill();
-    
+            if (dt < -time_window) { j1++; continue; } // troppo vecchio, avanti
+            if (dt > time_window) break;               // oltre finestra, stop loop
 
-    if (i % 1000 == 0) {
-        cout << "Events left: " << nentries_matching - i 
-             << " | Hits this event: " << hitxevent << "\r" << flush;
-    }
+            // Hit valido
+            built.Cell0timeSTamp_PICOSEC[hitxevent] = rec1.Cell0TimeStamp_corr;
+            built.chanel_PICOSEC[hitxevent] = rec1.channel;
+            built.TOTValue = rec1.TOTValue;
+            
+            for (int k = 0; k < 64; k++)            
+                built.Waveform_PICOSEC[hitxevent][k] = rec1.Waveform[k];
 
+            cell0.push_back(rec1.Cell0TimeStamp_corr);
+            channel_picosec.push_back(rec1.channel);
+            tot_picosec.push_back(rec1.TOTValue);
+            
+            for (int k = 0; k < 64; k++)
+                waveform_picosec.push_back(rec1.Waveform[k]);
 
-
-    /*if(t_mcp> 8.75e12 && hitxevent>0) 
-   // if(t_mcp<0.1e12 && hitxevent<4)
-    { // esempio di condizione per debug
-        cout << "Debug: MCP timestamp " << t_mcp << " at entry " << i << endl;
-        cout << "  FEB1 hits in window: " << cell0.size() << endl;
-        for (size_t idx = 0; idx < cell0.size(); idx++) {
-            cout << "    Hit " << idx 
-                 << ": Cell0TimeStamp_corr=" << cell0[idx] 
-                 << ", Channel=" << channel_picosec[idx] 
-                 << ", TOTValue=" << tot_picosec[idx] 
-                 << endl;
+            hitxevent++;
+            j1++;
         }
-    }*/
-}
-
-
-// Riportati all'inizio del tree
-output_tree->SetBranchAddress("Channel_PICOSEC", &channel_picosec);
-
-Long64_t nentries_out = output_tree->GetEntries();
-
-// Applicazione grafica
-int fakeargc = 0;
-char** fakeargv = nullptr;
-TApplication app("app", &fakeargc, fakeargv);
-
-// Istogramma (0–127 canali totali FEB1+FEB3)
-TH1I *hOcc = new TH1I("hOcc",
-                      "Channel Occupancy after EventBuilding;Channel;Counts",
-                      128, 0, 128);
-
-// Loop su eventi MCP (eventbuilding)
-for (Long64_t i = 0; i < nentries_out; i++) {
-
-    output_tree->GetEntry(i);
-
-    // channel_picosec è un vector<int>
-    for (size_t j = 0; j < channel_picosec.size(); j++) {
-        hOcc->Fill(channel_picosec[j]);
+        
+        built.hit_x_event = hitxevent;
+        output_tree->Fill();
+        
+        if (i % 1000 == 0) {
+            cout << "Events left: " << nentries_matching - i 
+                << " | Hits this event: " << hitxevent << "\r" << flush;
+        }
     }
-}
 
-// Disegno
-TCanvas *cOcc = new TCanvas("cOcc","Occupancy After EventBuilding",900,600);
-hOcc->Draw();
-cOcc->Update();
+    // Riportati all'inizio del tree
+    output_tree->SetBranchAddress("Channel_PICOSEC", &channel_picosec);
 
-cout << "Premi Ctrl+C per chiudere." << endl;
+    Long64_t nentries_out = output_tree->GetEntries();
 
-app.Run();
+    // Applicazione grafica
+    int fakeargc = 0;
+    char** fakeargv = nullptr;
+    TApplication app("app", &fakeargc, fakeargv);
 
-//chiudo i file
-matching_file->Close();
-file_feb1->Close();
-output_file->Close();
+    // Istogramma (0–127 canali totali FEB1+FEB3)
+    TH1I *hOcc = new TH1I("hOcc",
+                        "Channel Occupancy after EventBuilding;Channel;Counts",
+                        128, 0, 128);
+
+    // Loop su eventi MCP (eventbuilding)
+    for (Long64_t i = 0; i < nentries_out; i++) {
+
+        output_tree->GetEntry(i);
+
+        // channel_picosec è un vector<int>
+        for (size_t j = 0; j < channel_picosec.size(); j++) {
+            hOcc->Fill(channel_picosec[j]);
+        }
+    }
+
+    // Disegno
+    TCanvas *cOcc = new TCanvas("cOcc","Occupancy After EventBuilding",900,600);
+    hOcc->Draw();
+    cOcc->Update();
+
+    cout << "Premi Ctrl+C per chiudere." << endl;
+
+    app.Run();
+
+    //chiudo i file
+    matching_file->Close();
+    file_feb1->Close();
+    output_file->Close();
 }
