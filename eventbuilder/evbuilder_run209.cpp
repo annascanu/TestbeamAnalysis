@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
     cout<<"FINE!"<<endl;
      // Dichiarazioni vettori per output
     vector<double> cell0;
-    vector<int> channel_picosec;
+    vector<Int_t> channel_picosec;
     vector<float> tot_picosec;
     vector<float> waveform_picosec;
     int hitxevent;  // nuovo branch
@@ -175,14 +175,14 @@ int main(int argc, char* argv[])
     //output_tree->Branch("Channel_MCP", &built.c,"Channel_MCP/I");
     output_tree->Branch("TOTValue_MCP", &built.TOTValue,"TOTValue_MCP/F");
     output_tree->Branch("TriggerIDSRS_MCP", &built.SRS,"TriggerIDSRS_MCP/I");
-    //output_tree->Branch("Waveform_MCP", waveform_temp, "Waveform_MCP[64]/F");
+    output_tree->Branch("Waveform_MCP", waveform_temp, "Waveform_MCP[64]/F");
     output_tree->Branch("Cell0TimeStamp_PICOSEC", &built.Cell0timeSTamp_PICOSEC,"Cell0TimeStamp_PICOSEC[50]/D");
-    output_tree->Branch("Channel_PICOSEC", &built.chanel_PICOSEC,"Channel_PICOSEC[50]/I");
+    output_tree->Branch("Channel_PICOSEC", &built.chanel_PICOSEC, "Channel_PICOSEC[50]/I" );
     output_tree->Branch("TOTValue_PICOSEC", &built.TOTValue,"TOTValue_PICOSEC/F");
     //output_tree->Branch("TOTValue_PICOSEC", &tot_picosec);
     output_tree->Branch("Waveform_PICOSEC", &built.Waveform_PICOSEC,"Waveform_PICOSEC[50][64]/F");
     output_tree->Branch("hitxevent", &built.hit_x_event,"hitxevent/I");
-
+   
     Long64_t nentries_feb1 = tree_feb1->GetEntries();
     Long64_t nentries_matching = matching_tree->GetEntries();
 
@@ -272,7 +272,9 @@ int main(int argc, char* argv[])
     }
 
     // Riportati all'inizio del tree
-    output_tree->SetBranchAddress("Channel_PICOSEC", &channel_picosec);
+   /* output_tree->SetBranchAddress("Channel_PICOSEC", &channel_picosec);
+
+   
 
     Long64_t nentries_out = output_tree->GetEntries();
 
@@ -304,7 +306,7 @@ int main(int argc, char* argv[])
 
     cout << "Premi Ctrl+C per chiudere." << endl;
 
-    app.Run();
+    app.Run();*/
 
     //chiudo i file
     matching_file->Close();
