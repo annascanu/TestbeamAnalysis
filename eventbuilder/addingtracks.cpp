@@ -129,9 +129,9 @@ int main(int argc, char* argv[])
     trackdata_tree->SetBranchAddress("tracknumber", &trackevent.track_num);
     trackdata_tree->SetBranchAddress("trackchi2", &trackevent.track_chi_2);
     trackdata_tree->SetBranchAddress("ndetsintrack", &trackevent.ndetsintrack);
-    trackdata_tree->SetBranchAddress("hits", trackevent.hits);///sistemare hits e i seguenti
-    trackdata_tree->SetBranchAddress("distnextcluster", &trackevent.distnextcluster);
-    trackdata_tree->SetBranchAddress("totchanexcluster", &trackevent.totchanexcluster);
+   // trackdata_tree->SetBranchAddress("hits", trackevent.hits);///sistemare hits e i seguenti
+   // trackdata_tree->SetBranchAddress("distnextcluster", &trackevent.distnextcluster);
+   // trackdata_tree->SetBranchAddress("totchanexcluster", &trackevent.totchanexcluster);
 
     TFile *output = new TFile(output_filename.Data(), "RECREATE");
     TTree *output_tree = new TTree("eventbuilding_withtracks", "eventbuilding_withtracks");
@@ -144,9 +144,9 @@ int main(int argc, char* argv[])
     output_tree->Branch("track_num", &trackevent.track_num,"track_num/I");
     output_tree->Branch("track_chi_2", &trackevent.track_chi_2,"track_chi_2/D");
     output_tree->Branch("ndetsintrack", &trackevent.ndetsintrack,"ndetsintrack/I");
-    output_tree->Branch("hits", &trackevent.hits);
-    output_tree->Branch("distnextcluster", &trackevent.distnextcluster);
-    output_tree->Branch("totchanexcluster", &trackevent.totchanexcluster);
+   // output_tree->Branch("hits", &trackevent.hits);
+    //output_tree->Branch("distnextcluster", &trackevent.distnextcluster);
+   // output_tree->Branch("totchanexcluster", &trackevent.totchanexcluster);
     output_tree->Branch("TOTValue", &eventwotrack.TOTValue,"TOTValue/F");
     output_tree->Branch("Waveform_MCP", &eventwotrack.Waveform_MCP,"Waveform_MCP[64]/F");
     output_tree->Branch("hit_x_event", &eventwotrack.hit_x_event,"hit_x_event/I");
