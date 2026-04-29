@@ -1,6 +1,6 @@
 /*
 -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-                Analysis for the October 2025 ENUBET testbeam picosec time resolution.
+                Analysis for the April 2026 ENUBET testbeam picosec time resolution.
                                Authors: A. Scanu, R. Speziali
 -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
@@ -9,9 +9,8 @@ To compile:
 c++ raw_analysis.cpp raw_analysis.cc `root-config --cflags --libs` -o raw.out
 
 Processed files can be found at:
-/eos/experiment/neutplatform/enubet/testbeam2025/picosec_data/sampic_runs/rootSampicData/processed_waveforms/
-- Muon runs: run 19, 20, 21, 22
-- 15 GeV pion runs: run 23, 24, ...
+/eos/experiment/neutplatform/enubet/testbeam2026/picosec_data/sampic_runs/rootSampicData/processed_waveforms/
+
 */
 
 #include "raw_analysis.h"
@@ -98,13 +97,16 @@ int main(int argc, char**argv) {
 
     //////cout << "\n\n\nEsempio di coordinate: Canale " << coords[2][0] << " x: " << coords[2][1] << " y: " << coords[2][2] << " board: " << coords[2][3] << "\n\n\n" << endl;
     ProcessEvents(tree, branches, hists, coords);
+        cout<<"till here fine"<<endl;
+
 
     CreateCanvasesAndSaveResults(outputFileName, hists, run);
         
     // ------------------------------------------------
     //                     Cleanup
     // ------------------------------------------------
-    
+        cout<<"till here fine"<<endl;
+
     file->Close();
     delete file;
     

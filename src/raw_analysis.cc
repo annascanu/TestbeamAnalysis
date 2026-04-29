@@ -168,6 +168,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h, vector<vector<in
                 for(int k=0; k<64; k++){
                     if(b.Channel[j]==k){
                         if(det==0){
+                            
                             h.mapDet1->Fill(coordinates[k][1], coordinates[k][2]);
                         }
                         else if(det==1){

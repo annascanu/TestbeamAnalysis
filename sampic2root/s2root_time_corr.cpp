@@ -169,6 +169,11 @@ std::vector<WaveformRecord> read_waveform_file(const std::string& filename, int&
         }
         timestamp_prev = timestampRaw;
 
+
+
+        //////////IMPORTANT DEBUG CANCEL THIS LINE AFTER
+        //periodFactor =1;
+
         record.Cell0TimeStamp_corr = timestamp_ov * TIMESTAMP_MAX * periodFactor + timestampRaw;
         //record.Cell0TimeStamp;            
     

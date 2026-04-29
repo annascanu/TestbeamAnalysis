@@ -56,6 +56,7 @@ struct TreeBranches
     Float_t PeakValue[MAXPULSES];
     Float_t TOTValue[MAXPULSES];
     Float_t Waveform[MAXPULSES][NCHANNELS];
+   
 };
 
 // Function declarations
