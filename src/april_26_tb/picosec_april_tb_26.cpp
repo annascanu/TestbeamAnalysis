@@ -33,7 +33,7 @@ int main() {
 
     //TString filename = "/home/riccardo-speziali/Scrivania/november_2025/root_tree/sampic_run209_final.root"; // when running on Riccardo's machine
 
-    string outputFileName = "prova_tb_aprile.root";
+    string outputFileName = "aprile_run_51_triple.root";
     // ------------------------------------------------
     //         Open input file and get tree
     // ------------------------------------------------
@@ -47,7 +47,7 @@ int main() {
         return 1;
     }*/
     TChain* tree = new TChain("picoTree");
-        tree->Add("/home/riccardo-speziali/enubet/waveform_tb_april/sampic_run3_final_job*.root");
+        tree->Add("/home/riccardo-speziali/Scrivania/run51/sampic_run51_final_job*.root");
         int tree_Entries = tree->GetEntries();
     // ------------------------------------------------
     //         Initialize analysis structures

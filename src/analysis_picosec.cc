@@ -63,7 +63,7 @@ void InitializeHistograms(Histograms &h)
     
     h.htime30_12 = new TH1F("htime30_12", "Time difference;Time [ps];Counts", 100, -2000, 2000);
     h.htime30_13 = new TH1F("htime30_13", "Time difference;Time [ps];Counts", 100, -0.2, 0.2);
-    h.htime30_23 = new TH1F("htime30_23", "Time difference;Time [ps];Counts", 100, -0.2, 0.2);
+    h.htime30_23 = new TH1F("htime30_23", "Time difference;Time [ps];Counts", 1000, -3000, 3000);
 
 
     h.hcell0timestampMCP = new TH1F("hcell0timestamp", "Cell0TimeStamp distribution;Cell0TimeStamp [ns];Counts", 100, 0, 1e13);
@@ -173,6 +173,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
             double peak_time[3] = {-9999.0, -9999.0, -9999.0};
             double risetime[3] = {-9999.0, -9999.0, -9999.0};
             double integral[6] = {-9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0};
+            double cell0timestamp[3] = {-9999.0, -9999.0, -9999.0};
             
             for (int j = 0; j < b.npulses; j++) 
             {
@@ -195,7 +196,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
                 peak_time[det] = b.pulses_peak_time[j];
                 risetime[det] = b.pulses_rise_time[j];
                 integral[det] = b.pulses_integral[j];
-                
+                cell0timestamp[det] = b.Cell0TimeStamp[j];
                 if (det == 0){
                     h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
                     h.htriple1->Fill(b.pulses_amplitude[j]);
@@ -255,7 +256,7 @@ void ProcessEvents(TTree *tree, TreeBranches &b, Histograms &h,
             }
             
             // Time differences
-            double time30_12 = cfd30[0] - cfd30[1];
+            double time30_12 = (cfd30[0]+cell0timestamp[0]*1000) - (cfd30[1]+cell0timestamp[1]*1000);
             h.htime30_12->Fill(time30_12);
             
             h.hpeaktime1->Fill(peak_time[0]);

@@ -61,9 +61,10 @@ void InitializeHistograms(Histograms &h)
     h.htime20_13 = new TH1F("htime20_13", "Time difference;Time [ps];Counts", 100, -100, 100);
     h.htime20_23 = new TH1F("htime20_23", "Time difference;Time [ps];Counts", 100, -0.2, 0.2);
     
-    h.htime30_12 = new TH1F("htime30_12", "Time difference;Time [ps];Counts", 90, -3000, -1500);
-    h.htime30_13 = new TH1F("htime30_13", "Time difference;Time [ps];Counts", 100, -0.2, 0.2);
-    h.htime30_23 = new TH1F("htime30_23", "Time difference;Time [ps];Counts", 100, -0.2, 0.2);
+    //h.htime30_12 = new TH1F("htime30_12", "Time difference;Time [ps];Counts", 90, -3000, 0); run 3
+    h.htime30_12 = new TH1F("htime30_12", "Time difference;Time [ps];Counts", 100, -3000, 3000);
+    h.htime30_13 = new TH1F("htime30_13", "Time difference;Time [ps];Counts", 100, 2000, 5000);
+    h.htime30_23 = new TH1F("htime30_23", "Time difference;Time [ps];Counts", 100, 2000, 5000);
 
 
     h.hcell0timestampMCP = new TH1F("hcell0timestamp", "Cell0TimeStamp distribution;Cell0TimeStamp [ns];Counts", 100, 0, 1e13);
@@ -98,6 +99,7 @@ void InitializeHistograms(Histograms &h)
     h.hintegral3 = new TGraph();
     h.timevsamplitude = new TGraph();
     h.timevsamplitude2 = new TGraph();
+    h.timevsamplitude3 = new TGraph();
     h.timevsintegral = new TGraph();
     h.timevsintegral2 = new TGraph();
     h.cfdvschannel1 = new TGraph();
@@ -105,7 +107,7 @@ void InitializeHistograms(Histograms &h)
     // Profiles
     h.prof = new TProfile("prof", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0.08, 0.7);
     h.prof2 = new TProfile("prof2", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0.08, 0.7);
-    //h.prof3 = new TProfile("prof3", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0.08, 0.7);
+    h.prof3 = new TProfile("prof3", "Tempo medio per bin di ampiezza;Ampiezza;Tempo [ps]", 50, 0.08, 0.7);
 }
 
 void SetupTreeBranches(TTree *tree, TreeBranches &b) 
@@ -451,7 +453,7 @@ void CreateCanvases(Histograms &h)
     
     // Hit maps
     TCanvas *cmap1 = new TCanvas("cmap1", "Detector map", 800, 750);
-    cmap1->Divide(1,2);
+    cmap1->Divide(1,3);
     cmap1->cd(1);
     //cmap1->SetRightMargin(0.15);
     //gStyle->SetPalette(kViridis);
@@ -465,6 +467,13 @@ void CreateCanvases(Histograms &h)
     h.mapdet2->SetTitle("Hitmap of the second detector");
     h.mapdet2->GetXaxis()->SetTitle("X channel");   
     h.mapdet2->GetYaxis()->SetTitle("Y channel");
+
+    cmap1->cd(3);
+    h.mapdet3->Draw("COLZ TEXT");
+    h.mapdet3->SetTitle("Hitmap of the third detector");
+    h.mapdet3->GetXaxis()->SetTitle("X channel");
+    h.mapdet3->GetYaxis()->SetTitle("Y channel");
+
     cmap1->SaveAs("hitmap1.pdf");
     delete cmap1;
     
@@ -521,7 +530,7 @@ void CreateCanvases(Histograms &h)
     h.timevsamplitude->SetMarkerSize(0.6);
     h.timevsamplitude->SetMarkerColor(kAzure+2);
     //h.timevsamplitude->GetYaxis()->SetRangeUser(3500, 4500);
-    h.timevsamplitude->SetTitle("CFD30 time vs Amplitude;Amplitude [a.u.];CFD30 time [ps]");
+    h.timevsamplitude->SetTitle("CFD30 time vs Amplitude_det2;Amplitude [a.u.];CFD30 time [ps]");
     //h.timevsamplitude->SetLineColor(0);
     //h.timevsamplitude->SetLineStyle(0);
     //h.timevsamplitude->ComputeRange();
@@ -538,7 +547,7 @@ void CreateCanvases(Histograms &h)
     h.timevsamplitude2->SetMarkerSize(0.6);
     h.timevsamplitude2->SetMarkerColor(kAzure+2);
     //h.timevsamplitude2->GetYaxis()->SetRangeUser(3500, 4500);
-    h.timevsamplitude2->SetTitle("CFD30 time vs amplitude;amplitude [a.u.];CFD30 time [ps]"); 
+    h.timevsamplitude2->SetTitle("CFD30 time vs amplitude_det2 ;amplitude [a.u.];CFD30 time [ps]"); 
     //h.timevsamplitude2->SetLineColor(0);
     //h.timevsamplitude2->SetLineStyle(0);
  
@@ -548,6 +557,20 @@ void CreateCanvases(Histograms &h)
     c_q2->SaveAs("TimeVsamplitude2.pdf");
 
     delete c_q2;
+
+    TCanvas *c_q3 = new TCanvas("c_q3", "Time vs Integral", 900, 700);
+    c_q3->SetGrid();
+    h.timevsamplitude3->SetMarkerStyle(20);
+    h.timevsamplitude3->SetMarkerSize(0.6);
+    h.timevsamplitude3->SetMarkerColor(kAzure+2);   
+    //h.timevsamplitude3->GetYaxis()->SetRangeUser(3500, 4500);
+    h.timevsamplitude3->SetTitle("CFD30 time vs amplitude_det3 ;amplitude [a.u.];CFD30 time [ps]"); 
+    //h.timevsamplitude3->SetLineColor(0);
+    //h.timevsamplitude3->SetLineStyle(0);
+    //h.timevsamplitude3->ComputeRange();
+    h.timevsamplitude3->SetLineWidth(0);
+    h.timevsamplitude3->Draw("AP");  // A=assi, P=punti
+    c_q3->SaveAs("TimeVsamplitude3.pdf");
 }
 
 void SaveResults(const string &outputFileName, Histograms &h,
@@ -577,6 +600,8 @@ void SaveResults(const string &outputFileName, Histograms &h,
     h.htime_13->Write();
     h.htime20_12->Write();
     h.htime30_12->Write();
+    h.htime30_13->Write();
+    h.htime30_23->Write();
     h.hintegral1->Write();
     h.hintegral2->Write();
     h.hcharge1->Write();
@@ -587,6 +612,7 @@ void SaveResults(const string &outputFileName, Histograms &h,
     h.hpeaktime2->Write();
     h.timevsamplitude->Write();
     h.timevsamplitude2->Write();
+    h.timevsamplitude3->Write();
     h.hbaseline1->Write();
     h.hbaseline2->Write();
     h.timevsintegral->Write();
@@ -1172,7 +1198,11 @@ void test_events(TTree *tree, TreeBranches &b, Histograms &h)
                 //if(i%10==0) cout << "Detector: " << arrayDetector[j] << endl;
                 
                 
-                if (det == 1){
+              /* if (det == 1){
+                    //if(b.pulses_channel_x[j]==4 && b.pulses_channel_y[j]==3) continue; //canale rumoroso da escludere run 3
+                    //if(b.pulses_channel_x[j]==1 && b.pulses_channel_y[j]==4) continue; //canale rumoroso da escludere run 3
+
+                    
                     h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
                     h.htriple1->Fill(b.pulses_amplitude[j]);
                     h.hcharge1->Fill(b.pulses_integral[j]);
@@ -1192,7 +1222,7 @@ void test_events(TTree *tree, TreeBranches &b, Histograms &h)
                     h.htriple3->Fill(b.pulses_amplitude[j]);
                     //h.hcharge3->Fill(b.pulses_integral[j]);
                    
-                 }
+                 }*/
             }//////primo for che scorre i pulses
 
 
@@ -1203,6 +1233,7 @@ void test_events(TTree *tree, TreeBranches &b, Histograms &h)
     // =========================
     for (int j = 0; j < b.npulses; j++) 
     {
+        
         int det = b.Detector[j];
         if (det < 1 || det > 3) continue;
 
@@ -1228,6 +1259,31 @@ void test_events(TTree *tree, TreeBranches &b, Histograms &h)
     // =========================
     for (int j = 0; j < b.npulses; j++) 
     {
+                        if (arrayDetector[j]== 1){
+                    //if(b.pulses_channel_x[j]==4 && b.pulses_channel_y[j]==3) continue; //canale rumoroso da escludere run 3
+                    //if(b.pulses_channel_x[j]==1 && b.pulses_channel_y[j]==4) continue; //canale rumoroso da escludere run 3
+
+                    
+                    h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+                    h.htriple1->Fill(b.pulses_amplitude[j]);
+                    h.hcharge1->Fill(b.pulses_integral[j]);
+                    
+                }
+                if (arrayDetector[j] == 2){  
+                    h.mapdet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+                    h.htriple2->Fill(b.pulses_amplitude[j]); 
+                    h.hcharge2->Fill(b.pulses_integral[j]); 
+                    
+                 }
+                 if(arrayDetector[j]==3)
+                 {
+                    //h.mapDet3->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+                    h.mapdet3->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+
+                    h.htriple3->Fill(b.pulses_amplitude[j]);
+                    //h.hcharge3->Fill(b.pulses_integral[j]);
+                   
+                 }
         if (x_pico < 0) continue;
 
         if (b.pulses_channel_x[j] == cx &&
@@ -1344,7 +1400,7 @@ void triple_events(TTree *tree, TreeBranches &b, Histograms &h)
                 //if(i%10==0) cout << "Detector: " << arrayDetector[j] << endl;
                 
                 
-                if (det == 1){
+               /* if (det == 1){
                     h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
                     h.htriple1->Fill(b.pulses_amplitude[j]);
                     h.hcharge1->Fill(b.pulses_integral[j]);
@@ -1364,7 +1420,7 @@ void triple_events(TTree *tree, TreeBranches &b, Histograms &h)
                     h.htriple3->Fill(b.pulses_amplitude[j]);
                     //h.hcharge3->Fill(b.pulses_integral[j]);
                    
-                 }
+                 }*/
             }//////primo for che scorre i pulses
 
 
@@ -1401,13 +1457,42 @@ void triple_events(TTree *tree, TreeBranches &b, Histograms &h)
     // =========================
     for (int j = 0; j < b.npulses; j++) 
     {
+            if (arrayDetector[j]== 1){
+                    //if(b.pulses_channel_x[j]==4 && b.pulses_channel_y[j]==3) continue; //canale rumoroso da escludere run 3
+                    //if(b.pulses_channel_x[j]==1 && b.pulses_channel_y[j]==4) continue; //canale rumoroso da escludere run 3
+
+                    
+                    h.mapdet1->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+                    h.htriple1->Fill(b.pulses_amplitude[j]);
+                    h.hcharge1->Fill(b.pulses_integral[j]);
+                    
+                }
+                if (arrayDetector[j] == 2){  
+                    h.mapdet2->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+                    h.htriple2->Fill(b.pulses_amplitude[j]); 
+                    h.hcharge2->Fill(b.pulses_integral[j]); 
+                    
+                 }
+                 if(arrayDetector[j]==3)
+                 {
+                    //h.mapDet3->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+                    h.mapdet3->Fill(b.pulses_channel_x[j], b.pulses_channel_y[j]);
+
+                    h.htriple3->Fill(b.pulses_amplitude[j]);
+                    //h.hcharge3->Fill(b.pulses_integral[j]);
+                   
+                 }
         if (x_pico < 0) continue;
-        //if((b.Detector[j]==3) && (b.pulses_channel_x[j] != 0.5 && b.pulses_channel_y[j] != -1) ) continue;      riscrivi meglio   
+        //if((b.Detector[j]==3) && (b.pulses_channel_x[j] != 0.5 && b.pulses_channel_y[j] != -1) ) continue;   
         if ((b.pulses_channel_x[j] == cx &&
             b.pulses_channel_y[j] == cy)) 
         {
             if (b.Detector[j] == 1) idx1 = j;
             if (b.Detector[j] == 2) idx2 = j;
+          
+        }
+        if(b.pulses_channel_x[j]== 0.5 && b.pulses_channel_y[j]== 1)
+        {
             if (b.Detector[j] == 3) idx3 = j;
         }
     }
@@ -1424,24 +1509,37 @@ void triple_events(TTree *tree, TreeBranches &b, Histograms &h)
 
     double cfd30_1 = b.pulses_time_cfd30[idx1];
     double cfd30_2 = b.pulses_time_cfd30[idx2];
+    double cfd30_3 = b.pulses_time_cfd30[idx3];
 
     double tstamp1 = b.Cell0TimeStamp[idx1];
     double tstamp2 = b.Cell0TimeStamp[idx2];
+    double tstamp3 = b.Cell0TimeStamp[idx3];
 
     double time30_12 =
         (cfd30_1 + tstamp1 * 1000.0) -
         (cfd30_2 + tstamp2 * 1000.0);
 
-    h.htime30_12->Fill(time30_12);
+    double time30_13 =
+        (cfd30_1 + tstamp1 * 1000.0) -
+        (cfd30_3 + tstamp3 * 1000.0);
+    
+    double time30_23 =
+        (cfd30_2 + tstamp2 * 1000.0) -
+        (cfd30_3 + tstamp3 * 1000.0);
 
+    h.htime30_12->Fill(time30_12);
+    h.htime30_13->Fill(time30_13);
+    h.htime30_23->Fill(time30_23);
     // =========================
     // ESEMPI ISTOGRAMMI
     // =========================
     h.hrisetime1->Fill(b.pulses_rise_time[idx1]);
     h.hrisetime2->Fill(b.pulses_rise_time[idx2]);
+    //h.hrisetime3->Fill(b.pulses_rise_time[idx3]);
 
     h.htriple1->Fill(b.pulses_amplitude[idx1]);
     h.htriple2->Fill(b.pulses_amplitude[idx2]);
+    h.htriple3->Fill(b.pulses_amplitude[idx3]);
 
     //h.hQ1->Fill(b.pulses_integral[idx1]);
    // h.hQ2->Fill(b.pulses_integral[idx2]);
@@ -1460,8 +1558,30 @@ void triple_events(TTree *tree, TreeBranches &b, Histograms &h)
 
     h.prof->Fill(ampFEB[idx1], time30_12);
    h.prof2->Fill(ampFEB[idx2], time30_12);
+   h.timevsamplitude->SetPoint(h.timevsamplitude->GetN(), ampFEB[idx1], time30_12);
+   h.timevsamplitude->SetMarkerStyle(20);   // cerchio pieno
+   h.timevsamplitude->SetMarkerSize(1.3);
+   h.timevsamplitude->SetMarkerColor(kBlue+1);
+
+// disegno solo punti
+   h.timevsamplitude->Draw("AP");
+   h.timevsamplitude2->SetPoint(h.timevsamplitude2->GetN(), ampFEB[idx2], time30_23);
+    h.timevsamplitude2->SetMarkerStyle(21);   // quadrato pieno
+    h.timevsamplitude2->SetMarkerSize(1.3);
+    h.timevsamplitude2->SetMarkerColor(kRed+1);
+    h.timevsamplitude2->Draw("AP");
+
+   h.timevsamplitude3->SetPoint(h.timevsamplitude3->GetN(), ampFEB[idx3], time30_13);
+    h.timevsamplitude3->SetMarkerStyle(22);   // triangolo pieno
+    h.timevsamplitude3->SetMarkerSize(1.3);
+    h.timevsamplitude3->SetMarkerColor(kGreen+1);
+    h.timevsamplitude3->Draw("AP");
 
     if (i % 100000 == 0)
         cout << "Processed " << i << " / " << nentries << "\r" << flush;
 }
 }
+
+
+
+

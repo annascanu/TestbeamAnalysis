@@ -49,12 +49,12 @@ struct Histograms {
     
     // Graphs
     TGraph *hintegral1, *hintegral2, *hintegral3;
-    TGraph *timevsamplitude, *timevsamplitude2;
+    TGraph *timevsamplitude, *timevsamplitude2, *timevsamplitude3;
     TGraph *timevsintegral, *timevsintegral2;
     TGraph *cfdvschannel1;
     
     // Profiles
-    TProfile *prof, *prof2;
+    TProfile *prof, *prof2, *prof3;
 };
 
 // Struct to hold tree branches
