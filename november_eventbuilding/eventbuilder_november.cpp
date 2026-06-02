@@ -25,7 +25,7 @@ TFile* OpenInputFile(const string &filename)
 struct WaveformRecord 
 {
     double Cell0TimeStamp;
-    double Cell0TimeStamp_corr; // <-- aggiunta per il timestamp corretto
+    double Cell0TimeStamp_corr; // added for corrected timestamp
     int channel;
     double UnixTime;
     float TOTValue;
@@ -79,30 +79,6 @@ int main(int argc, char* argv[])
     tree_feb0->SetBranchAddress("Amplitude", &rec0.Amplitude);
     tree_feb0->SetBranchAddress("Waveform", rec0.Waveform);
 
-    /*   
-    tree_feb1->Branch("Cell0TimeStamp", &rec1.Cell0TimeStamp,"Cell0TimeStamp/D");
-    tree_feb1->Branch("Cell0TimeStamp_corr", &rec1.Cell0TimeStamp_corr,"Cell0TimeStamp_corr/D");
-    // tree_feb1->Branch("UnixTime", &rec.UnixTime,"UnixTime/D");
-    tree_feb1->Branch("Channel", &rec1.channel,"Channel/I");
-    tree_feb1->Branch("TOTValue", &rec1.TOTValue,"TOTValue/F");
-    tree_feb1->Branch("TimeInstant", &rec1.TimeInstant,"TimeInstant/D");
-    tree_feb1->Branch("Baseline", &rec1.Baseline,"Baseline/F");
-    tree_feb1->Branch("PeakValue", &rec1.PeakValue,"PeakValue/F");
-    tree_feb1->Branch("Amplitude", &rec1.Amplitude,"Amplitude/F");
-    tree_feb1->Branch("Waveform", rec1.Waveform, "Waveform[64]/F");
-
-    tree_feb3->Branch("Cell0TimeStamp", &rec3.Cell0TimeStamp,"Cell0TimeStamp/D");
-    tree_feb3->Branch("Cell0TimeStamp_corr", &rec3.Cell0TimeStamp_corr,"Cell0TimeStamp_corr/D");
-    // tree_feb1->Branch("UnixTime", &rec.UnixTime,"UnixTime/D");
-    tree_feb3->Branch("Channel", &rec3.channel,"Channel/I");
-    tree_feb3->Branch("TOTValue", &rec3.TOTValue,"TOTValue/F");
-    tree_feb3->Branch("TimeInstant", &rec3.TimeInstant,"TimeInstant/D");
-    tree_feb3->Branch("Baseline", &rec3.Baseline,"Baseline/F");
-    tree_feb3->Branch("PeakValue", &rec3.PeakValue,"PeakValue/F");
-    tree_feb3->Branch("Amplitude", &rec3.Amplitude,"Amplitude/F");
-    tree_feb3->Branch("Waveform", rec3.Waveform, "Waveform[64]/F");
-    */
-
     trigger_tree->SetBranchAddress("TriggerIDSRS", &trig.TriggerIDSRS);
     trigger_tree->SetBranchAddress("timestamp_ns", &trig.timestamp);
 
@@ -122,9 +98,8 @@ int main(int argc, char* argv[])
     //Long64_t nentries_feb3 = tree_feb3->GetEntries();
     Long64_t nentries_trigger = trigger_tree->GetEntries();
 
-   const double EPS = 1e10;   // tua finestra di matching
-
-    Long64_t j = 0;
+    const double EPS = 1e10;   // matching window in ns (10 microseconds)
+    Long64_t j = 0;  // index for feb0
 
     for (Long64_t i = 0; i < nentries_trigger; i++) 
     {
@@ -141,29 +116,28 @@ int main(int argc, char* argv[])
                 conta++;
                 j++; 
 
-                //aprire file output e inserire i dati di rec0, rec1 e rec3 in un unico albero con le stesse entry del trigger egrazie all'if legare srsID con gli eventi di feb0.
+                // open output file and insert data of rec0, rec1 e rec3 in one TTree with same entries
+                // of the trigger; thanks to if statement, bind srsID to events in feb0.
                 output_tree->Fill();
                 break;
             }
 
             if (rec0.Cell0TimeStamp_corr < trig.timestamp - EPS) 
             {
-                j++;           // feb0 troppo indietro → avanza feb0
+                j++; // feb0 is behind, advance 
             }
             else 
             {    
-                break;         // feb0 è già avanti → passa al prossimo trigger
+                break; // feb0 is ahead, wait for next trigger
             }
         }
 
         cout << "events left: " << nentries_trigger - i << "\r" << flush;
     }
 
-    cout<<"Numero di match trovati: " << conta << endl;
-    // Chiudi i file alla fine
+    // cout<<"Numero di match trovati: " << conta << endl;
+
     file_feb0->Close();
-    //file_feb1->Close();
-    //file_feb3->Close();
     trigger_file->Close();
     output_file->cd();
     output_tree->Write();
