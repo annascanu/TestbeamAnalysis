@@ -43,7 +43,7 @@ TFile* OpenInputFile(const string &filename)
 struct WaveformRecord 
 {
     double Cell0TimeStamp;
-    double Cell0TimeStamp_corr; // <-- aggiunta per il timestamp corretto
+    double Cell0TimeStamp_corr; // added for corrected timestamp
     int channel;
     double UnixTime;
     float TOTValue;
@@ -55,19 +55,19 @@ struct WaveformRecord
     float Waveform[64];
 };
 
-struct EntryRef {
+struct EntryRef 
+{
     double time;
     Long64_t entry;
 };
 
-
-
 int main(int argc, char* argv[]) 
 {
-    if (argc < 2) {
+    if (argc < 2) 
+    {
         std::cerr << "Usage: " << argv[0] << " <run_number>\n";
         return 1;
-}
+    }
 
     int run_number = std::stoi(argv[1]);
     std::filesystem::create_directories("/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run" + std::to_string(run_number));
@@ -87,7 +87,6 @@ int main(int argc, char* argv[])
     TTree *tree_feb3 = (TTree*)file_feb3->Get("picoTreewithCorr");
 
     WaveformRecord rec1, rec3;
-
 
     tree_feb1->SetBranchAddress("Cell0TimeStamp", &rec1.Cell0TimeStamp  );
     tree_feb1->SetBranchAddress("Cell0TimeStamp_corr", &rec1.Cell0TimeStamp_corr);
@@ -110,7 +109,6 @@ int main(int argc, char* argv[])
     tree_feb3->SetBranchAddress("PeakValue", &rec3.PeakValue);
     tree_feb3->SetBranchAddress("Amplitude", &rec3.Amplitude);
     tree_feb3->SetBranchAddress("Waveform", rec3.Waveform);
-
 
     //output file: ordered by Cell0TimeStamp_corr
     TString output_filename_feb1 = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/eventbuilder/run" + std::to_string(run_number) + "/ordered_feb1.root";
@@ -137,84 +135,68 @@ int main(int argc, char* argv[])
     output_tree3->Branch("PeakValue_FEB3", &rec3.PeakValue,"PeakValue_FEB3/F");
     output_tree3->Branch("Amplitude_FEB3", &rec3.Amplitude,"Amplitude_FEB3/F");
     output_tree3->Branch("Waveform_FEB3", rec3.Waveform, "Waveform_FEB3[64]/F");
-
     
     Long64_t nentries_feb1 = tree_feb1->GetEntries();
+    std::vector<EntryRef> feb1_entries;
+    feb1_entries.reserve(nentries_feb1);
 
-std::vector<EntryRef> feb1_entries;
-feb1_entries.reserve(nentries_feb1);
+    // Build vector (timestamp, entry_number)
+    for (Long64_t i = 0; i < nentries_feb1; i++) 
+    {
+        tree_feb1->GetEntry(i);
 
-// Costruisci vettore (timestamp, entry_number)
-for (Long64_t i = 0; i < nentries_feb1; i++) {
-    tree_feb1->GetEntry(i);
+        EntryRef e;
+        e.time  = rec1.Cell0TimeStamp_corr;
+        e.entry = i;
 
-    EntryRef e;
-    e.time  = rec1.Cell0TimeStamp_corr;
-    e.entry = i;
+        feb1_entries.push_back(e);
+    }
 
-    feb1_entries.push_back(e);
-}
+    // Order by timestamp
+    std::sort(feb1_entries.begin(), feb1_entries.end(), [](const EntryRef &a, const EntryRef &b) { return a.time < b.time; });
+    // and now write ordered by timestamp TTree
+    for (const auto &e : feb1_entries) 
+    {
+        tree_feb1->GetEntry(e.entry);
+        output_tree->Fill();
+    }
 
-// Ordina per timestamp
-std::sort(feb1_entries.begin(), feb1_entries.end(),
-          [](const EntryRef &a, const EntryRef &b) {
-              return a.time < b.time;
-          });
+    Long64_t nentries_feb3 = tree_feb3->GetEntries();
+    std::vector<EntryRef> feb3_entries;
+    feb3_entries.reserve(nentries_feb3);
 
-// Scrivi tree ordinato
-for (const auto &e : feb1_entries) {
-    tree_feb1->GetEntry(e.entry);
-    output_tree->Fill();
-}
+    for (Long64_t i = 0; i < nentries_feb3; i++) 
+    {
+        tree_feb3->GetEntry(i);
 
-Long64_t nentries_feb3 = tree_feb3->GetEntries();
+        EntryRef e;
+        e.time  = rec3.Cell0TimeStamp_corr;
+        e.entry = i;
 
-std::vector<EntryRef> feb3_entries;
-feb3_entries.reserve(nentries_feb3);
+        feb3_entries.push_back(e);
+    }
 
-for (Long64_t i = 0; i < nentries_feb3; i++) {
-    tree_feb3->GetEntry(i);
+    std::sort(feb3_entries.begin(), feb3_entries.end(), [](const EntryRef &a, const EntryRef &b) { return a.time < b.time; });
+    for (const auto &e : feb3_entries) 
+    {
+        tree_feb3->GetEntry(e.entry);
+        output_tree3->Fill();
+    }
 
-    EntryRef e;
-    e.time  = rec3.Cell0TimeStamp_corr;
-    e.entry = i;
+    // Check if ordered
+    double prev = -1e20;
+    for (int i=0; i<100; i++) 
+    {
+        output_tree->GetEntry(i);
+        if (rec1.Cell0TimeStamp_corr < prev)
+            std::cout << "Not ordered!" << std::endl;
+        prev = rec1.Cell0TimeStamp_corr;
+    }
 
-    feb3_entries.push_back(e);
-}
-
-std::sort(feb3_entries.begin(), feb3_entries.end(),
-          [](const EntryRef &a, const EntryRef &b) {
-              return a.time < b.time;
-          });
-
-for (const auto &e : feb3_entries) {
-    tree_feb3->GetEntry(e.entry);
-    output_tree3->Fill();
-}
-double prev = -1e20;
-for (int i=0; i<100; i++) {
-    output_tree->GetEntry(i);
-    if (rec1.Cell0TimeStamp_corr < prev)
-        std::cout << "Not ordered!" << std::endl;
-    prev = rec1.Cell0TimeStamp_corr;
-}
-
-output_file->cd();
-output_tree->Write();
-output_file->Close();
-
-output_file3->cd();
-output_tree3->Write();
-output_file3->Close();
-
-
-
-    
-
-
-
-
-
-
-
+    output_file->cd();
+    output_tree->Write();
+    output_file->Close();
+    output_file3->cd();
+    output_tree3->Write();
+    output_file3->Close();
 }

@@ -91,15 +91,15 @@ std::vector<TriggerEntry> readSAMPICTriggerBinary(const std::string& filename, i
 
     while (file) 
     {
-        // --- Leggi TriggerIDFPGA ---
+        // --- Read TriggerIDFPGA ---
         file.read(reinterpret_cast<char*>(&TriggerIDFPGA), sizeof(uint8_t));
         if (!file) break;
 
-        // --- Leggi TriggerIDSRSRaw ---
+        // --- Read TriggerIDSRSRaw ---
         file.read(reinterpret_cast<char*>(&TriggerIDSRSRaw), sizeof(uint16_t));
         if (!file) break;
 
-        // --- Leggi timestampRaw (5 byte) ---
+        // --- Read timestampRaw (5 byte) ---
         uint8_t buffer[5];
         file.read(reinterpret_cast<char*>(buffer), 5);
         if (!file) break;
@@ -113,7 +113,7 @@ std::vector<TriggerEntry> readSAMPICTriggerBinary(const std::string& filename, i
             | ((uint64_t)buffer[3] << 24)
             | ((uint64_t)buffer[4] << 32);
 
-        // --- Conta overflow timestamp ---
+        // --- Counter for overflow timestamp ---
         if (timestampRaw < timestamp_prev) {
             timestamp_ov++;
         }
@@ -122,14 +122,15 @@ std::vector<TriggerEntry> readSAMPICTriggerBinary(const std::string& filename, i
         uint64_t timestamp_full = timestamp_ov * 1099511627776ULL + timestampRaw;
         double timestamp_ns = timestamp_full * periodFactor;
 
-        // --- Conta overflow TriggerIDSRSRaw ---
-        if (TriggerIDSRSRaw < (event_id_prev - 500)) {
+        // --- Counter for overflow TriggerIDSRSRaw ---
+        if (TriggerIDSRSRaw < (event_id_prev - 500)) 
+        {
             event_id_ov++;
         }
         event_id_prev = TriggerIDSRSRaw;
         uint64_t TriggerIDSRS = event_id_ov * 65536ULL + TriggerIDSRSRaw;
 
-        // --- Salva entry ---
+        // --- Save entry ---
         entries.push_back({TriggerIDSRS, timestamp_ns});
     }
 
@@ -151,12 +152,12 @@ int main(int argc, char* argv[])
     auto entries = readSAMPICTriggerBinary(filename, run_number);
     std::cout << "Read " << entries.size() << " entries\n";
 
-    // --- Crea un ROOT file ---
+    // --- Create ROOT file ---
     std::string output_filename = "sampic_trigger_run" + std::to_string(run_number) + ".root";
     TFile *f = new TFile(output_filename.c_str(), "RECREATE");
     TTree *tree = new TTree("triggerTree", "SAMPIC Trigger Data");
 
-    // Variabili per il TTree
+    // TTree variables
     uint64_t TriggerIDSRS;
     double timestamp;
 
@@ -165,9 +166,10 @@ int main(int argc, char* argv[])
     tree->Branch("timestamp_ns", &timestamp);
 
     // Riempi il TTree
-    for (auto &entry : entries) {
+    for (auto &entry : entries) 
+    {
         TriggerIDSRS = entry.TriggerIDSRS;
-        timestamp   = entry.timestamp;
+        timestamp = entry.timestamp;
         tree->Fill();
     }
 

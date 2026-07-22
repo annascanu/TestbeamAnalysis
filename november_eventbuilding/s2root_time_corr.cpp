@@ -3,16 +3,19 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+#include <sstream>
+#include <filesystem>
+#include <cmath>
+#include <array> 
+
 #include "TFile.h"
 #include "TTree.h"
-#include <cmath>
 #include <TStyle.h>
 #include <TLegend.h>
 #include <TLatex.h>
 #include <TMath.h>
 #include <TROOT.h>
-#include <TApplication.h>
-#include <array>    
+#include <TApplication.h>   
 //#include <TString.h>
 #include <TCanvas.h>
 #include <TH1F.h>
@@ -21,19 +24,15 @@
 #include <TGraph2D.h>
 #include <TProfile.h>
 #include <TF1.h>
-#include <vector>
-#include <string>
 #include "TTreeIndex.h"
 #include "TApplication.h"
 #include "TH1I.h"
 #include "TCanvas.h"    
-#include <sstream>
-#include <filesystem>
 
 struct WaveformRecord 
 {
     double Cell0TimeStamp;
-    double Cell0TimeStamp_corr; // <-- aggiunta per il timestamp corretto
+    double Cell0TimeStamp_corr; // added for corrected timestamp
     int channel;
     double UnixTime;
     float TOTValue;
@@ -54,10 +53,7 @@ void s2root_time_corr(int run_number, int feb_number)
     auto records = read_waveform_file(filename, run_number, feb_number);
     std::cout << "Read " << records.size() << " waveform record(s)\n";
 
-    ////////////////////////////////
     // -- Output to root TTree -- //
-    ////////////////////////////////
-
     std::filesystem::create_directories("/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run" + std::to_string(run_number));
     TString outfile_name = "/home/riccardo-speziali/Scrivania/git/TestbeamAnalysis/sampic2root/root_file/run" + std::to_string(run_number) + "/sampic_run1_feb"+std::to_string(feb_number)+"_Corr.root";
     TFile outfile(outfile_name,"RECREATE");
@@ -157,21 +153,16 @@ std::vector<WaveformRecord> read_waveform_file(const std::string& filename, int&
         }
 
         if (!file) break;
-        // ==============================
+
         //    TIMESTAMP OVERFLOW FIX
-        // ==============================
-
         double timestampRaw = record.Cell0TimeStamp;
-
         if (timestampRaw < (timestamp_prev - 5000)) 
         {
             timestamp_ov++;
         }
         timestamp_prev = timestampRaw;
 
-
-
-        //////////IMPORTANT DEBUG CANCEL THIS LINE AFTER
+        // Only for debugging, cancel this line later! 
         //periodFactor =1;
 
         record.Cell0TimeStamp_corr = timestamp_ov * TIMESTAMP_MAX * periodFactor + timestampRaw;
@@ -179,7 +170,6 @@ std::vector<WaveformRecord> read_waveform_file(const std::string& filename, int&
     
         //timestamp_ov * TIMESTAMP_MAX * periodFactor + timestampRaw;
 
-        // ==============================
         if(feb_number>0)
         {
             //if(record.channel ==19) continue; }//canale rumoroso
@@ -191,7 +181,6 @@ std::vector<WaveformRecord> read_waveform_file(const std::string& filename, int&
         } //per feb0 
         
         records.push_back(std::move(record));
-       
     }
 
     return records;
