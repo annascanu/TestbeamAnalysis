@@ -177,7 +177,7 @@ std::vector<WaveformRecord> read_waveform_file(const std::string& filename, int&
     
         //timestamp_ov * TIMESTAMP_MAX * periodFactor + timestampRaw;
 
-       /* if(feb_number>0)
+        /*if(feb_number>0)
         {
             //if(record.channel ==19) continue; }//canale rumoroso
         }
